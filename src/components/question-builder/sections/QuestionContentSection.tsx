@@ -2,6 +2,7 @@
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 import { RichTextEditor } from '../../common/RichTextEditor/index.ts';
+import { Controller } from 'react-hook-form';
 
 interface Props {
   control: Control<QuizFormValues>;
@@ -11,9 +12,8 @@ interface Props {
   index: number;
 }
 
-export default function QuestionContentSection({ watch, setValue, errors, index }: Props) {
+export default function QuestionContentSection({ control, watch, setValue, index }: Props) {
   const question = watch(`questions.${index}`);
-  const titleError = errors.questions?.[index]?.title;
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
@@ -21,17 +21,20 @@ export default function QuestionContentSection({ watch, setValue, errors, index 
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
           Question Content
         </Typography>
-        <TextField
-          fullWidth
-          label="Question Title"
-          placeholder="Enter a short question title"
-          value={question?.title || ''}
-          onChange={(e) =>
-            setValue(`questions.${index}.title`, e.target.value, { shouldValidate: true })
-          }
-          error={!!titleError}
-          helperText={titleError?.message as string}
-          sx={{ mb: 3 }}
+        <Controller
+          name={`questions.${index}.title`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <TextField
+              {...field}
+              fullWidth
+              label="Question Title"
+              placeholder="Enter a short question title"
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+              sx={{ mb: 3 }}
+            />
+          )}
         />
         <RichTextEditor
           label="Question Content"
