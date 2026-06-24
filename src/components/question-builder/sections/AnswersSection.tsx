@@ -23,23 +23,8 @@ export default function AnswersSection({
   index,
 }: Props) {
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        borderRadius: 2,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <CardContent
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-
-      >
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
+      <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
           Answers
         </Typography>

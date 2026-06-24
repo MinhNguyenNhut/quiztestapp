@@ -48,7 +48,7 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
             type="number"
             value={rows}
             onChange={(e) => setRows(Number(e.target.value))}
-            inputProps={{ min: 1, max: 10 }}
+            slotProps={{ htmlInput: { min: 1, max: 10 } }}
             size="small"
             sx={{ width: 100 }}
           />
@@ -57,7 +57,7 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
             type="number"
             value={cols}
             onChange={(e) => setCols(Number(e.target.value))}
-            inputProps={{ min: 1, max: 10 }}
+            slotProps={{ htmlInput: { min: 1, max: 10 } }}
             size="small"
             sx={{ width: 100 }}
           />

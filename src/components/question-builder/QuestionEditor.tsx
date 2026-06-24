@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+﻿import { Stack } from '@mui/material';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../types/index.ts';
 import QuestionContentSection from './sections/QuestionContentSection.tsx';
@@ -26,7 +26,7 @@ export default function QuestionEditor({
   index,
 }: Props) {
   return (
-    <Stack spacing={3} sx={{ p: 3, overflowY: 'auto', flex: 1 }}>
+    <Stack spacing={3} sx={{ p: 3, overflowY: 'auto', flex: 1, minHeight: 0 }}>
       <QuestionContentSection
         control={control}
         errors={errors}

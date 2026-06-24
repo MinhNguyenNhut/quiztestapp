@@ -15,7 +15,7 @@ export default function ExplanationSection({ watch, setValue, index }: Props) {
   const explanation = watch(`questions.${index}.explanation`);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
           Explanation

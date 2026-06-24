@@ -37,7 +37,7 @@ export default function MatchingAnswers({ control, watch, setValue, index }: Pro
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
           Matching Pairs

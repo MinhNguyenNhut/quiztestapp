@@ -5,7 +5,7 @@ import QuizIcon from '@mui/icons-material/Quiz';
 
 export default function AppLayout() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <AppBar position="static" elevation={0}>
         <Toolbar>
           <QuizIcon sx={{ mr: 1 }} />
@@ -22,7 +22,7 @@ export default function AppLayout() {
           </Button>
         </Toolbar>
       </AppBar>
-      <Container maxWidth={false} sx={{ mt: 4, mb: 4, flex: 1 }}>
+      <Container maxWidth={false} disableGutters sx={{ mt: 0, mb: 0, px: 0, flex: 1 }}>
         <Outlet />
       </Container>
     </Box>

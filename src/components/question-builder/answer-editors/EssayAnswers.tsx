@@ -1,4 +1,4 @@
-import { Box, TextField, Typography, Card, CardContent, Alert } from '@mui/material';
+import { TextField, Typography, Card, CardContent, Alert } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
@@ -16,7 +16,7 @@ export default function EssayAnswers({ watch, setValue, index }: Props) {
   const scoringGuide = watch(`questions.${index}.scoringGuide`);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
           Essay Configuration

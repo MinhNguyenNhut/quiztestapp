@@ -16,7 +16,7 @@ export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
   const caseSensitive = watch(`questions.${index}.caseSensitive`);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
           Short Answer Configuration

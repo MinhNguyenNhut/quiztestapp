@@ -52,7 +52,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
           Question Settings
@@ -104,7 +104,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
                 shouldValidate: true,
               })
             }
-            inputProps={{ min: 1 }}
+            slotProps={{ htmlInput: { min: 1 } }}
           />
 
           <TextField

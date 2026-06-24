@@ -1,16 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
+﻿import { useState, useCallback, useEffect } from 'react';
+import { useForm, FormProvider, useFieldArray, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import type { QuizFormValues, QuestionType, Difficulty, RichTextContent } from '../../types/index.ts';
+import type { QuizFormValues, QuestionType, Difficulty } from '../../types/index.ts';
 import { quizFormSchema } from '../../utils/validation.ts';
 import AddQuestionModal from './AddQuestionModal.tsx';
 import QuestionList from './QuestionList.tsx';
 import QuestionEditor from './QuestionEditor.tsx';
 import SaveBar from './SaveBar.tsx';
-
-const EMPTY_RICH_TEXT: RichTextContent = { html: '', text: '' };
 
 const INITIAL_QUESTION_TEMPLATE: QuizFormValues = {
   title: '',
@@ -23,7 +21,7 @@ export default function QuestionBuilder() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const methods = useForm<QuizFormValues>({
-    resolver: zodResolver(quizFormSchema),
+    resolver: zodResolver(quizFormSchema) as Resolver<QuizFormValues>,
     defaultValues: INITIAL_QUESTION_TEMPLATE,
     mode: 'onChange',
   });
@@ -194,7 +192,7 @@ export default function QuestionBuilder() {
           />
 
           {/* Right Panel */}
-          <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {selectedQuestion ? (
               <QuestionEditor
                 control={control}
@@ -235,7 +233,7 @@ export default function QuestionBuilder() {
           </Box>
         </Box>
 
-        <SaveBar />
+        {/* <SaveBar /> */}
       </Box>
 
       <AddQuestionModal

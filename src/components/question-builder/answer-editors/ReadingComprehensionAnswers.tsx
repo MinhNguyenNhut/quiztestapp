@@ -20,7 +20,7 @@ const CHILD_TYPES: QuestionType[] = ['single_choice', 'multiple_choice', 'short_
 
 export default function ReadingComprehensionAnswers({ watch, setValue, index }: Props) {
   const childQuestions = watch(`questions.${index}.childQuestions`) || [];
-
+  const setChildValue = setValue as unknown as (path: string, value: unknown, options?: { shouldValidate?: boolean }) => void;
   const handleAddChild = useCallback(() => {
     const newChild = {
       id: uuidv4(),
@@ -36,23 +36,23 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
         { id: uuidv4(), text: '', isCorrect: false, order: 1 },
       ],
     };
-    setValue(`questions.${index}.childQuestions`, [...childQuestions, newChild], {
+    setChildValue(`questions.${index}.childQuestions`, [...childQuestions, newChild], {
       shouldValidate: false,
     });
-  }, [childQuestions, setValue, index]);
+  }, [childQuestions, setChildValue, index]);
 
   const handleRemoveChild = useCallback(
     (childIdx: number) => {
       const updated = childQuestions.filter((_, i) => i !== childIdx);
-      setValue(`questions.${index}.childQuestions`, updated, {
+      setChildValue(`questions.${index}.childQuestions`, updated, {
         shouldValidate: false,
       });
     },
-    [childQuestions, setValue, index],
+    [childQuestions, setChildValue, index],
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
           Reading Comprehension
@@ -86,7 +86,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
                 <Select
                   value={child.type}
                   onChange={(e) =>
-                    setValue(`questions.${index}.childQuestions.${childIdx}.type`, e.target.value as QuestionType, {
+                    setChildValue(`questions.${index}.childQuestions.${childIdx}.type`, e.target.value as QuestionType, {
                       shouldValidate: false,
                     })
                   }
@@ -108,7 +108,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
               placeholder="Question title"
               value={child.title || ''}
               onChange={(e) =>
-                setValue(`questions.${index}.childQuestions.${childIdx}.title`, e.target.value, {
+                setChildValue(`questions.${index}.childQuestions.${childIdx}.title`, e.target.value, {
                   shouldValidate: false,
                 })
               }
@@ -123,7 +123,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
                     placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
                     value={opt.text || ''}
                     onChange={(e) =>
-                      setValue(
+                      setChildValue(
                         `questions.${index}.childQuestions.${childIdx}.options.${optIdx}.text`,
                         e.target.value,
                         { shouldValidate: false },

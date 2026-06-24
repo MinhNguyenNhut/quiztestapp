@@ -1,4 +1,4 @@
-import { Box, TextField, Typography, Card, CardContent, FormHelperText } from '@mui/material';
+﻿import { TextField, Typography, Card, CardContent } from '@mui/material';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 import { RichTextEditor } from '../../common/RichTextEditor/index.ts';
@@ -16,7 +16,7 @@ export default function QuestionContentSection({ watch, setValue, errors, index 
   const titleError = errors.questions?.[index]?.title;
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
           Question Content

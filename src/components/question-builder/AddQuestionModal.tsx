@@ -74,7 +74,7 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ pb: 0 }}>
+      <DialogTitle component="div" sx={{ pb: 0 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.25rem' }}>
           Create New Question
         </Typography>

@@ -35,6 +35,8 @@ export function insertBlankAtCursor(): BlankDefinition | null {
 }
 
 export function extractBlanksFromHtml(html: string): BlankDefinition[] {
+  // Fast path: skip regex entirely when no blanks exist in the document.
+  if (html.indexOf('data-blank-id') === -1) return [];
   const blanks: BlankDefinition[] = [];
   const regex = /data-blank-id="([^"]+)"[^>]*>\[BLANK_(\d+)\]<\/span>/g;
   let match;

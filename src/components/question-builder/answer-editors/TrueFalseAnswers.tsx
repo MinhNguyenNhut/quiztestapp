@@ -27,7 +27,7 @@ export default function TrueFalseAnswers({ watch, setValue, index }: Props) {
   );
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
           Select the correct answer
