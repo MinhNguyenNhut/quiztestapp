@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -28,6 +28,9 @@ interface ColorPickerPopoverProps {
   onRemove: () => void;
   /** Short label shown inside the popover header (e.g. "Text" or "Highlight"). */
   modeLabel: string;
+  /** Color currently at the caret, in `#rrggbb` form. Used to mark the active swatch
+   *  and seed the custom-color picker. */
+  currentColor?: string;
 }
 
 export default function ColorPickerPopover({
@@ -36,9 +39,16 @@ export default function ColorPickerPopover({
   onApply,
   onRemove,
   modeLabel,
+  currentColor = '#000000',
 }: ColorPickerPopoverProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [custom, setCustom] = useState<string>('#000000');
+  const [custom, setCustom] = useState<string>(currentColor);
+
+  // Whenever the caret color changes, sync the custom-picker seed so it matches.
+  // This is what makes the picker show "current color selected" out of the box.
+  useEffect(() => {
+    setCustom(currentColor);
+  }, [currentColor]);
 
   const open = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
@@ -48,6 +58,7 @@ export default function ColorPickerPopover({
   const apply = useCallback(
     (color: string) => {
       onApply(color);
+      setCustom(color);
       setAnchorEl(null);
     },
     [onApply],
@@ -69,11 +80,35 @@ export default function ColorPickerPopover({
     setAnchorEl(null);
   }, [onRemove]);
 
+  const normalizedCurrent = (currentColor || '').toLowerCase();
+  const isTransparent = normalizedCurrent === 'transparent' || normalizedCurrent === '';
+
   return (
     <>
       <Tooltip title={label}>
-        <IconButton size="small" onMouseDown={e => e.preventDefault()} onClick={open} aria-label={label}>
+        <IconButton
+          size="small"
+          onMouseDown={e => e.preventDefault()}
+          onClick={open}
+          aria-label={label}
+          sx={{ position: 'relative' }}
+        >
           {icon}
+          {/* Small color dot under the icon shows the current caret color. */}
+          <Box
+            aria-hidden
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 15,
+              height: 3,
+              borderRadius: 2,
+              bgcolor: isTransparent ? 'transparent' : currentColor,
+              border: isTransparent ? '1px dashed #9ca3af' : 'none',
+            }}
+          />
         </IconButton>
       </Tooltip>
       <Popover
@@ -89,6 +124,15 @@ export default function ColorPickerPopover({
         <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
           {modeLabel} color
         </Typography>
+
+        {/* If there's no selection, picking a color stages it for the next typed text
+            instead of mutating the document. Communicate that to the user. */}
+        {hasCollapsedSelection() && (
+          <Typography variant="caption" sx={{ display: 'block', color: 'text.disabled', mt: 0.5 }}>
+            No text selected — color applies to next typed text
+          </Typography>
+        )}
+
         <Box
           sx={{
             display: 'grid',
@@ -97,33 +141,44 @@ export default function ColorPickerPopover({
             mt: 1,
           }}
         >
-          {PRESET_COLORS.map(c => (
-            <Box
-              key={c}
-              role="button"
-              tabIndex={0}
-              aria-label={`Apply color ${c}`}
-              onMouseDown={e => e.preventDefault()}
-              onClick={() => apply(c)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  apply(c);
-                }
-              }}
-              sx={{
-                width: 18,
-                height: 18,
-                borderRadius: '3px',
-                bgcolor: c,
-                border: '1px solid',
-                borderColor: c === '#ffffff' ? '#d1d5db' : 'transparent',
-                cursor: 'pointer',
-                transition: 'transform 0.1s',
-                '&:hover': { transform: 'scale(1.2)' },
-              }}
-            />
-          ))}
+          {PRESET_COLORS.map(c => {
+            const isCurrent = !isTransparent && c.toLowerCase() === normalizedCurrent;
+            return (
+              <Box
+                key={c}
+                role="button"
+                tabIndex={0}
+                aria-label={`Apply color ${c}`}
+                aria-pressed={isCurrent}
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => apply(c)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    apply(c);
+                  }
+                }}
+                sx={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: '3px',
+                  bgcolor: c,
+                  border: '1px solid',
+                  borderColor: isCurrent
+                    ? 'primary.main'
+                    : c === '#ffffff'
+                      ? '#d1d5db'
+                      : 'transparent',
+                  outline: isCurrent ? '2px solid' : 'none',
+                  outlineColor: 'primary.light',
+                  outlineOffset: 1,
+                  cursor: 'pointer',
+                  transition: 'transform 0.1s',
+                  '&:hover': { transform: 'scale(1.2)' },
+                }}
+              />
+            );
+          })}
         </Box>
 
         <Divider sx={{ my: 1.5 }} />
@@ -144,7 +199,7 @@ export default function ColorPickerPopover({
             <Box sx={{ position: 'absolute', inset: 0, bgcolor: custom }} />
             <input
               type="color"
-              value={custom}
+              value={isValidHex(custom) ? custom : '#000000'}
               onChange={handleCustomChange}
               aria-label={`Custom ${modeLabel.toLowerCase()} color`}
               style={{
@@ -179,4 +234,14 @@ export default function ColorPickerPopover({
       </Popover>
     </>
   );
+}
+
+function hasCollapsedSelection(): boolean {
+  const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+  if (!sel || sel.rangeCount === 0) return true;
+  return sel.isCollapsed;
+}
+
+function isValidHex(value: string): boolean {
+  return /^#[0-9a-fA-F]{6}$/.test(value);
 }

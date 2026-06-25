@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Quiz, Question } from '../../types/index.ts';
+import type { RootState } from './store.ts';
 
 interface QuizState {
   quizzes: Quiz[];
@@ -68,5 +69,8 @@ export const {
   deleteQuiz,
   reorderQuestions,
 } = quizSlice.actions;
+
+export const getQuizzes = (state: RootState) => state.quiz.quizzes;
+export const getCurrentQuiz = (state: RootState) => state.quiz.currentQuiz;
 
 export default quizSlice.reducer;

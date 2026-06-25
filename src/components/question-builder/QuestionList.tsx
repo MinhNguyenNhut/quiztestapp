@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -15,7 +15,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import QuestionListItem from './QuestionListItem.tsx';
-import type { QuestionFormValues, QuestionType } from '../../types/index.ts';
+import type { QuestionFormValues } from '../../types/index.ts';
 
 interface QuestionListProps {
   questions: QuestionFormValues[];
@@ -25,6 +25,9 @@ interface QuestionListProps {
   onDelete: (index: number) => void;
   onReorder: (from: number, to: number) => void;
   onAddQuestion: () => void;
+  onSaveQuiz: () => void;
+  quizTitle: string;
+  onQuizTitleChange: (value: string) => void;
 }
 
 export default function QuestionList({
@@ -34,6 +37,9 @@ export default function QuestionList({
   onDuplicate,
   onDelete,
   onAddQuestion,
+  onSaveQuiz,
+  quizTitle,
+  onQuizTitleChange,
 }: QuestionListProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -61,7 +67,22 @@ export default function QuestionList({
     >
       {/* Header */}
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ mb: 1, fontWeight: 600 }}
+        >
+          Quiz Information
+        </Typography>
+
+        <TextField
+          fullWidth
+          size="small"
+          label="Quiz Title"
+          value={quizTitle}
+          onChange={(e) => onQuizTitleChange(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
             Questions
           </Typography>
@@ -128,7 +149,7 @@ export default function QuestionList({
             <Typography variant="body2">No matching questions</Typography>
           </Box>
         ) : (
-          filtered.map((question, displayIdx) => {
+          filtered.map((question) => {
             const realIndex = questions.indexOf(question);
             return (
               <QuestionListItem
@@ -152,8 +173,17 @@ export default function QuestionList({
           fullWidth
           startIcon={<AddIcon />}
           onClick={onAddQuestion}
+          sx={{ mb: 1 }}
         >
           Add Question
+        </Button>
+
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={onSaveQuiz}
+        >
+          Save Quiz
         </Button>
       </Box>
     </Paper>

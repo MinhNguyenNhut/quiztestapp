@@ -3,12 +3,16 @@ import { useForm, FormProvider, useFieldArray, type Resolver } from 'react-hook-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import type { QuizFormValues, QuestionType, Difficulty } from '../../types/index.ts';
+import type { QuizFormValues, QuestionType, Difficulty, Quiz, QuestionFormValues, Question } from '../../types/index.ts';
 import { quizFormSchema } from '../../utils/validation.ts';
 import AddQuestionModal from './AddQuestionModal.tsx';
 import QuestionList from './QuestionList.tsx';
 import QuestionEditor from './QuestionEditor.tsx';
-import SaveBar from './SaveBar.tsx';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { addQuiz } from '../../features/quiz/quizSlice.ts';
+import { useAlert } from '../../hooks/useAlert.ts';
+import AppAlert from '../common/AppAlert/AppAlert.tsx';
 
 const INITIAL_QUESTION_TEMPLATE: QuizFormValues = {
   title: '',
@@ -19,6 +23,9 @@ const INITIAL_QUESTION_TEMPLATE: QuizFormValues = {
 export default function QuestionBuilder() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const { alert, showAlert, closeAlert } = useAlert();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const methods = useForm<QuizFormValues>({
     resolver: zodResolver(quizFormSchema) as Resolver<QuizFormValues>,
@@ -32,6 +39,55 @@ export default function QuestionBuilder() {
     control,
     name: 'questions',
   });
+
+  const onSubmit = (data: QuizFormValues) => {
+    const mapQuestionToQuestion = (
+      question: QuestionFormValues,
+      index: number
+    ): Question => ({
+      ...question,
+
+      id: question.id ?? uuidv4(),
+      order: index,
+
+      options: question.options.map((option, optionIndex) => ({
+        ...option,
+        id: option.id ?? uuidv4(),
+        order: option.order ?? optionIndex,
+      })),
+
+      childQuestions: question.childQuestions?.map((child, childIndex) =>
+        mapQuestionToQuestion(child, childIndex)
+      ),
+    });
+
+    const quiz: Quiz = {
+      id: uuidv4(),
+      title: data.title,
+      description: data.description,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+
+      questions: data.questions.map(mapQuestionToQuestion),
+    };
+
+    dispatch(addQuiz(quiz));
+
+    navigate('/');
+  };
+
+  const handleSaveQuiz = methods.handleSubmit(
+    (data) => {
+      showAlert('Quiz saved successfully!', 'success');
+      onSubmit(data);
+    },
+    (errors) => {
+      showAlert(
+        errors.title?.message || 'Please fix validation errors.',
+        'error'
+      );
+    }
+  );
 
   // Auto-select first question when list changes to non-empty
   useEffect(() => {
@@ -189,6 +245,9 @@ export default function QuestionBuilder() {
             onDelete={handleDelete}
             onReorder={handleReorder}
             onAddQuestion={() => setModalOpen(true)}
+            onSaveQuiz={handleSaveQuiz}
+            quizTitle={watch('title')}
+            onQuizTitleChange={(value) => setValue('title', value, { shouldValidate: true })}
           />
 
           {/* Right Panel */}
@@ -232,14 +291,19 @@ export default function QuestionBuilder() {
             )}
           </Box>
         </Box>
-
-        {/* <SaveBar /> */}
       </Box>
 
       <AddQuestionModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={handleAddQuestion}
+      />
+
+      <AppAlert
+        open={alert.open}
+        message={alert.message}
+        severity={alert.severity}
+        onClose={closeAlert}
       />
     </FormProvider>
   );
