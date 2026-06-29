@@ -28,6 +28,7 @@ interface QuestionListProps {
   onSaveQuiz: () => void;
   quizTitle: string;
   onQuizTitleChange: (value: string) => void;
+  isSaving: boolean;
 }
 
 export default function QuestionList({
@@ -40,6 +41,7 @@ export default function QuestionList({
   onSaveQuiz,
   quizTitle,
   onQuizTitleChange,
+  isSaving
 }: QuestionListProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -182,8 +184,9 @@ export default function QuestionList({
           variant="outlined"
           fullWidth
           onClick={onSaveQuiz}
+          disabled={isSaving}
         >
-          Save Quiz
+          {isSaving ? 'Saving...' : 'Save Quiz'}
         </Button>
       </Box>
     </Paper>

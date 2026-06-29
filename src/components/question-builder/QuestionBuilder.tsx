@@ -1,10 +1,17 @@
-﻿import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useForm, FormProvider, useFieldArray, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import type { QuizFormValues, QuestionType, Difficulty, Quiz, QuestionFormValues, Question } from '../../types/index.ts';
+import type {
+  QuizFormValues,
+  QuestionType,
+  Quiz,
+  QuestionFormValues,
+  Question,
+} from '../../types/index.ts';
 import { quizFormSchema } from '../../utils/validation.ts';
+import { createQuestionTemplate } from '../../utils/quizMappers.ts';
 import AddQuestionModal from './AddQuestionModal.tsx';
 import QuestionList from './QuestionList.tsx';
 import QuestionEditor from './QuestionEditor.tsx';
@@ -14,48 +21,84 @@ import { addQuiz } from '../../features/quiz/quizSlice.ts';
 import { useAlert } from '../../hooks/useAlert.ts';
 import AppAlert from '../common/AppAlert/AppAlert.tsx';
 
-const INITIAL_QUESTION_TEMPLATE: QuizFormValues = {
-  title: '',
-  description: '',
-  questions: [],
-};
+/**
+ * QuestionBuilder is a reusable form for editing a quiz's question set.
+ *
+ * It is intentionally mode-agnostic: it owns the form, validation, and
+ * selection state, but knows nothing about how the persisted quiz is
+ * stored or where to navigate afterwards. The page supplies the mode
+ * (`create` vs `edit`) and an `onSave` callback that decides what to do
+ * with the validated values (dispatch + navigate, etc.).
+ *
+ * In `edit` mode the caller must provide `defaultValues` (already mapped
+ * from a persisted `Quiz`) and `originalQuiz`. The component mounts only
+ * once `defaultValues` is defined — see `QuizEditorPage`.
+ */
+type QuestionBuilderProps =
+  | {
+    mode: 'create';
+    onSave: (data: QuizFormValues) => void | Promise<void>;
+    onCancel?: () => void;
+    onDirtyChange?: (isDirty: boolean) => void;
+  }
+  | {
+    mode: 'edit';
+    defaultValues: QuizFormValues;
+    originalQuiz: Quiz;
+    onSave: (data: QuizFormValues) => void | Promise<void>;
+    onCancel?: () => void;
+    onDirtyChange?: (isDirty: boolean) => void;
+  };
 
-export default function QuestionBuilder() {
+export default function QuestionBuilder(props: QuestionBuilderProps) {
+  const { onSave, onDirtyChange } = props;
+
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { alert, showAlert, closeAlert } = useAlert();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const initialValues: QuizFormValues =
+    props.mode === 'edit' ? props.defaultValues : { title: '', description: '', questions: [] };
+
   const methods = useForm<QuizFormValues>({
     resolver: zodResolver(quizFormSchema) as Resolver<QuizFormValues>,
-    defaultValues: INITIAL_QUESTION_TEMPLATE,
+    defaultValues: initialValues,
     mode: 'onChange',
   });
 
-  const { control, watch, setValue, getValues, formState: { errors } } = methods;
+  const { control, watch, setValue, getValues, formState: { errors, isDirty } } = methods;
 
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'questions',
   });
 
-  const onSubmit = (data: QuizFormValues) => {
+  // Fire `onDirtyChange` only on transitions, not per keystroke.
+  const prevDirtyRef = useRef(isDirty);
+  useEffect(() => {
+    if (isDirty !== prevDirtyRef.current) {
+      prevDirtyRef.current = isDirty;
+      onDirtyChange?.(isDirty);
+    }
+  }, [isDirty, onDirtyChange]);
+
+  const submitToStore = (data: QuizFormValues) => {
+    // In step 2 the dispatch lives in the builder. Step 3 moves it to the page.
     const mapQuestionToQuestion = (
       question: QuestionFormValues,
       index: number
     ): Question => ({
       ...question,
-
       id: question.id ?? uuidv4(),
       order: index,
-
       options: question.options.map((option, optionIndex) => ({
         ...option,
         id: option.id ?? uuidv4(),
         order: option.order ?? optionIndex,
       })),
-
       childQuestions: question.childQuestions?.map((child, childIndex) =>
         mapQuestionToQuestion(child, childIndex)
       ),
@@ -67,27 +110,60 @@ export default function QuestionBuilder() {
       description: data.description,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-
       questions: data.questions.map(mapQuestionToQuestion),
     };
 
     dispatch(addQuiz(quiz));
-
     navigate('/');
   };
 
-  const handleSaveQuiz = methods.handleSubmit(
-    (data) => {
+  const handleSaveQuiz = methods.handleSubmit(async (data) => {
+    setIsSaving(true);
+
+    try {
+      if (props.mode === 'create') {
+        submitToStore(data);
+      } else {
+        await onSave?.(data);
+      }
+
       showAlert('Quiz saved successfully!', 'success');
-      onSubmit(data);
-    },
+    } catch (err) {
+      showAlert(err instanceof Error ? err.message : 'Save failed', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  },
     (errors) => {
+      const message = getFirstErrorMessage(errors);
+
       showAlert(
-        errors.title?.message || 'Please fix validation errors.',
+        message ?? 'Please fix validation errors',
         'error'
       );
     }
   );
+  function getFirstErrorMessage(errors: any): string | undefined {
+    if (!errors) return undefined;
+
+    // string or direct message
+    if (typeof errors === 'string') return errors;
+
+    // RHF field error
+    if (typeof errors === 'object') {
+      if ('message' in errors && typeof errors.message === 'string') {
+        return errors.message;
+      }
+
+      // nested object → search first value
+      for (const value of Object.values(errors)) {
+        const msg = getFirstErrorMessage(value);
+        if (msg) return msg;
+      }
+    }
+
+    return undefined;
+  }
 
   // Auto-select first question when list changes to non-empty
   useEffect(() => {
@@ -100,90 +176,16 @@ export default function QuestionBuilder() {
 
   const handleAddQuestion = useCallback(
     (type: QuestionType) => {
-      let options: { text: string; isCorrect: boolean; order: number }[];
-      switch (type) {
-        case 'single_choice':
-          options = [
-            { text: '', isCorrect: true, order: 0 },
-            { text: '', isCorrect: false, order: 1 },
-          ];
-          break;
-        case 'multiple_choice':
-          options = [
-            { text: '', isCorrect: false, order: 0 },
-            { text: '', isCorrect: false, order: 1 },
-          ];
-          break;
-        case 'true_false':
-          options = [
-            { text: 'True', isCorrect: true, order: 0 },
-            { text: 'False', isCorrect: false, order: 1 },
-          ];
-          break;
-        case 'fill_in_blank':
-          options = [{ text: '', isCorrect: false, order: 0 }];
-          break;
-        case 'matching':
-          options = [
-            { text: '', isCorrect: false, order: 0 },
-            { text: '', isCorrect: false, order: 1 },
-          ];
-          break;
-        case 'reading_comprehension':
-          options = [
-            { text: '', isCorrect: false, order: 0 },
-            { text: '', isCorrect: false, order: 1 },
-          ];
-          break;
-        case 'short_answer':
-          options = [{ text: '', isCorrect: false, order: 0 }];
-          break;
-        case 'essay':
-          options = [{ text: '', isCorrect: false, order: 0 }];
-          break;
-        default:
-          options = [
-            { text: '', isCorrect: true, order: 0 },
-            { text: '', isCorrect: false, order: 1 },
-          ];
-      }
-
-      const newQuestion = {
-        id: uuidv4(),
-        type,
-        title: '',
-        content: { html: '', text: '' } as const,
-        description: '',
-        points: 1,
-        difficulty: 'medium' as Difficulty,
-        topic: '',
-        tags: [],
-        estimatedTime: undefined,
-        options,
-        explanation: { html: '', text: '' } as const,
-        blanks: type === 'fill_in_blank' ? [] : undefined,
-        matchingPairs: type === 'matching' ? [] : undefined,
-        passage: type === 'reading_comprehension' ? { html: '', text: '' } : undefined,
-        childQuestions: type === 'reading_comprehension' ? [] : undefined,
-        expectedAnswer: type === 'short_answer' ? '' : undefined,
-        caseSensitive: type === 'short_answer' ? false : undefined,
-        rubric: type === 'essay' ? { html: '', text: '' } : undefined,
-        scoringGuide: type === 'essay' ? '' : undefined,
-      };
-
-      append(newQuestion);
-      // Auto-select the newly added question
+      const template = createQuestionTemplate(type);
+      append(template);
       setSelectedIndex(fields.length);
     },
-    [append, fields.length],
+    [append, fields.length]
   );
 
-  const handleSelectQuestion = useCallback(
-    (index: number) => {
-      setSelectedIndex(index);
-    },
-    [],
-  );
+  const handleSelectQuestion = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
 
   const handleDuplicate = useCallback(
     (index: number) => {
@@ -191,14 +193,17 @@ export default function QuestionBuilder() {
       if (question) {
         const cloned = { ...question, id: uuidv4() };
         const newIndex = index + 1;
-        // Insert after the current question
         const allQuestions = getValues('questions');
-        const updated = [...allQuestions.slice(0, newIndex), cloned, ...allQuestions.slice(newIndex)];
+        const updated = [
+          ...allQuestions.slice(0, newIndex),
+          cloned,
+          ...allQuestions.slice(newIndex),
+        ];
         setValue('questions', updated, { shouldValidate: true });
         setSelectedIndex(newIndex);
       }
     },
-    [getValues, setValue],
+    [getValues, setValue]
   );
 
   const handleDelete = useCallback(
@@ -215,7 +220,7 @@ export default function QuestionBuilder() {
         setSelectedIndex(selectedIndex - 1);
       }
     },
-    [remove, selectedIndex, fields.length],
+    [remove, selectedIndex, fields.length]
   );
 
   const handleReorder = useCallback(
@@ -227,7 +232,7 @@ export default function QuestionBuilder() {
         setSelectedIndex(from);
       }
     },
-    [move, selectedIndex],
+    [move, selectedIndex]
   );
 
   const selectedQuestion = selectedIndex !== null ? fields[selectedIndex] : null;
@@ -236,7 +241,6 @@ export default function QuestionBuilder() {
     <FormProvider {...methods}>
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Left Panel */}
           <QuestionList
             questions={fields}
             selectedIndex={selectedIndex}
@@ -248,9 +252,9 @@ export default function QuestionBuilder() {
             onSaveQuiz={handleSaveQuiz}
             quizTitle={watch('title')}
             onQuizTitleChange={(value) => setValue('title', value, { shouldValidate: true })}
+            isSaving={isSaving}
           />
 
-          {/* Right Panel */}
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {selectedQuestion ? (
               <QuestionEditor

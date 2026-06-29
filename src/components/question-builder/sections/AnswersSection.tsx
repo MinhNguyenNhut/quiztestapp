@@ -1,4 +1,4 @@
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Typography, Card, CardContent } from '@mui/material';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../../types/index.ts';
 import DynamicAnswerEditor from '../answer-editors/DynamicAnswerEditor.tsx';
