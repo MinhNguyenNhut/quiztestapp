@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import type { QuizFormValues } from '../types';

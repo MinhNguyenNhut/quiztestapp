@@ -7,6 +7,9 @@ export interface Quiz {
   updatedAt: string;
 }
 
+// Re-export candidate types
+export * from './candidate';
+
 export type QuestionType =
   | 'single_choice'
   | 'multiple_choice'

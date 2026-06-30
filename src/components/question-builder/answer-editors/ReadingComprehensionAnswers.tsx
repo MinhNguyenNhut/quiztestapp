@@ -1,8 +1,7 @@
-import { Box, Typography, Card, CardContent, Button, Select, MenuItem, TextField, IconButton, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Select, MenuItem, TextField, IconButton, FormControl } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
-import { useFieldArray } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../../types/index.ts';
 import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';

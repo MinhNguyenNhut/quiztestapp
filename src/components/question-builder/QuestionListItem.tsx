@@ -2,7 +2,7 @@ import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import type { QuestionFormValues, QuestionType, Difficulty } from '../../types/index.ts';
+import type { QuestionFormValues, QuestionType } from '../../types/index.ts';
 import { QUESTION_TYPE_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '../../types/index.ts';
 
 interface QuestionListItemProps {

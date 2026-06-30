@@ -1,4 +1,4 @@
-import { Box, TextField, Typography, Card, CardContent, FormControlLabel, Switch } from '@mui/material';
+import { TextField, Typography, Card, CardContent, FormControlLabel, Switch } from '@mui/material';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 
