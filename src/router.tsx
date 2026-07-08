@@ -1,8 +1,11 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout.tsx';
 import QuizListPage from './pages/QuizListPage.tsx';
 import QuizEditorPage from './pages/QuizEditorPage.tsx';
 import CandidateInfoDemoPage from './pages/CandidateInfoDemoPage.tsx';
+import ExamDemoPage from './pages/ExamDemoPage.tsx';
+import ResultDemoPage from './pages/ResultDemoPage.tsx';
+import NotFoundPage from './pages/NotFoundPage.tsx';
 
 export const router = createBrowserRouter([
   {
@@ -12,7 +15,9 @@ export const router = createBrowserRouter([
       { path: 'quiz/new', element: <QuizEditorPage /> },
       { path: 'quiz/:id/edit', element: <QuizEditorPage /> },
       { path: 'quiz/:id/candidate', element: <CandidateInfoDemoPage /> },
-      { path: '*', element: <Navigate to="/" replace /> },
+      { path: 'quiz/:id/exam', element: <ExamDemoPage /> },
+      { path: 'quiz/:id/result/:submissionId', element: <ResultDemoPage /> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

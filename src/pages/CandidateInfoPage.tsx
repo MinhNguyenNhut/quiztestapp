@@ -6,25 +6,20 @@ import {
   Paper,
   Typography,
   Fade,
-  TextField,
-  MenuItem,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Select,
-  InputLabel,
-  FormHelperText,
-  Checkbox,
-  FormControlLabel as CheckboxFormControlLabel,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
-import type { UseFormRegister, FieldError } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import type { UseFormRegister } from 'react-hook-form';
+import { useAppDispatch, useAppSelector } from '../features/quiz/store';
+import { startSession } from '../features/exam/examSlice';
+import { getQuizzes } from '../features/quiz/quizSlice';
 import {
   QuizOverviewCard,
   StartExamButton,
 } from '../components/candidate-info';
+import DynamicFieldRenderer from '../components/candidate-info/DynamicFieldRenderer';
 import type {
   QuizOverview,
   CandidateFieldsConfig,
@@ -35,14 +30,10 @@ import type {
 interface CandidateInfoPageProps {
   quiz: QuizOverview;
   fieldsConfig: CandidateFieldsConfig;
-  onStartQuiz: (candidateData: CandidateFormValues) => void;
+  onStartQuiz?: (candidateData: CandidateFormValues) => void;
   isLoading?: boolean;
 }
 
-/**
- * CandidateInfoPage displays quiz overview and candidate information form
- * before starting the exam. Fully responsive with animations.
- */
 export default function CandidateInfoPage({
   quiz,
   fieldsConfig,
@@ -50,21 +41,50 @@ export default function CandidateInfoPage({
   isLoading = false,
 }: CandidateInfoPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const storedQuizzes = useAppSelector(getQuizzes);
 
   const methods = useForm<CandidateFormValues>({
     mode: 'onBlur',
     defaultValues: fieldsConfig.fields.reduce((acc, field) => {
-      acc[field.id] = field.type === 'checkbox' ? false : '';
+      acc[field.id] =
+        field.type === 'checkbox' ? Boolean(field.defaultValue) : (field.defaultValue ?? '');
       return acc;
     }, {} as CandidateFormValues),
   });
 
-  const { handleSubmit } = methods;
+  const { handleSubmit, watch } = methods;
+  const formValues = watch();
 
   const handleFormSubmit = async (data: CandidateFormValues) => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      await onStartQuiz(data);
+      // Locate the full Quiz document (questions, points, etc.) for the
+      // exam page. The candidate-info "QuizOverview" is metadata-only.
+      const fullQuiz = storedQuizzes.find((q) => q.id === quiz.id);
+      if (!fullQuiz) {
+        setSubmitError(
+          'Quiz configuration not found. Please go back and pick a quiz from the list.',
+        );
+        return;
+      }
+
+      dispatch(
+        startSession({
+          quizId: fullQuiz.id,
+          questions: fullQuiz.questions,
+          estimatedMinutes: fullQuiz.estimatedTime,
+          candidate: data,
+        }),
+      );
+
+      if (onStartQuiz) {
+        await onStartQuiz(data);
+      }
+      navigate(`/quiz/${fullQuiz.id}/exam`);
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +117,6 @@ export default function CandidateInfoPage({
             </Typography>
 
             <Grid container spacing={3}>
-              {/* Quiz Overview Card */}
               <Grid size={{ xs: 12, md: 5 }}>
                 <Fade in timeout={800}>
                   <Box sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
@@ -106,7 +125,6 @@ export default function CandidateInfoPage({
                 </Fade>
               </Grid>
 
-              {/* Candidate Form Card */}
               <Grid size={{ xs: 12, md: 7 }}>
                 <Fade in timeout={1000}>
                   <Paper
@@ -131,6 +149,7 @@ export default function CandidateInfoPage({
                       <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
                         <CandidateFormFields
                           fieldsConfig={fieldsConfig}
+                          formValues={formValues}
                           isLoading={isLoading}
                         />
 
@@ -148,30 +167,50 @@ export default function CandidateInfoPage({
           </Box>
         </Fade>
       </Container>
+
+      <Snackbar
+        open={Boolean(submitError)}
+        autoHideDuration={4000}
+        onClose={() => setSubmitError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity="error" variant="filled" onClose={() => setSubmitError(null)}>
+          {submitError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
 
-/**
- * CandidateFormFields renders the dynamic form fields
- */
 interface CandidateFormFieldsProps {
   fieldsConfig: CandidateFieldsConfig;
+  formValues: CandidateFormValues;
   isLoading?: boolean;
 }
 
-function CandidateFormFields({ fieldsConfig, isLoading }: CandidateFormFieldsProps) {
+function CandidateFormFields({
+  fieldsConfig,
+  formValues,
+  isLoading,
+}: CandidateFormFieldsProps) {
   const { fields, sections } = fieldsConfig;
   const { register, watch, setValue, formState: { errors } } = useFormContext<CandidateFormValues>();
+
+  const isFieldVisible = (field: CandidateField): boolean => {
+    if (!field.visibleIf) return true;
+    const value = formValues[field.visibleIf.fieldId];
+    return value === field.visibleIf.equals;
+  };
 
   const groupedFields = sections?.length
     ? sections.map((section) => ({
         ...section,
         fields: fields
           .filter((f) => f.section === section.id)
+          .filter(isFieldVisible)
           .sort((a, b) => (a.order || 0) - (b.order || 0)),
       }))
-    : [{ id: 'default', title: 'Candidate Information', fields: fields }];
+    : [{ id: 'default', title: 'Candidate Information', fields: fields.filter(isFieldVisible) }];
 
   if (isLoading) {
     return (
@@ -224,170 +263,22 @@ function CandidateFormFields({ fieldsConfig, isLoading }: CandidateFormFieldsPro
   );
 }
 
-/**
- * FieldRenderer renders individual form fields based on type
- */
 interface FieldRendererProps {
   field: CandidateField;
   register: UseFormRegister<CandidateFormValues>;
   watch: ReturnType<typeof useForm<CandidateFormValues>>['watch'];
   setValue: ReturnType<typeof useForm<CandidateFormValues>>['setValue'];
-  error?: FieldError;
+  error?: import('react-hook-form').FieldError;
 }
 
 function FieldRenderer({ field, register, watch, setValue, error }: FieldRendererProps) {
-  const { id, type, label, placeholder, required, options, validation } = field;
-  const hasError = !!error;
-  const errorMessage = error?.message as string | undefined;
-
-  const commonProps = {
-    fullWidth: true,
-    margin: 'normal' as const,
-    label: label,
-    placeholder: placeholder,
-    error: hasError,
-    helperText: errorMessage,
-    required: required,
-    InputLabelProps: { shrink: true },
-  };
-
-  const getValidationRules = () => {
-    const rules: Record<string, unknown> = {};
-
-    if (required) {
-      rules.required = validation?.customMessage || `${label} is required`;
-    }
-
-    if (type === 'email') {
-      rules.pattern = {
-        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-        message: 'Please enter a valid email address',
-      };
-    }
-
-    if (type === 'phone') {
-      rules.pattern = {
-        value: /^[\d\s\-+()]*$/,
-        message: 'Please enter a valid phone number',
-      };
-    }
-
-    if (validation?.minLength && type !== 'number') {
-      rules.minLength = {
-        value: validation.minLength,
-        message: `Minimum ${validation.minLength} characters required`,
-      };
-    }
-
-    if (validation?.maxLength && type !== 'number') {
-      rules.maxLength = {
-        value: validation.maxLength,
-        message: `Maximum ${validation.maxLength} characters allowed`,
-      };
-    }
-
-    return rules;
-  };
-
-  switch (type) {
-    case 'text':
-    case 'email':
-    case 'phone':
-    case 'date':
-    case 'number':
-      return (
-        <TextField
-          {...commonProps}
-          type={type === 'phone' ? 'tel' : type}
-          {...register(id, getValidationRules())}
-        />
-      );
-
-    case 'textarea':
-      return (
-        <TextField
-          {...commonProps}
-          multiline
-          rows={4}
-          {...register(id, getValidationRules())}
-        />
-      );
-
-    case 'select':
-      return (
-        <FormControl fullWidth error={hasError} margin="normal" required={required}>
-          <InputLabel id={`${id}-label`}>{label}</InputLabel>
-          <Select
-            labelId={`${id}-label`}
-            label={label}
-            {...register(id, getValidationRules())}
-          >
-            {options?.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-          {errorMessage && <FormHelperText>{errorMessage}</FormHelperText>}
-        </FormControl>
-      );
-
-    case 'radio':
-      return (
-        <FormControl component="fieldset" fullWidth margin="normal" error={hasError} required={required}>
-          <FormLabel component="legend" id={`${id}-label`}>
-            {label}
-          </FormLabel>
-          <RadioGroup
-            aria-labelledby={`${id}-label`}
-            {...register(id, getValidationRules())}
-          >
-            {options?.map((option) => (
-              <FormControlLabel
-                key={option.value}
-                value={option.value}
-                control={<Radio />}
-                label={option.label}
-              />
-            ))}
-          </RadioGroup>
-          {errorMessage && <FormHelperText>{errorMessage}</FormHelperText>}
-        </FormControl>
-      );
-
-    case 'checkbox':
-      return (
-        <FormControl fullWidth margin="normal" error={hasError}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Checkbox
-              {...register(id)}
-              checked={watch(id) === true}
-              onChange={(e) => setValue(id, e.target.checked)}
-            />
-            <CheckboxFormControlLabel
-              control={<></>}
-              label={
-                <Box component="span">
-                  {required && (
-                    <Box component="span" sx={{ color: 'error.main', mr: 0.5 }}>
-                      *
-                    </Box>
-                  )}
-                  {label}
-                </Box>
-              }
-            />
-          </Box>
-          {errorMessage && <FormHelperText sx={{ ml: 4 }}>{errorMessage}</FormHelperText>}
-        </FormControl>
-      );
-
-    default:
-      return (
-        <TextField
-          {...commonProps}
-          {...register(id, getValidationRules())}
-        />
-      );
-  }
+  return (
+    <DynamicFieldRenderer
+      field={field}
+      register={register}
+      watch={watch}
+      setValue={setValue}
+      error={error}
+    />
+  );
 }

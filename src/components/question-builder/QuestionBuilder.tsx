@@ -86,6 +86,9 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
   }, [isDirty, onDirtyChange]);
 
   const submitToStore = (data: QuizFormValues) => {
+    const difficulties = data.questions.map((q) => q.difficulty);
+
+    const difficulty = difficulties.includes('hard') ? 'hard' : difficulties.includes('medium') ? 'medium' : 'easy';
     // In step 2 the dispatch lives in the builder. Step 3 moves it to the page.
     const mapQuestionToQuestion = (
       question: QuestionFormValues,
@@ -111,6 +114,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       questions: data.questions.map(mapQuestionToQuestion),
+      difficulty: difficulty
     };
 
     dispatch(addQuiz(quiz));

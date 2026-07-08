@@ -19,21 +19,38 @@ export interface CandidateFieldOption {
   value: string;
 }
 
+/**
+ * Conditional visibility rule — `visibleIf` lets one field's visibility
+ * depend on another field's value (e.g. show "Other gender" only when
+ * gender === 'other').
+ */
+export interface FieldVisibilityRule {
+  /** The id of the field whose value is being inspected. */
+  fieldId: string;
+  /** The value the field must equal for this field to be visible. */
+  equals: string | number | boolean;
+}
+
 export interface CandidateField {
   id: string;
   type: CandidateFieldType;
   label: string;
   placeholder?: string;
+  helpText?: string;
+  defaultValue?: string | number | boolean;
   required?: boolean;
   options?: CandidateFieldOption[];
   validation?: {
     minLength?: number;
     maxLength?: number;
+    min?: number;
+    max?: number;
     pattern?: string;
     customMessage?: string;
   };
   order?: number;
   section?: string;
+  visibleIf?: FieldVisibilityRule;
 }
 
 export interface CandidateFieldSection {
@@ -60,6 +77,11 @@ export interface QuizOverview {
   createdAt?: string;
 }
 
+/**
+ * Loose record of form values keyed by field id. Values are coerced
+ * to strings when persisted to `sessionStorage`; callers that need
+ * numbers/booleans should cast at the use site.
+ */
 export interface CandidateFormValues {
   [key: string]: string | number | boolean | string[] | undefined;
 }
@@ -86,10 +108,4 @@ export const FIELD_TYPE_ICONS: Record<CandidateFieldType, string> = {
   textarea: 'notes',
   date: 'calendar_today',
   number: 'pin',
-};
-
-export const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: '#22c55e',
-  medium: '#eab308',
-  hard: '#ef4444',
 };

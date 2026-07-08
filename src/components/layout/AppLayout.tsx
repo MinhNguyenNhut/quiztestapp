@@ -22,7 +22,7 @@ export default function AppLayout() {
           </Button>
         </Toolbar>
       </AppBar>
-      <Container maxWidth={false} disableGutters sx={{ mt: 0, mb: 0, px: 0, flex: 1 }}>
+      <Container maxWidth={false} disableGutters sx={{ mt: 0, mb: 0, px: 0, flex: 1, overflow: 'auto' }}>
         <Outlet />
       </Container>
     </Box>

@@ -1,3 +1,10 @@
+/**
+ * DynamicFieldRenderer renders form fields based on their type
+ * configuration. Supports text, email, phone, select, radio, checkbox,
+ * textarea, date, and number inputs — entirely driven by the
+ * `CandidateField` config. No field is hard-coded; renderers are
+ * selected by a switch on `field.type`.
+ */
 import {
   TextField,
   MenuItem,
@@ -12,6 +19,7 @@ import {
   Select,
   InputLabel,
   FormControlLabel as CheckboxFormControlLabel,
+  Typography,
 } from '@mui/material';
 import type { UseFormRegister, FieldError } from 'react-hook-form';
 import type { CandidateField, CandidateFormValues } from '../../types/candidate';
@@ -24,10 +32,6 @@ interface DynamicFieldRendererProps {
   error?: FieldError;
 }
 
-/**
- * DynamicFieldRenderer renders form fields based on their type configuration
- * Supports: text, email, phone, select, radio, checkbox, textarea, date, number
- */
 export default function DynamicFieldRenderer({
   field,
   register,
@@ -35,19 +39,35 @@ export default function DynamicFieldRenderer({
   setValue,
   error,
 }: DynamicFieldRendererProps) {
-  const { id, type, label, placeholder, required, options, validation } = field;
+  const {
+    id,
+    type,
+    label,
+    placeholder,
+    required,
+    options,
+    validation,
+    defaultValue,
+    helpText,
+  } = field;
   const hasError = !!error;
   const errorMessage = error?.message;
+  const helper = errorMessage ?? helpText;
 
   const commonProps = {
     fullWidth: true,
     margin: 'normal' as const,
-    label: label,
-    placeholder: placeholder,
+    label,
+    placeholder,
     error: hasError,
-    helperText: errorMessage,
-    required: required,
-    InputLabelProps: { shrink: true },
+    helperText: helper,
+    required,
+    defaultValue: defaultValue as string | number | undefined,
+    slotProps: {
+      inputLabel: {
+        shrink: true,
+      },
+    },
   };
 
   const getValidationRules = () => {
@@ -72,8 +92,8 @@ export default function DynamicFieldRenderer({
     }
 
     if (type === 'number') {
-      rules.min = validation?.minLength;
-      rules.max = validation?.maxLength;
+      if (validation?.min !== undefined) rules.min = { value: validation.min, message: `Minimum value is ${validation.min}` };
+      if (validation?.max !== undefined) rules.max = { value: validation.max, message: `Maximum value is ${validation.max}` };
     }
 
     if (validation?.minLength && type !== 'number') {
@@ -131,6 +151,7 @@ export default function DynamicFieldRenderer({
           <Select
             labelId={`${id}-label`}
             label={label}
+            defaultValue={defaultValue as string | undefined}
             {...register(id, getValidationRules())}
           >
             {options?.map((option) => (
@@ -139,18 +160,25 @@ export default function DynamicFieldRenderer({
               </MenuItem>
             ))}
           </Select>
-          {errorMessage && <FormHelperText>{errorMessage}</FormHelperText>}
+          {helper && <FormHelperText>{helper}</FormHelperText>}
         </FormControl>
       );
 
     case 'radio':
       return (
-        <FormControl component="fieldset" fullWidth margin="normal" error={hasError} required={required}>
+        <FormControl
+          component="fieldset"
+          fullWidth
+          margin="normal"
+          error={hasError}
+          required={required}
+        >
           <FormLabel component="legend" id={`${id}-label`}>
             {label}
           </FormLabel>
           <RadioGroup
             aria-labelledby={`${id}-label`}
+            defaultValue={defaultValue as string | undefined}
             {...register(id, getValidationRules())}
           >
             {options?.map((option) => (
@@ -162,17 +190,19 @@ export default function DynamicFieldRenderer({
               />
             ))}
           </RadioGroup>
-          {errorMessage && <FormHelperText>{errorMessage}</FormHelperText>}
+          {helper && <FormHelperText>{helper}</FormHelperText>}
         </FormControl>
       );
 
-    case 'checkbox':
+    case 'checkbox': {
+      const requiredHelp =
+        required && !watch(id) ? `${label} is required` : null;
       return (
         <FormControl fullWidth margin="normal" error={hasError}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
             <Checkbox
               {...register(id)}
-              checked={watch(id) === true}
+              defaultChecked={Boolean(defaultValue)}
               onChange={(e) => setValue(id, e.target.checked)}
             />
             <CheckboxFormControlLabel
@@ -189,9 +219,19 @@ export default function DynamicFieldRenderer({
               }
             />
           </Box>
-          {errorMessage && <FormHelperText sx={{ ml: 4 }}>{errorMessage}</FormHelperText>}
+          {(errorMessage || requiredHelp) && (
+            <FormHelperText sx={{ ml: 4 }}>
+              {errorMessage || requiredHelp}
+            </FormHelperText>
+          )}
+          {!errorMessage && helpText && (
+            <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+              {helpText}
+            </Typography>
+          )}
         </FormControl>
       );
+    }
 
     default:
       return (

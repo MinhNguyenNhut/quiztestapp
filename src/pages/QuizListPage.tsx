@@ -336,6 +336,14 @@ function QuizCard({
           >
             Preview
           </Button>
+          <Button
+            size="small"
+            variant="contained"
+            component={RouterLink}
+            to={`/quiz/${quiz.id}/candidate`}
+          >
+            Start
+          </Button>
         </Stack>
         <Stack direction="row" spacing={0.5}>
           <Tooltip title="Duplicate">

@@ -16,7 +16,7 @@ import {
   CalendarToday,
 } from '@mui/icons-material';
 import type { QuizOverview } from '../../types/candidate';
-import { DIFFICULTY_COLORS } from '../../types/candidate';
+import { DIFFICULTY_COLORS } from '../../types/quiz';
 
 interface QuizOverviewCardProps {
   quiz: QuizOverview;
@@ -111,19 +111,24 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
-            <Typography variant="body2" color="text.secondary">
-              Difficulty:{' '}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
+
+              <Typography variant="body2" color="text.secondary">
+                Difficulty:
+              </Typography>
+
               <Chip
                 label={quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}
                 size="small"
                 sx={{
-                  backgroundColor: difficultyColor,
+                  bgcolor: difficultyColor,
                   color: '#fff',
                   fontWeight: 600,
                   height: 24,
                 }}
               />
-            </Typography>
+            </Box>
           </Box>
 
           {quiz.createdBy && (
