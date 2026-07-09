@@ -2,7 +2,8 @@
  * Aggregations used by the result-page charts.
  */
 
-import type { Question, Quiz, Difficulty } from '../../types/quiz';
+import type { AnyAnswer } from '../../types';
+import type { Quiz, Difficulty } from '../../types/quiz';
 import type { PerQuestionResult } from './scoring';
 
 export interface BreakdownStat {
@@ -77,12 +78,14 @@ export interface SummaryStats {
 export const summaryStats = (
   quiz: Quiz,
   perQuestion: PerQuestionResult[],
+  answers: Record<string, AnyAnswer>,
   timeSpentSeconds: number,
 ): SummaryStats => {
   const total = quiz.questions.length;
   const correct = perQuestion.filter((p) => p.result.isCorrect).length;
-  const skipped = perQuestion.filter((p) => p.pointsEarned === 0 && !p.result.ungraded).length;
-  const wrong = total - correct - skipped;
+  const wrong = perQuestion.filter((p) => !p.result.isCorrect && !p.result.ungraded && answers[p.questionId] !== null && answers[p.questionId] !== undefined,).length;
+  const skipped = perQuestion.filter((p) => answers[p.questionId] === null || answers[p.questionId] === undefined,).length;
+
   return {
     total,
     correct,

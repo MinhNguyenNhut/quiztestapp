@@ -5,6 +5,8 @@
  * `Question` documents. Nothing is hard-coded per page.
  */
 
+import type { CandidateFieldsConfig } from './candidate';
+
 /** Question types supported by the platform. */
 export type QuestionType =
   | 'single_choice'
@@ -95,6 +97,9 @@ export interface Quiz {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
+  /** Owner-defined candidate-info field config. If absent, the app falls
+   * back to a shared default (first name, last name, email). */
+  candidateFieldsConfig?: CandidateFieldsConfig;
   questions: Question[];
 }
 

@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Quiz, Question } from '../../types/index.ts';
+import type { CandidateFieldsConfig } from '../../types/candidate.ts';
 import type { RootState } from './store.ts';
 
 interface QuizState {
@@ -56,6 +57,19 @@ const quizSlice = createSlice({
         quiz.questions = action.payload.questions;
       }
     },
+    updateCandidateFieldsConfig(
+      state,
+      action: PayloadAction<{ quizId: string; config: CandidateFieldsConfig }>
+    ) {
+      const { quizId, config } = action.payload;
+      const quiz = state.quizzes.find((q) => q.id === quizId);
+      if (quiz) {
+        quiz.candidateFieldsConfig = config;
+      }
+      if (state.currentQuiz?.id === quizId) {
+        state.currentQuiz = { ...state.currentQuiz, candidateFieldsConfig: config };
+      }
+    },
   },
 });
 
@@ -68,6 +82,7 @@ export const {
   updateQuiz,
   deleteQuiz,
   reorderQuestions,
+  updateCandidateFieldsConfig,
 } = quizSlice.actions;
 
 export const getQuizzes = (state: RootState) => state.quiz.quizzes;

@@ -28,10 +28,17 @@ const submissionSlice = createSlice({
     clearCurrent(state) {
       state.current = null;
     },
+    deleteSubmission(state, action: PayloadAction<string>) {
+      const submissionId = action.payload;
+      state.history = state.history.filter((s) => s.id !== submissionId);
+      if (state.current?.id === submissionId) {
+        state.current = null;
+      }
+    },
   },
 });
 
-export const { recordSubmission, clearCurrent } = submissionSlice.actions;
+export const { recordSubmission, clearCurrent, deleteSubmission } = submissionSlice.actions;
 
 export const getCurrentSubmission = (state: {
   submission: SubmissionState;

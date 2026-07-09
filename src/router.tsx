@@ -5,6 +5,7 @@ import QuizEditorPage from './pages/QuizEditorPage.tsx';
 import CandidateInfoDemoPage from './pages/CandidateInfoDemoPage.tsx';
 import ExamDemoPage from './pages/ExamDemoPage.tsx';
 import ResultDemoPage from './pages/ResultDemoPage.tsx';
+import SubmissionsDashboardPage from './pages/SubmissionsDashboardPage.tsx';
 import NotFoundPage from './pages/NotFoundPage.tsx';
 
 export const router = createBrowserRouter([
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
       { path: 'quiz/:id/candidate', element: <CandidateInfoDemoPage /> },
       { path: 'quiz/:id/exam', element: <ExamDemoPage /> },
       { path: 'quiz/:id/result/:submissionId', element: <ResultDemoPage /> },
+      { path: 'quiz/:id/submissions', element: <SubmissionsDashboardPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

@@ -52,7 +52,7 @@ const formatAnswer = (question: import('../../../types/quiz').Question, answer: 
     }
     case 'matching': {
       const pairs = question.matchingPairs ?? [];
-      return pairs.map((p, i) => `${p.left} → ${answer.pairs[p.id] ?? '?'}`).join('\n');
+      return pairs.map((p) => `${p.left} → ${answer.pairs[p.id] ?? '?'}`).join('\n');
     }
     case 'short_answer':
     case 'essay':
@@ -112,7 +112,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
         {results.map((r, i) => {
           const meta = statusMeta(
             r.result.isCorrect,
-            r.pointsEarned === 0 && !r.result.ungraded,
+            candidateAnswers[r.questionId] === null || candidateAnswers[r.questionId] === undefined,
             r.result.ungraded ?? false,
           );
           const candidateText = formatAnswer(r.question, candidateAnswers[r.questionId] ?? null);

@@ -15,7 +15,9 @@ import { ScoreCircle } from './components/ScoreCircle';
 import { BreakdownChart } from './components/BreakdownChart';
 import { PerformanceRadar } from './components/PerformanceRadar';
 import { QuestionReviewAccordion } from './components/QuestionReviewAccordion';
+import { CandidateSummaryCard } from './components/CandidateSummaryCard';
 import { computeScore } from '../../shared/utils/scoring';
+import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../../shared/constants/defaultCandidateFields';
 import {
   difficultyBreakdown,
   estimateRankPercentile,
@@ -41,8 +43,13 @@ export default function ResultPage({ quiz, submission }: ResultPageProps) {
   const passed = (submission.percentage ?? 0) >= (quiz.passingScore ?? 0);
 
   const stats = useMemo(() => {
-    return summaryStats(quiz, summary.perQuestion, submission.timeSpentSeconds ?? 0);
-  }, [quiz, summary, submission.timeSpentSeconds]);
+    return summaryStats(
+      quiz,
+      summary.perQuestion,
+      submission.answers,
+      submission.timeSpentSeconds ?? 0,
+    );
+  }, [quiz, summary, submission.answers, submission.timeSpentSeconds]);
 
   const topics = useMemo(() => topicBreakdown(quiz, summary.perQuestion), [quiz, summary.perQuestion]);
   const difficulties = useMemo(() => difficultyBreakdown(quiz, summary.perQuestion), [quiz, summary.perQuestion]);
@@ -112,12 +119,16 @@ export default function ResultPage({ quiz, submission }: ResultPageProps) {
         <Stack spacing={3}>
           <ResultHeader submission={submission} passed={passed} rankPercentile={rankPercentile} />
           <StatsBlock
-            total={stats.total}
-            correct={stats.correct}
-            wrong={stats.wrong}
-            skipped={stats.skipped}
-            accuracy={stats.accuracy}
+            total={summary.perQuestion.length}
+            correct={summary.correct}
+            wrong={summary.wrong}
+            skipped={summary.skipped}
+            accuracy={summary.percentage / 100}
             timeUsedSeconds={submission.timeSpentSeconds ?? 0}
+          />
+          <CandidateSummaryCard
+            candidate={submission.candidate}
+            fieldsConfig={quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG}
           />
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 4 }}>
@@ -186,7 +197,7 @@ export default function ResultPage({ quiz, submission }: ResultPageProps) {
                     Print Result
                   </Button>
                 </Stack>
-                <Stack direction="row" spacing={1.5} sx={{ flexWrap:"wrap" }} useFlexGap>
+                <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }} useFlexGap>
                   <Button
                     variant="outlined"
                     startIcon={<ShareIcon />}

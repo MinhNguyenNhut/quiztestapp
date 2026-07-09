@@ -26,6 +26,7 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import StarIcon from '@mui/icons-material/Star';
 import TimerIcon from '@mui/icons-material/Timer';
 import UpdateIcon from '@mui/icons-material/Update';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { Link as RouterLink } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../features/quiz/store.ts';
@@ -330,14 +331,6 @@ function QuizCard({
           </Button>
           <Button
             size="small"
-            variant="outlined"
-            startIcon={<VisibilityIcon />}
-            onClick={() => onPreview(quiz)}
-          >
-            Preview
-          </Button>
-          <Button
-            size="small"
             variant="contained"
             component={RouterLink}
             to={`/quiz/${quiz.id}/candidate`}
@@ -346,6 +339,25 @@ function QuizCard({
           </Button>
         </Stack>
         <Stack direction="row" spacing={0.5}>
+          <Tooltip title="Submissions">
+            <IconButton
+              size="small"
+              component={RouterLink}
+              to={`/quiz/${quiz.id}/submissions`}
+              aria-label={'View submissions for ' + quiz.title}
+            >
+              <AssessmentIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Preview">
+            <IconButton
+              size="small"
+              onClick={() => onPreview(quiz)}
+              aria-label={'Preview ' + quiz.title}
+            >
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Duplicate">
             <IconButton
               size="small"

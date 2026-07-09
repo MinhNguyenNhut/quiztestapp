@@ -3,10 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CandidateInfoPage from './CandidateInfoPage';
 import type {
   QuizOverview,
-  CandidateFieldsConfig,
   CandidateFormValues,
 } from '../types/candidate';
-
+import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
 import { useAppDispatch, useAppSelector } from '../features/quiz/store';
 import { getQuizzes } from '../features/quiz/quizSlice';
 import { startSession } from '../features/exam/examSlice';
@@ -49,42 +48,8 @@ export default function CandidateInfoDemoPage() {
     createdBy: quiz.createdBy ?? 'Unknown',
     createdAt: quiz.createdAt,
   };
-  // Replace this later if you store candidate fields in Quiz.
-  const fieldsConfig: CandidateFieldsConfig = {
-    sections: [
-      {
-        id: 'personal',
-        title: 'Personal Information',
-        order: 1,
-      },
-    ],
-    fields: [
-      {
-        id: 'firstname',
-        type: 'text',
-        label: 'First Name',
-        required: true,
-        order: 1,
-        section: 'personal',
-      },
-      {
-        id: 'lastname',
-        type: 'text',
-        label: 'Last Name',
-        required: true,
-        order: 2,
-        section: 'personal',
-      },
-      {
-        id: 'email',
-        type: 'email',
-        label: 'Email',
-        required: true,
-        order: 3,
-        section: 'personal',
-      },
-    ],
-  };
+
+  const fieldsConfig = quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG;
 
   const handleStartQuiz = (candidate: CandidateFormValues) => {
     dispatch(

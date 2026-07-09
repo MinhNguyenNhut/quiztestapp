@@ -118,7 +118,6 @@ const ChildProxy = ({ question, value, onChange }: ProxyProps) => {
   // onChange instead of writing the global answers map. Easiest path:
   // temporarily rewrite the slice via a one-shot effect. We use a
   // dedicated slice-less store subscription here.
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     // no-op — kept for parity / future analytics

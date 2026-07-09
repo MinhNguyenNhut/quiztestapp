@@ -18,11 +18,9 @@ import {
   previousQuestion,
   resetSession,
   setAutoSaveStatus,
-  submitSession,
   tickTimer,
   toggleFlag,
 } from './examSlice';
-import { recordSubmission } from './submissionSlice';
 import { computeScore } from './../../shared/utils/scoring';
 import { isAnswered } from '../../types';
 import { useFullscreen } from './../../shared/hooks/useFullscreen';

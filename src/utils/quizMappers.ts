@@ -48,17 +48,22 @@ function questionToFormValues(question: Question): QuestionFormValues {
  * - `order` is reassigned from the array index (top-level and recursively
  *   for `childQuestions`).
  * - Missing option IDs are filled with `uuidv4()`; `order` defaults to index.
+ * - `difficulty` is computed from the question difficulties (hard if any hard, else medium if any medium, else easy).
  */
 export function formValuesToQuiz(
   values: QuizFormValues,
   meta: { id: string; createdAt: string; updatedAt: string }
 ): Quiz {
+  const difficulties = values.questions.map((q) => q.difficulty);
+  const difficulty = difficulties.includes('hard') ? 'hard' : difficulties.includes('medium') ? 'medium' : 'easy';
+
   return {
     id: meta.id,
     title: values.title,
     description: values.description,
     createdAt: meta.createdAt,
     updatedAt: meta.updatedAt,
+    difficulty,
     questions: values.questions.map((question, index) =>
       formValuesToQuestion(question, index)
     ),
