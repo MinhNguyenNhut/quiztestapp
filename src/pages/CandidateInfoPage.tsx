@@ -1,45 +1,120 @@
+/**
+ * Route component for /quiz/:id/candidate.
+ *
+ * Looks up the quiz from Redux, derives a QuizOverview (metadata-only
+ * view used by the form), guards against a missing quiz, and renders
+ * the candidate info form. On submit, starts the exam session in
+ * Redux and navigates to /quiz/:id/exam.
+ */
 import { useState } from 'react';
 import {
+  Alert,
   Box,
+  Button,
   Container,
+  Fade,
   Grid,
   Paper,
-  Typography,
-  Fade,
   Snackbar,
-  Alert,
+  Typography,
 } from '@mui/material';
-import { useForm, FormProvider, useFormContext } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import type { UseFormRegister } from 'react-hook-form';
-import { useAppDispatch, useAppSelector } from '../features/quiz/store';
-import { startSession } from '../features/exam/examSlice';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../features/store';
 import { getQuizzes } from '../features/quiz/quizSlice';
-import {
-  QuizOverviewCard,
-  StartExamButton,
-} from '../components/candidate-info';
+import { startSession } from '../features/exam/examSlice';
+import { QuizOverviewCard, StartExamButton } from '../components/candidate-info';
 import DynamicFieldRenderer from '../components/candidate-info/DynamicFieldRenderer';
+import {
+  DEFAULT_CANDIDATE_FIELDS_CONFIG,
+} from '../shared/constants/defaultCandidateFields';
 import type {
-  QuizOverview,
+  CandidateField,
   CandidateFieldsConfig,
   CandidateFormValues,
-  CandidateField,
+  QuizOverview,
 } from '../types/candidate';
 
-interface CandidateInfoPageProps {
+export default function CandidateInfoPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const quizzes = useAppSelector(getQuizzes);
+  const quiz = quizzes.find((q) => q.id === id);
+
+  if (!quiz) {
+    return (
+      <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
+        <Alert
+          severity="error"
+          action={
+            <Button onClick={() => navigate('/')}>Home</Button>
+          }
+        >
+          Quiz not found.
+        </Alert>
+      </Box>
+    );
+  }
+
+  const quizOverview: QuizOverview = {
+    id: quiz.id,
+    title: quiz.title,
+    description: quiz.description,
+    coverImage: quiz.coverImage,
+    estimatedTime: quiz.estimatedTime ?? 30,
+    questionCount: quiz.questions.length,
+    passingScore: quiz.passingScore ?? 0,
+    difficulty: quiz.difficulty ?? 'medium',
+    createdBy: quiz.createdBy ?? 'Unknown',
+    createdAt: quiz.createdAt,
+  };
+
+  const fieldsConfig =
+    quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG;
+
+  const handleStartQuiz = (candidate: CandidateFormValues) => {
+    dispatch(
+      startSession({
+        quizId: quiz.id,
+        questions: quiz.questions,
+        estimatedMinutes: quiz.estimatedTime,
+        candidate,
+      })
+    );
+
+    navigate(`/quiz/${quiz.id}/exam`);
+  };
+
+  return (
+    <CandidateInfoForm
+      quiz={quizOverview}
+      fieldsConfig={fieldsConfig}
+      onStartQuiz={handleStartQuiz}
+    />
+  );
+}
+
+interface CandidateInfoFormProps {
   quiz: QuizOverview;
   fieldsConfig: CandidateFieldsConfig;
   onStartQuiz?: (candidateData: CandidateFormValues) => void;
   isLoading?: boolean;
 }
 
-export default function CandidateInfoPage({
+/**
+ * The candidate-info form. Reads/writes form state via react-hook-form,
+ * dispatches `startSession` on submit, and delegates any extra
+ * post-submit work (e.g. analytics) to `onStartQuiz`.
+ */
+function CandidateInfoForm({
   quiz,
   fieldsConfig,
   onStartQuiz,
   isLoading = false,
-}: CandidateInfoPageProps) {
+}: CandidateInfoFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -50,7 +125,9 @@ export default function CandidateInfoPage({
     mode: 'onBlur',
     defaultValues: fieldsConfig.fields.reduce((acc, field) => {
       acc[field.id] =
-        field.type === 'checkbox' ? Boolean(field.defaultValue) : (field.defaultValue ?? '');
+        field.type === 'checkbox'
+          ? Boolean(field.defaultValue)
+          : (field.defaultValue ?? '');
       return acc;
     }, {} as CandidateFormValues),
   });
@@ -194,7 +271,12 @@ function CandidateFormFields({
   isLoading,
 }: CandidateFormFieldsProps) {
   const { fields, sections } = fieldsConfig;
-  const { register, watch, setValue, formState: { errors } } = useFormContext<CandidateFormValues>();
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<CandidateFormValues>();
 
   const isFieldVisible = (field: CandidateField): boolean => {
     if (!field.visibleIf) return true;
@@ -210,7 +292,13 @@ function CandidateFormFields({
           .filter(isFieldVisible)
           .sort((a, b) => (a.order || 0) - (b.order || 0)),
       }))
-    : [{ id: 'default', title: 'Candidate Information', fields: fields.filter(isFieldVisible) }];
+    : [
+        {
+          id: 'default',
+          title: 'Candidate Information',
+          fields: fields.filter(isFieldVisible),
+        },
+      ];
 
   if (isLoading) {
     return (

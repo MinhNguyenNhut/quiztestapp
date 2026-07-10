@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Quiz, Question } from '../../types/index.ts';
 import type { CandidateFieldsConfig } from '../../types/candidate.ts';
-import type { RootState } from './store.ts';
+import type { RootState } from '../store.ts';
 
 interface QuizState {
   quizzes: Quiz[];

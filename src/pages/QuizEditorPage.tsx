@@ -6,7 +6,7 @@ import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
 import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
 import type { QuizFormValues } from '../types';
-import type { RootState } from '../features/quiz/store.ts';
+import type { RootState } from '../features/store.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import { addQuiz, updateQuiz } from '../features/quiz/quizSlice.ts';
 import { v4 as uuidv4 } from 'uuid';

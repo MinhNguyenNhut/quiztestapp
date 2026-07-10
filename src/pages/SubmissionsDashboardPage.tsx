@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Alert, Box, Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppSelector } from '../features/quiz/store';
+import { useAppSelector } from '../features/store';
 import { getQuizzes } from '../features/quiz/quizSlice';
-import { getSubmissionHistory } from '../features/exam/submissionSlice';
+import { getSubmissionHistory } from '../features/submissions/submissionSlice';
 import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
-import { SubmissionsSummaryHeader } from './../features/submissions/components/SubmissionsSummaryHeader';
-import { SubmissionsFilterBar } from './../features/submissions/components/SubmissionsFilterBar';
-import { SubmissionsTable } from './../features/submissions/components/SubmissionsTable';
-import { SubmissionsBulkActions } from './../features/submissions/components/SubmissionsBulkActions';
+import { SubmissionsSummaryHeader } from '../components/submissions/SubmissionsSummaryHeader';
+import { SubmissionsFilterBar } from '../components/submissions/SubmissionsFilterBar';
+import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
+import { SubmissionsBulkActions } from '../components/submissions/SubmissionsBulkActions';
 import type { Submission } from '../types/submission';
 
 export default function SubmissionsDashboardPage() {

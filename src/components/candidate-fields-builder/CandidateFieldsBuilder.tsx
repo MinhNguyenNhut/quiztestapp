@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { useAppDispatch } from '../../features/quiz/store';
+import { useAppDispatch } from '../../features/store';
 import { updateCandidateFieldsConfig } from '../../features/quiz/quizSlice';
 import { useAlert } from '../../hooks/useAlert';
 import AppAlert from '../common/AppAlert/AppAlert';

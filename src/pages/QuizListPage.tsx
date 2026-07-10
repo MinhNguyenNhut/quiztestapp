@@ -29,7 +29,7 @@ import UpdateIcon from '@mui/icons-material/Update';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { Link as RouterLink } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { useAppDispatch, useAppSelector } from '../features/quiz/store.ts';
+import { useAppDispatch, useAppSelector } from '../features/store.ts';
 import { addQuiz, deleteQuiz, getQuizzes } from '../features/quiz/quizSlice.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import {
