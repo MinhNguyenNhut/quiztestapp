@@ -1,6 +1,8 @@
 import {
    Box,
+   Checkbox,
    Chip,
+   IconButton,
    Table,
    TableBody,
    TableCell,
@@ -8,8 +10,10 @@ import {
    TableHead,
    TablePagination,
    TableRow,
+   Tooltip,
    Typography,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import type { CandidateFieldsConfig } from '../../types/candidate';
 import type { Submission, SubmissionStatus } from '../../types/submission';
 
@@ -17,6 +21,10 @@ interface SubmissionsTableProps {
    submissions: Submission[];
    fieldsConfig: CandidateFieldsConfig;
    onRowClick: (submission: Submission) => void;
+   onDelete: (submission: Submission) => void;
+   selectedIds: Set<string>;
+   onToggleSelect: (id: string) => void;
+   onToggleSelectAll: (ids: string[], checked: boolean) => void;
    page: number;
    rowsPerPage: number;
    totalCount: number;
@@ -31,15 +39,14 @@ const STATUS_COLOR: Record<SubmissionStatus, 'success' | 'warning' | 'default' |
    in_progress: 'default',
 };
 
-/**
- * Paginated table of submissions. Columns are derived from the quiz's
- * candidate fields config, followed by score, status, time spent, and
- * submitted date. Clicking a row navigates to the submission's result page.
- */
 export function SubmissionsTable({
    submissions,
    fieldsConfig,
    onRowClick,
+   onDelete,
+   selectedIds,
+   onToggleSelect,
+   onToggleSelectAll,
    page,
    rowsPerPage,
    totalCount,
@@ -47,6 +54,12 @@ export function SubmissionsTable({
    onRowsPerPageChange,
 }: SubmissionsTableProps) {
    const sortedFields = [...fieldsConfig.fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+   const colCount = sortedFields.length + 6; // checkbox + fields + score + status + time + submitted + actions
+
+   const pageIds = submissions.map((s) => s.id);
+   const selectedOnPageCount = pageIds.filter((id) => selectedIds.has(id)).length;
+   const allOnPageSelected = pageIds.length > 0 && selectedOnPageCount === pageIds.length;
+   const someOnPageSelected = selectedOnPageCount > 0 && !allOnPageSelected;
 
    return (
       <Box sx={{ mt: 2, width: '100%' }}>
@@ -54,6 +67,14 @@ export function SubmissionsTable({
             <Table size="small">
                <TableHead>
                   <TableRow>
+                     <TableCell padding="checkbox">
+                        <Checkbox
+                           checked={allOnPageSelected}
+                           indeterminate={someOnPageSelected}
+                           onChange={(e) => onToggleSelectAll(pageIds, e.target.checked)}
+                           slotProps={{ input: { 'aria-label': 'Select all submissions on this page' } }}
+                        />
+                     </TableCell>
                      {sortedFields.map((field) => (
                         <TableCell key={field.id} sx={{ fontWeight: 600 }}>
                            {field.label}
@@ -63,43 +84,71 @@ export function SubmissionsTable({
                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
                      <TableCell sx={{ fontWeight: 600 }}>Time Spent</TableCell>
                      <TableCell sx={{ fontWeight: 600 }}>Submitted</TableCell>
+                     <TableCell sx={{ fontWeight: 600 }} align="right">
+                        Actions
+                     </TableCell>
                   </TableRow>
                </TableHead>
                <TableBody>
                   {submissions.length === 0 ? (
                      <TableRow>
-                        <TableCell colSpan={sortedFields.length + 4} align="center" sx={{ py: 4 }}>
+                        <TableCell colSpan={colCount} align="center" sx={{ py: 4 }}>
                            <Typography variant="body2" color="text.secondary">
                               No submissions found.
                            </Typography>
                         </TableCell>
                      </TableRow>
                   ) : (
-                     submissions.map((s) => (
-                        <TableRow
-                           key={s.id}
-                           hover
-                           onClick={() => onRowClick(s)}
-                           sx={{ cursor: 'pointer' }}
-                        >
-                           {sortedFields.map((field) => (
-                              <TableCell key={field.id}>
-                                 {formatCellValue(s.candidate[field.id])}
+                     submissions.map((s) => {
+                        const isSelected = selectedIds.has(s.id);
+                        return (
+                           <TableRow
+                              key={s.id}
+                              hover
+                              selected={isSelected}
+                              onClick={() => onRowClick(s)}
+                              sx={{ cursor: 'pointer' }}
+                           >
+                              <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                                 <Checkbox
+                                    checked={isSelected}
+                                    onChange={() => onToggleSelect(s.id)}
+                                    slotProps={{ input: { 'aria-label': `Select submission ${s.id}` } }}
+                                 />
                               </TableCell>
-                           ))}
-                           <TableCell>{formatScore(s)}</TableCell>
-                           <TableCell>
-                              <Chip
-                                 size="small"
-                                 label={s.status}
-                                 color={STATUS_COLOR[s.status] ?? 'default'}
-                                 variant="outlined"
-                              />
-                           </TableCell>
-                           <TableCell>{formatSeconds(s.timeSpentSeconds)}</TableCell>
-                           <TableCell>{formatDate(s.submittedAt)}</TableCell>
-                        </TableRow>
-                     ))
+                              {sortedFields.map((field) => (
+                                 <TableCell key={field.id}>
+                                    {formatCellValue(s.candidate[field.id])}
+                                 </TableCell>
+                              ))}
+                              <TableCell>{formatScore(s)}</TableCell>
+                              <TableCell>
+                                 <Chip
+                                    size="small"
+                                    label={s.status}
+                                    color={STATUS_COLOR[s.status] ?? 'default'}
+                                    variant="outlined"
+                                 />
+                              </TableCell>
+                              <TableCell>{formatSeconds(s.timeSpentSeconds)}</TableCell>
+                              <TableCell>{formatDate(s.submittedAt)}</TableCell>
+                              <TableCell align="right">
+                                 <Tooltip title="Delete submission">
+                                    <IconButton
+                                       size="small"
+                                       color="error"
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          onDelete(s);
+                                       }}
+                                    >
+                                       <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                 </Tooltip>
+                              </TableCell>
+                           </TableRow>
+                        );
+                     })
                   )}
                </TableBody>
             </Table>
