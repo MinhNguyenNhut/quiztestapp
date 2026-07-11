@@ -12,6 +12,7 @@ interface Props {
 
 export const ReadingComprehensionAnswer = ({ question }: Props) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const session = useAppSelector(getExamSession);
   const answer = session.answers[question.id];
   const childAnswers: Record<string, import('../../../types/answer').AnyAnswer> =
@@ -57,7 +58,7 @@ export const ReadingComprehensionAnswer = ({ question }: Props) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <MenuBookIcon fontSize="small" color="primary" />
             <Typography variant="overline" sx={{ fontWeight: 600, color: 'primary.main' }}>
-              Reading passage
+              {t('answer.readingPassage')}
             </Typography>
           </Box>
           <Box
@@ -75,14 +76,15 @@ export const ReadingComprehensionAnswer = ({ question }: Props) => {
 
       {childQuestions.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          No sub-questions configured.
+          {t('answer.noSubQuestions')}
         </Typography>
       ) : (
         childQuestions.map((child, i) => (
           <Accordion key={child.id} defaultExpanded={i === 0} disableGutters sx={{ mb: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1.5, '&:before': { display: 'none' } }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography sx={{ fontWeight: 600 }}>
-                Question {i + 1}: {child.title || 'Sub-question'}
+                {t('answer.question')} {i + 1}:{' '}
+                {child.title || t('answer.subQuestion')}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -106,6 +108,7 @@ export const ReadingComprehensionAnswer = ({ question }: Props) => {
  */
 import { useEffect, useMemo } from 'react';
 import type { AnyAnswer } from '../../../types';
+import { useTranslation } from 'react-i18next';
 
 interface ProxyProps {
   question: Question;
@@ -181,6 +184,7 @@ interface RendererProps {
 // We re-implement the per-type renderers here (without the global
 // dispatch) so changes bubble into the parent's childAnswers map.
 const AnswerRendererForChild = ({ question, value, onChange, dispatch: _dispatch }: RendererProps) => {
+  const { t } = useTranslation();
   void _dispatch; // explicitly unused in this branch
   switch (question.type) {
     case 'single_choice':
@@ -258,7 +262,7 @@ const AnswerRendererForChild = ({ question, value, onChange, dispatch: _dispatch
                 cursor: 'pointer',
               }}
             >
-              {v ? 'True' : 'False'}
+              {v ? t('answer.true') : t('answer.false')}
             </Box>
           ))}
         </Box>

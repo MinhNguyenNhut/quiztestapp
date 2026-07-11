@@ -1,5 +1,6 @@
 import { Box, Tabs, Tab, CircularProgress } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
@@ -43,6 +44,7 @@ function TabPanel(props: TabPanelProps) {
 export default function QuizEditorPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const quiz = useSelector((state: RootState) =>
     state.quiz.quizzes.find((q) => q.id === id)
@@ -85,17 +87,16 @@ export default function QuizEditorPage() {
     );
   }
 
-
   const quizId = id ?? uuidv4();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
       <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tab label="Questions" id="tab-0" aria-controls="tabpanel-0" />
-        <Tab label="Candidate Fields" id="tab-1" aria-controls="tabpanel-1" />
+        <Tab label={t('quizEditor.tabQuestions')} id="tab-0" aria-controls="tabpanel-0" />
+        <Tab label={t('quizEditor.tabCandidateFields')} id="tab-1" aria-controls="tabpanel-1" />
       </Tabs>
 
-      <Box sx={{ flex: 1, display: 'flex', minHeight: 0, }}>
+      <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
         <TabPanel value={tabValue} index={0}>
           {id ? (
             quiz && (
@@ -107,10 +108,7 @@ export default function QuizEditorPage() {
               />
             )
           ) : (
-            <QuestionBuilder
-              mode="create"
-              onSave={handleSave}
-            />
+            <QuestionBuilder mode="create" onSave={handleSave} />
           )}
         </TabPanel>
 

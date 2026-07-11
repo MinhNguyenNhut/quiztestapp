@@ -1,4 +1,5 @@
 import { Box, Paper, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { CandidateField, CandidateFieldSection } from '../../types/candidate';
 import CandidateFieldListItem from './CandidateFieldListItem';
 
@@ -22,6 +23,8 @@ export default function CandidateFieldList({
   onReorder,
   onDelete,
 }: CandidateFieldListProps) {
+  const { t } = useTranslation();
+
   return (
     <Paper
       variant="outlined"
@@ -39,10 +42,10 @@ export default function CandidateFieldList({
     >
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          Candidate Fields
+          {t('candidateFieldsBuilder.title')}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {fields.length} field{fields.length === 1 ? '' : 's'}
+          {t('candidateFieldsBuilder.fieldCount', { count: fields.length })}
         </Typography>
       </Box>
 
@@ -61,8 +64,8 @@ export default function CandidateFieldList({
             }}
           >
             <Typography variant="h4" sx={{ mb: 1, opacity: 0.3 }}>?</Typography>
-            <Typography variant="body2">No fields yet</Typography>
-            <Typography variant="caption">Click "Add Field" to get started</Typography>
+            <Typography variant="body2">{t('candidateFieldsBuilder.noFieldsYet')}</Typography>
+            <Typography variant="caption">{t('candidateFieldsBuilder.clickAddField')}</Typography>
           </Box>
         ) : (
           fields.map((field, index) => (

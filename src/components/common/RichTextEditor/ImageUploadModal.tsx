@@ -9,6 +9,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ImageIcon from '@mui/icons-material/Image';
 
 interface ImageUploadModalProps {
@@ -18,6 +19,7 @@ interface ImageUploadModalProps {
 }
 
 export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploadModalProps) {
+  const { t } = useTranslation();
   const [url, setUrl] = useState('');
   const [alt, setAlt] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
@@ -60,17 +62,17 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ImageIcon color="primary" />
-        Insert Image
+        {t('richTextEditor.imageModal.title')}
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, mt: 1 }}>
-          Provide an image URL or upload a file.
+          {t('richTextEditor.imageModal.description')}
         </Typography>
         <TextField
           autoFocus
           fullWidth
-          label="Image URL"
-          placeholder="https://example.com/image.png"
+          label={t('richTextEditor.imageModal.urlLabel')}
+          placeholder={t('richTextEditor.imageModal.urlPlaceholder')}
           value={url}
           onChange={(e) => handleUrlChange(e.target.value)}
           variant="outlined"
@@ -93,7 +95,7 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click();
           }}
-          aria-label="Upload image"
+          aria-label={t('richTextEditor.imageModal.uploadAria')}
         >
           <input
             ref={fileInputRef}
@@ -103,16 +105,16 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
             onChange={handleFileSelect}
           />
           <Typography color="text.secondary" variant="body2">
-            Click to upload or drag and drop
+            {t('richTextEditor.imageModal.uploadHint')}
           </Typography>
           <Typography color="text.disabled" variant="caption">
-            PNG, JPG, GIF up to 10MB
+            {t('richTextEditor.imageModal.uploadFileTypes')}
           </Typography>
         </Box>
         <TextField
           fullWidth
-          label="Alt Text"
-          placeholder="Description of the image"
+          label={t('richTextEditor.imageModal.altLabel')}
+          placeholder={t('richTextEditor.imageModal.altPlaceholder')}
           value={alt}
           onChange={(e) => setAlt(e.target.value)}
           variant="outlined"
@@ -122,16 +124,16 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
           <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
             <img
               src={previewUrl}
-              alt="Preview"
+              alt={t('richTextEditor.imageModal.previewAlt')}
               style={{ maxWidth: '100%', maxHeight: 200, display: 'block', margin: '0 auto' }}
             />
           </Box>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button variant="contained" onClick={handleInsert} disabled={!previewUrl.trim()}>
-          Insert
+          {t('common.add')}
         </Button>
       </DialogActions>
     </Dialog>

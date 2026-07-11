@@ -1,4 +1,5 @@
 import { Box, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
@@ -35,6 +36,8 @@ export default function CandidateFieldListItem({
   onReorder,
   onDelete,
 }: CandidateFieldListItemProps) {
+  const { t } = useTranslation();
+
   return (
     <Box
       role="button"
@@ -91,7 +94,7 @@ export default function CandidateFieldListItem({
             color: 'text.primary',
           }}
         >
-          {field.label || `Field ${index + 1}`}
+          {field.label || t('candidateFieldsBuilder.fieldLabelFallback', { index: index + 1 })}
         </Typography>
         <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
           <Chip
@@ -122,7 +125,7 @@ export default function CandidateFieldListItem({
           )}
           {field.required && (
             <Chip
-              label="Required"
+              label={t('candidate.required')}
               size="small"
               sx={{
                 height: 22,
@@ -138,7 +141,7 @@ export default function CandidateFieldListItem({
       </Box>
 
       <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
-        <Tooltip title="Move up">
+        <Tooltip title={t('candidateFieldsBuilder.moveUp')}>
           <span>
             <IconButton
               size="small"
@@ -152,7 +155,7 @@ export default function CandidateFieldListItem({
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title="Move down">
+        <Tooltip title={t('candidateFieldsBuilder.moveDown')}>
           <span>
             <IconButton
               size="small"
@@ -166,7 +169,7 @@ export default function CandidateFieldListItem({
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title="Edit">
+        <Tooltip title={t('common.edit')}>
           <IconButton
             size="small"
             onClick={(e) => {
@@ -177,7 +180,7 @@ export default function CandidateFieldListItem({
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
+        <Tooltip title={t('common.delete')}>
           <IconButton
             size="small"
             color="error"

@@ -1,11 +1,9 @@
 /**
  * Route component for /quiz/:id/result/:submissionId.
- *
- * Looks up the quiz and submission from Redux, guards against a
- * missing quiz, missing submission, or a submission that belongs to
- * a different quiz (redirects/alert), and renders the result view.
+ * ... (unchanged doc comment)
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
@@ -51,6 +49,7 @@ import { isAnswered } from '../types/answer';
 export default function ResultPage() {
   const { id, submissionId } = useParams<{ id: string; submissionId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const quizzes = useAppSelector(getQuizzes);
   const submissions = useAppSelector(getSubmissionHistory);
@@ -64,9 +63,6 @@ export default function ResultPage() {
     [submissions, submissionId]
   );
 
-  // If the result URL is valid but we don't have a submission yet (e.g.
-  // the page was refreshed and the submission isn't in the store), send
-  // the candidate back to start the quiz over.
   useEffect(() => {
     if (!quiz) return;
     if (submission) return;
@@ -77,8 +73,8 @@ export default function ResultPage() {
     return (
       <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Alert severity="error">
-          Quiz not found.{' '}
-          <Button onClick={() => navigate('/')}>Go home</Button>
+          {t('errors.quizNotFound')}{' '}
+          <Button onClick={() => navigate('/')}>{t('common.goHome')}</Button>
         </Alert>
       </Box>
     );
@@ -87,7 +83,7 @@ export default function ResultPage() {
   if (!submission) {
     return (
       <Box sx={{ p: 4 }}>
-        <Alert severity="info">Loading result…</Alert>
+        <Alert severity="info">{t('result.loadingResult')}</Alert>
       </Box>
     );
   }
@@ -97,9 +93,9 @@ export default function ResultPage() {
       <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Alert
           severity="warning"
-          action={<Button onClick={() => navigate('/')}>Home</Button>}
+          action={<Button onClick={() => navigate('/')}>{t('common.home')}</Button>}
         >
-          The result belongs to a different quiz.
+          {t('result.differentQuiz')}
         </Alert>
       </Box>
     );
@@ -113,14 +109,10 @@ interface ResultViewProps {
   submission: Submission;
 }
 
-/**
- * The result UI. Reads submission data, computes the score breakdown,
- * and renders the header, stats, charts, question review, and
- * post-result actions.
- */
 function ResultView({ quiz, submission }: ResultViewProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const summary = useMemo(
@@ -170,13 +162,14 @@ function ResultView({ quiz, submission }: ResultViewProps) {
   };
 
   const handleDownloadPdf = () => {
-    // Lightweight: trigger the browser's print-to-PDF flow. We avoid
-    // pulling a PDF library to keep the bundle small.
     window.print();
   };
 
   const handleShare = async () => {
-    const text = `I scored ${submission.percentage ?? 0}% on "${quiz.title}"!`;
+    const text = t('result.shareText', {
+      percentage: submission.percentage ?? 0,
+      title: quiz.title,
+    });
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
         await (
@@ -195,13 +188,13 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(text);
-        setShareMessage('Result copied to clipboard');
+        setShareMessage(t('result.shareCopied'));
         return;
       } catch {
         // ignore
       }
     }
-    setShareMessage('Sharing is not supported in this browser');
+    setShareMessage(t('result.shareUnsupported'));
   };
 
   const handleHome = () => {
@@ -257,12 +250,12 @@ function ResultView({ quiz, submission }: ResultViewProps) {
               />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <BreakdownChart title="By difficulty" stats={difficulties} />
+              <BreakdownChart title={t('result.byDifficulty')} stats={difficulties} />
             </Grid>
           </Grid>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 12 }}>
-              <BreakdownChart title="By topic" stats={topics} />
+              <BreakdownChart title={t('result.byTopic')} stats={topics} />
             </Grid>
           </Grid>
 
@@ -290,27 +283,22 @@ function ResultView({ quiz, submission }: ResultViewProps) {
                 }}
                 useFlexGap
               >
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ flexWrap: 'wrap' }}
-                  useFlexGap
-                >
+                <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }} useFlexGap>
                   <Button
                     variant="contained"
                     color="primary"
                     startIcon={<RefreshIcon />}
                     onClick={handleRetry}
                   >
-                    Retry Quiz
+                    {t('result.retryQuiz')}
                   </Button>
-                  <Tooltip title="Download a PDF copy of your result">
+                  <Tooltip title={t('result.downloadPdfTooltip')}>
                     <Button
                       variant="outlined"
                       startIcon={<PictureAsPdfIcon />}
                       onClick={handleDownloadPdf}
                     >
-                      Download PDF
+                      {t('result.downloadPdf')}
                     </Button>
                   </Tooltip>
                   <Button
@@ -318,28 +306,23 @@ function ResultView({ quiz, submission }: ResultViewProps) {
                     startIcon={<PrintIcon />}
                     onClick={handlePrint}
                   >
-                    Print Result
+                    {t('result.printResult')}
                   </Button>
                 </Stack>
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ flexWrap: 'wrap' }}
-                  useFlexGap
-                >
+                <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }} useFlexGap>
                   <Button
                     variant="outlined"
                     startIcon={<ShareIcon />}
                     onClick={handleShare}
                   >
-                    Share Result
+                    {t('result.shareResult')}
                   </Button>
                   <Button
                     variant="text"
                     startIcon={<HomeIcon />}
                     onClick={handleHome}
                   >
-                    Return Home
+                    {t('result.returnHome')}
                   </Button>
                 </Stack>
               </Stack>

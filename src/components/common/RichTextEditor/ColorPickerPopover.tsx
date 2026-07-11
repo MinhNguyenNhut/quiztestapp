@@ -8,6 +8,7 @@ import {
   Typography,
   Divider,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 // 40 preset swatches covering the common text / highlight cases.
 export const PRESET_COLORS: ReadonlyArray<string> = [
@@ -41,6 +42,7 @@ export default function ColorPickerPopover({
   modeLabel,
   currentColor = '#000000',
 }: ColorPickerPopoverProps) {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [custom, setCustom] = useState<string>(currentColor);
 
@@ -82,6 +84,7 @@ export default function ColorPickerPopover({
 
   const normalizedCurrent = (currentColor || '').toLowerCase();
   const isTransparent = normalizedCurrent === 'transparent' || normalizedCurrent === '';
+  const modeLower = modeLabel.toLowerCase();
 
   return (
     <>
@@ -122,14 +125,14 @@ export default function ColorPickerPopover({
         slotProps={{ paper: { sx: { p: 1.5, width: 240 } } }}
       >
         <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-          {modeLabel} color
+          {t('richTextEditor.colorPicker.modeColorSuffix', { mode: modeLabel })}
         </Typography>
 
         {/* If there's no selection, picking a color stages it for the next typed text
             instead of mutating the document. Communicate that to the user. */}
         {hasCollapsedSelection() && (
           <Typography variant="caption" sx={{ display: 'block', color: 'text.disabled', mt: 0.5 }}>
-            No text selected — color applies to next typed text
+            {t('richTextEditor.colorPicker.noSelectionHint')}
           </Typography>
         )}
 
@@ -148,7 +151,7 @@ export default function ColorPickerPopover({
                 key={c}
                 role="button"
                 tabIndex={0}
-                aria-label={`Apply color ${c}`}
+                aria-label={t('richTextEditor.colorPicker.applyColorAria', { color: c })}
                 aria-pressed={isCurrent}
                 onMouseDown={e => e.preventDefault()}
                 onClick={() => apply(c)}
@@ -201,7 +204,7 @@ export default function ColorPickerPopover({
               type="color"
               value={isValidHex(custom) ? custom : '#000000'}
               onChange={handleCustomChange}
-              aria-label={`Custom ${modeLabel.toLowerCase()} color`}
+              aria-label={t('richTextEditor.colorPicker.customColorAria', { mode: modeLower })}
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -217,7 +220,7 @@ export default function ColorPickerPopover({
             {custom.toUpperCase()}
           </Typography>
           <Button size="small" onMouseDown={e => e.preventDefault()} variant="outlined" onClick={handleCustomApply}>
-            Apply
+            {t('richTextEditor.colorPicker.apply')}
           </Button>
         </Box>
 
@@ -229,7 +232,7 @@ export default function ColorPickerPopover({
           onClick={handleRemove}
           sx={{ mt: 1, textTransform: 'none' }}
         >
-          Remove {modeLabel.toLowerCase()} color
+          {t('richTextEditor.colorPicker.removeColor', { mode: modeLower })}
         </Button>
       </Popover>
     </>

@@ -10,6 +10,7 @@ import {
   TextField,
   Stack,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import TableChartIcon from '@mui/icons-material/TableChart';
 
 interface TableInsertModalProps {
@@ -19,6 +20,7 @@ interface TableInsertModalProps {
 }
 
 export default function TableInsertModal({ open, onClose, onInsert }: TableInsertModalProps) {
+  const { t } = useTranslation();
   const [rows, setRows] = useState(3);
   const [cols, setCols] = useState(3);
 
@@ -39,12 +41,12 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <TableChartIcon color="primary" />
-        Insert Table
+        {t('richTextEditor.tableModal.title')}
       </DialogTitle>
       <DialogContent>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <TextField
-            label="Rows"
+            label={t('richTextEditor.tableModal.rows')}
             type="number"
             value={rows}
             onChange={(e) => setRows(Number(e.target.value))}
@@ -53,7 +55,7 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
             sx={{ width: 100 }}
           />
           <TextField
-            label="Columns"
+            label={t('richTextEditor.tableModal.columns')}
             type="number"
             value={cols}
             onChange={(e) => setCols(Number(e.target.value))}
@@ -64,7 +66,7 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
         </Stack>
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-            Preview: {rows} × {cols}
+            {t('richTextEditor.tableModal.preview', { rows, cols })}
           </Typography>
           <Box
             sx={{
@@ -89,9 +91,9 @@ export default function TableInsertModal({ open, onClose, onInsert }: TableInser
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button variant="contained" onClick={handleInsert}>
-          Insert
+          {t('common.add')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -83,7 +83,7 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ padding: 0.5 }}>
           {TYPES.map((type) => {
             const isSelected = selected === type;
             return (

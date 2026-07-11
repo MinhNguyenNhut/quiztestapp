@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
    Alert,
    Box,
@@ -23,14 +24,13 @@ import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
 import { SubmissionsBulkActions } from '../components/submissions/SubmissionsBulkActions';
 import type { Submission } from '../types/submission';
 
-// Distinguish "delete one row" vs "delete selected batch" so the
-// confirmation dialog can show the right copy for either case.
 type PendingDelete = { kind: 'single'; submission: Submission } | { kind: 'bulk'; ids: string[] };
 
 export default function SubmissionsDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const quizzes = useAppSelector(getQuizzes);
   const allSubmissions = useAppSelector(getSubmissionHistory);
@@ -62,11 +62,11 @@ export default function SubmissionsDashboardPage() {
           severity="error"
           action={
             <Button onClick={() => navigate('/')}>
-              Home
+              {t('common.home')}
             </Button>
           }
         >
-          Quiz not found.
+          {t('errors.quizNotFound')}
         </Alert>
       </Box>
     );
@@ -135,8 +135,6 @@ export default function SubmissionsDashboardPage() {
     [sorted, page, rowsPerPage]
   );
 
-  // Drop any selected ids that are no longer in the filtered/sorted set
-  // (e.g. the user changed a filter after selecting rows).
   const validSelectedIds = useMemo(() => {
     const validIds = new Set(sorted.map((s) => s.id));
     return new Set([...selectedIds].filter((sid) => validIds.has(sid)));
@@ -193,7 +191,6 @@ export default function SubmissionsDashboardPage() {
       return next;
     });
 
-    // Step back a page if this delete would empty the current page.
     const remainingOnPage = paged.filter((s) => !idsToDelete.includes(s.id)).length;
     if (remainingOnPage === 0 && page > 0) {
       setPage(page - 1);
@@ -244,7 +241,7 @@ export default function SubmissionsDashboardPage() {
           }}
         >
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {validSelectedIds.size} selected
+            {t('submissions.selectedCount', { count: validSelectedIds.size })}
           </Typography>
           <Button
             size="small"
@@ -252,7 +249,7 @@ export default function SubmissionsDashboardPage() {
             startIcon={<DeleteIcon />}
             onClick={handleBulkDeleteRequest}
           >
-            Delete selected
+            {t('submissions.deleteSelected')}
           </Button>
         </Toolbar>
       )}
@@ -275,20 +272,20 @@ export default function SubmissionsDashboardPage() {
       <Dialog open={!!pendingDelete} onClose={handleCancelDelete}>
         <DialogTitle>
           {pendingDelete?.kind === 'bulk'
-            ? `Delete ${pendingDelete.ids.length} submissions?`
-            : 'Delete submission?'}
+            ? t('submissions.deleteBulkTitle', { count: pendingDelete.ids.length })
+            : t('submissions.deleteSingleTitle')}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
             {pendingDelete?.kind === 'bulk'
-              ? `This will permanently remove ${pendingDelete.ids.length} submissions from "${quiz.title}". This action cannot be undone.`
-              : `This will permanently remove the submission from "${quiz.title}". This action cannot be undone.`}
+              ? t('submissions.deleteBulkMessage', { count: pendingDelete.ids.length, title: quiz.title })
+              : t('submissions.deleteSingleMessage', { title: quiz.title })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete}>Cancel</Button>
+          <Button onClick={handleCancelDelete}>{t('common.cancel')}</Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
-            Delete
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

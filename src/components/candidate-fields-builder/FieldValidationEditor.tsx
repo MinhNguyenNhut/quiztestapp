@@ -1,4 +1,5 @@
 import { Box, Stack, TextField, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { CandidateField } from '../../types/candidate';
 
 interface FieldValidationEditorProps {
@@ -18,6 +19,7 @@ const supportsPattern = (type: CandidateField['type']): boolean =>
  * re-emits the whole validation object so partial edits stay clean.
  */
 export default function FieldValidationEditor({ field, onChange }: FieldValidationEditorProps) {
+  const { t } = useTranslation();
   const v = field.validation ?? {};
   const update = (patch: Partial<NonNullable<CandidateField['validation']>>) => {
     onChange({ ...v, ...patch });
@@ -26,7 +28,7 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
   if (!supportsText(field.type) && !supportsNumber(field.type)) {
     return (
       <Typography variant="caption" color="text.secondary">
-        No validation options for this field type.
+        {t('candidateFieldsBuilder.noValidationOptions')}
       </Typography>
     );
   }
@@ -36,7 +38,7 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
       {supportsText(field.type) && (
         <Box sx={{ display: 'flex', gap: 1.5 }}>
           <TextField
-            label="Min length"
+            label={t('candidateFieldsBuilder.minLength')}
             type="number"
             size="small"
             value={v.minLength ?? ''}
@@ -45,7 +47,7 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
             fullWidth
           />
           <TextField
-            label="Max length"
+            label={t('candidateFieldsBuilder.maxLength')}
             type="number"
             size="small"
             value={v.maxLength ?? ''}
@@ -59,7 +61,7 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
       {supportsNumber(field.type) && (
         <Box sx={{ display: 'flex', gap: 1.5 }}>
           <TextField
-            label="Min value"
+            label={t('candidateFieldsBuilder.minValue')}
             type="number"
             size="small"
             value={v.min ?? ''}
@@ -67,7 +69,7 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
             fullWidth
           />
           <TextField
-            label="Max value"
+            label={t('candidateFieldsBuilder.maxValue')}
             type="number"
             size="small"
             value={v.max ?? ''}
@@ -79,18 +81,18 @@ export default function FieldValidationEditor({ field, onChange }: FieldValidati
 
       {supportsPattern(field.type) && (
         <TextField
-          label="Regex pattern"
+          label={t('candidateFieldsBuilder.regexPattern')}
           size="small"
           value={v.pattern ?? ''}
           onChange={(e) => update({ pattern: e.target.value || undefined })}
-          placeholder="e.g. ^[A-Z]{2}\\d{4}$"
+          placeholder={t('candidateFieldsBuilder.regexPlaceholder')}
           fullWidth
-          helperText="JavaScript regex applied on submit"
+          helperText={t('candidateFieldsBuilder.regexHelper')}
         />
       )}
 
       <TextField
-        label="Custom error message"
+        label={t('candidateFieldsBuilder.customErrorMessage')}
         size="small"
         value={v.customMessage ?? ''}
         onChange={(e) => update({ customMessage: e.target.value || undefined })}

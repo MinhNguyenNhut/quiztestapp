@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
@@ -24,12 +25,9 @@ import FieldVisibilityEditor from './FieldVisibilityEditor';
 
 interface AddCandidateFieldModalProps {
   open: boolean;
-  /** When set, the modal edits this field instead of creating a new one. */
   field: CandidateField | null;
   sections: CandidateFieldSection[];
-  /** All fields in the form — used by the visibility editor. */
   allFields: CandidateField[];
-  /** Suggested next `order` when creating a new field. */
   nextOrder: number;
   onClose: () => void;
   onSubmit: (field: CandidateField) => void;
@@ -53,6 +51,7 @@ export default function AddCandidateFieldModal({
   onClose,
   onSubmit,
 }: AddCandidateFieldModalProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<CandidateField>(() => emptyTemplate(nextOrder, sections));
 
   useEffect(() => {
@@ -77,10 +76,10 @@ export default function AddCandidateFieldModal({
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle component="div">
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.25rem' }}>
-          {field ? 'Edit Field' : 'Add Field'}
+          {field ? t('candidateFieldsBuilder.editField') : t('candidateFieldsBuilder.addField')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Configure how this field appears on the candidate form
+          {t('candidateFieldsBuilder.configureFieldDesc')}
         </Typography>
       </DialogTitle>
 
@@ -98,7 +97,7 @@ export default function AddCandidateFieldModal({
           {supportsValidation && (
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                Validation
+                {t('candidateFieldsBuilder.validation')}
               </Typography>
               <FieldValidationEditor field={draft} onChange={(validation) => update({ validation })} />
             </Box>
@@ -106,7 +105,7 @@ export default function AddCandidateFieldModal({
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-              Conditional visibility
+              {t('candidateFieldsBuilder.conditionalVisibility')}
             </Typography>
             <FieldVisibilityEditor
               allFields={allFields}
@@ -125,16 +124,16 @@ export default function AddCandidateFieldModal({
                   onChange={(e) => update({ defaultValue: e.target.checked })}
                 />
               }
-              label="Checked by default"
+              label={t('candidateFieldsBuilder.checkedByDefault')}
             />
           )}
         </Stack>
       </DialogContent>
 
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('common.cancel')}</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={!draft.label.trim()}>
-          {field ? 'Save' : 'Add Field'}
+          {field ? t('common.save') : t('candidateFieldsBuilder.addField')}
         </Button>
       </DialogActions>
     </Dialog>

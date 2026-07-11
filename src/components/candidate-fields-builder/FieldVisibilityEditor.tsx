@@ -1,11 +1,9 @@
 import { FormControl, InputLabel, MenuItem, Select, TextField, Typography, Stack, Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { CandidateField, FieldVisibilityRule } from '../../types/candidate';
 
 interface FieldVisibilityEditorProps {
-  /** All fields in the form, in display order. */
   allFields: CandidateField[];
-  /** The current field being edited (used to filter out fields that come
-   *  after it, so we never offer a self-reference or a circular rule). */
   currentField: CandidateField;
   rule: FieldVisibilityRule | undefined;
   onChange: (rule: FieldVisibilityRule | undefined) => void;
@@ -23,12 +21,13 @@ export default function FieldVisibilityEditor({
   rule,
   onChange,
 }: FieldVisibilityEditorProps) {
+  const { t } = useTranslation();
   const candidates = allFields.filter((f) => f.id !== currentField.id && (f.order ?? 0) < (currentField.order ?? 0));
 
   if (candidates.length === 0) {
     return (
       <Typography variant="caption" color="text.secondary">
-        No earlier fields available — add another field above this one to define a visibility rule.
+        {t('candidateFieldsBuilder.noEarlierFields')}
       </Typography>
     );
   }
@@ -41,9 +40,9 @@ export default function FieldVisibilityEditor({
   return (
     <Stack spacing={1.5}>
       <FormControl size="small" fullWidth>
-        <InputLabel>Show only when</InputLabel>
+        <InputLabel>{t('candidateFieldsBuilder.showOnlyWhen')}</InputLabel>
         <Select
-          label="Show only when"
+          label={t('candidateFieldsBuilder.showOnlyWhen')}
           value={rule?.fieldId ?? ''}
           onChange={(e) => {
             const fieldId = e.target.value as string;
@@ -60,18 +59,18 @@ export default function FieldVisibilityEditor({
 
       {rule && (
         <TextField
-          label="Equals value"
+          label={t('candidateFieldsBuilder.equalsValue')}
           size="small"
           value={String(rule.equals)}
           onChange={(e) => update({ equals: e.target.value })}
           fullWidth
-          helperText="The trigger field must equal this value for this field to be shown."
+          helperText={t('candidateFieldsBuilder.equalsHelper')}
         />
       )}
 
       {rule && (
         <Button size="small" color="inherit" onClick={() => onChange(undefined)} sx={{ alignSelf: 'flex-start' }}>
-          Clear rule
+          {t('candidateFieldsBuilder.clearRule')}
         </Button>
       )}
     </Stack>

@@ -1,4 +1,5 @@
 import { FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Switch, TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type {
   CandidateField,
   CandidateFieldSection,
@@ -30,20 +31,22 @@ interface FieldBasicsFormProps {
  * single switch that drives which other controls appear below.
  */
 export default function FieldBasicsForm({ field, sections, onChange }: FieldBasicsFormProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <FormControl size="small" fullWidth>
-            <InputLabel>Field type</InputLabel>
+            <InputLabel>{t('candidateFieldsBuilder.fieldType')}</InputLabel>
             <Select
-              label="Field type"
+              label={t('candidateFieldsBuilder.fieldType')}
               value={field.type}
               onChange={(e) => onChange({ type: e.target.value as CandidateFieldType })}
             >
-              {ALL_TYPES.map((t) => (
-                <MenuItem key={t} value={t}>
-                  {FIELD_TYPE_LABELS[t]}
+              {ALL_TYPES.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {FIELD_TYPE_LABELS[type]}
                 </MenuItem>
               ))}
             </Select>
@@ -51,13 +54,13 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <FormControl size="small" fullWidth>
-            <InputLabel>Section</InputLabel>
+            <InputLabel>{t('candidateFieldsBuilder.section')}</InputLabel>
             <Select
-              label="Section"
+              label={t('candidateFieldsBuilder.section')}
               value={field.section ?? ''}
               onChange={(e) => onChange({ section: (e.target.value as string) || undefined })}
             >
-              <MenuItem value="">— None —</MenuItem>
+              <MenuItem value="">{t('candidateFieldsBuilder.noneOption')}</MenuItem>
               {sections.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
                   {s.title}
@@ -69,7 +72,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
       </Grid>
 
       <TextField
-        label="Label"
+        label={t('candidateFieldsBuilder.label')}
         size="small"
         value={field.label}
         onChange={(e) => onChange({ label: e.target.value })}
@@ -80,7 +83,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            label="Placeholder"
+            label={t('candidateFieldsBuilder.placeholder')}
             size="small"
             value={field.placeholder ?? ''}
             onChange={(e) => onChange({ placeholder: e.target.value || undefined })}
@@ -89,7 +92,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            label="Help text"
+            label={t('candidateFieldsBuilder.helpText')}
             size="small"
             value={field.helpText ?? ''}
             onChange={(e) => onChange({ helpText: e.target.value || undefined })}
@@ -99,7 +102,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
       </Grid>
 
       <TextField
-        label="Default value"
+        label={t('candidateFieldsBuilder.defaultValue')}
         size="small"
         value={String(field.defaultValue ?? '')}
         onChange={(e) => onChange({ defaultValue: e.target.value || undefined })}
@@ -114,7 +117,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
             onChange={(e) => onChange({ required: e.target.checked })}
           />
         }
-        label="Required"
+        label={t('candidate.required')}
       />
     </>
   );

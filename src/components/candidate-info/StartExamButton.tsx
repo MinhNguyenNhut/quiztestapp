@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { PlayArrow } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import type { UseFormHandleSubmit } from 'react-hook-form';
 import type { CandidateFormValues } from '../../types/candidate';
 
@@ -20,6 +21,7 @@ export default function StartExamButton({
   isSubmitting = false,
 }: StartExamButtonProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isVisible, setIsVisible] = useState(true);
 
@@ -98,7 +100,7 @@ export default function StartExamButton({
             },
           }}
         >
-          {isSubmitting ? 'Starting Quiz...' : 'Start Quiz'}
+          {isSubmitting ? t('candidate.startingQuiz') : t('candidate.startQuiz')}
         </Button>
       </Box>
     </Box>

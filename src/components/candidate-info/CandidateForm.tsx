@@ -1,5 +1,6 @@
 import { useForm, FormProvider } from 'react-hook-form';
 import { Box, Grid, Typography, Paper, Skeleton } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DynamicFieldRenderer from './DynamicFieldRenderer';
 import type { CandidateFieldsConfig, CandidateFormValues, CandidateField } from '../../types/candidate';
 
@@ -18,6 +19,7 @@ export default function CandidateForm({
   isLoading = false,
   onSubmit,
 }: CandidateFormProps) {
+  const { t } = useTranslation();
   const { fields, sections } = config;
 
   const methods = useForm<CandidateFormValues>({
@@ -38,7 +40,7 @@ export default function CandidateForm({
           .filter((f) => f.section === section.id)
           .sort((a, b) => (a.order || 0) - (b.order || 0)),
       }))
-    : [{ id: 'default', title: 'Candidate Information', fields: fields }];
+    : [{ id: 'default', title: t('candidate.title'), fields: fields }];
 
   if (isLoading) {
     return (

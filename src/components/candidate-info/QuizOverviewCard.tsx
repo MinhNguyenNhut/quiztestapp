@@ -15,6 +15,7 @@ import {
   Speed,
   CalendarToday,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import type { QuizOverview } from '../../types/candidate';
 import { DIFFICULTY_COLORS } from '../../types/quiz';
 
@@ -27,7 +28,9 @@ interface QuizOverviewCardProps {
  * Shows cover image, title, description, and metadata
  */
 export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
+  const { t, i18n } = useTranslation();
   const difficultyColor = DIFFICULTY_COLORS[quiz.difficulty];
+  const dateLocale = i18n.language?.startsWith('vi') ? 'vi-VN' : 'en-US';
 
   return (
     <Card
@@ -79,9 +82,9 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
-                Estimated Time:{' '}
+                {t('candidate.estimatedTime')}:{' '}
                 <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {quiz.estimatedTime} minutes
+                  {t('candidate.minutesUnit', { count: quiz.estimatedTime })}
                 </Box>
               </Typography>
             </Box>
@@ -90,7 +93,7 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <HelpOutlined sx={{ color: 'text.secondary', fontSize: 20 }} />
             <Typography variant="body2" color="text.secondary">
-              Questions:{' '}
+              {t('candidate.questionsLabel')}:{' '}
               <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
                 {quiz.questionCount}
               </Box>
@@ -101,7 +104,7 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
-                Passing Score:{' '}
+                {t('candidate.passingScore')}:{' '}
                 <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   {quiz.passingScore}%
                 </Box>
@@ -115,11 +118,11 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
               <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
 
               <Typography variant="body2" color="text.secondary">
-                Difficulty:
+                {t('candidate.difficultyLabel')}:
               </Typography>
 
               <Chip
-                label={quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}
+                label={t(`difficulty.${quiz.difficulty}`)}
                 size="small"
                 sx={{
                   bgcolor: difficultyColor,
@@ -135,7 +138,7 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
-                Created By:{' '}
+                {t('candidate.createdBy')}:{' '}
                 <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   {quiz.createdBy}
                 </Box>
@@ -147,9 +150,9 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <CalendarToday sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
-                Created:{' '}
+                {t('candidate.createdLabel')}:{' '}
                 <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {new Date(quiz.createdAt).toLocaleDateString()}
+                  {new Date(quiz.createdAt).toLocaleDateString(dateLocale)}
                 </Box>
               </Typography>
             </Box>

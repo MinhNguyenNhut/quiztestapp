@@ -8,6 +8,7 @@ import { store } from './features/store.ts';
 import { router } from './router.tsx';
 import theme from './theme/index.ts';
 import './index.css';
+import "./i18n";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -21,6 +21,7 @@ import {
   FormControlLabel as CheckboxFormControlLabel,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { UseFormRegister, FieldError } from 'react-hook-form';
 import type { CandidateField, CandidateFormValues } from '../../types/candidate';
 
@@ -39,6 +40,7 @@ export default function DynamicFieldRenderer({
   setValue,
   error,
 }: DynamicFieldRendererProps) {
+  const { t } = useTranslation();
   const {
     id,
     type,
@@ -74,46 +76,46 @@ export default function DynamicFieldRenderer({
     const rules: Record<string, unknown> = {};
 
     if (required) {
-      rules.required = validation?.customMessage || `${label} is required`;
+      rules.required = validation?.customMessage || t('validation.requiredField', { label });
     }
 
     if (type === 'email') {
       rules.pattern = {
         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-        message: 'Please enter a valid email address',
+        message: t('validation.invalidEmail'),
       };
     }
 
     if (type === 'phone') {
       rules.pattern = {
         value: /^[\d\s\-+()]*$/,
-        message: 'Please enter a valid phone number',
+        message: t('validation.invalidPhone'),
       };
     }
 
     if (type === 'number') {
-      if (validation?.min !== undefined) rules.min = { value: validation.min, message: `Minimum value is ${validation.min}` };
-      if (validation?.max !== undefined) rules.max = { value: validation.max, message: `Maximum value is ${validation.max}` };
+      if (validation?.min !== undefined) rules.min = { value: validation.min, message: t('validation.minValue', { min: validation.min }) };
+      if (validation?.max !== undefined) rules.max = { value: validation.max, message: t('validation.maxValue', { max: validation.max }) };
     }
 
     if (validation?.minLength && type !== 'number') {
       rules.minLength = {
         value: validation.minLength,
-        message: `Minimum ${validation.minLength} characters required`,
+        message: t('validation.minLength', { count: validation.minLength }),
       };
     }
 
     if (validation?.maxLength && type !== 'number') {
       rules.maxLength = {
         value: validation.maxLength,
-        message: `Maximum ${validation.maxLength} characters allowed`,
+        message: t('validation.maxLength', { count: validation.maxLength }),
       };
     }
 
     if (validation?.pattern) {
       rules.pattern = {
         value: new RegExp(validation.pattern),
-        message: validation.customMessage || 'Invalid format',
+        message: validation.customMessage || t('validation.invalidFormat'),
       };
     }
 
@@ -196,7 +198,7 @@ export default function DynamicFieldRenderer({
 
     case 'checkbox': {
       const requiredHelp =
-        required && !watch(id) ? `${label} is required` : null;
+        required && !watch(id) ? t('validation.requiredField', { label }) : null;
       return (
         <FormControl fullWidth margin="normal" error={hasError}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>

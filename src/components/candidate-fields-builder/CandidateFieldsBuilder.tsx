@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -35,6 +36,7 @@ const renumber = (items: CandidateField[]): CandidateField[] =>
  */
 export default function CandidateFieldsBuilder({ quizId, defaultConfig }: CandidateFieldsBuilderProps) {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const { alert, showAlert, closeAlert } = useAlert();
 
   const [fields, setFields] = useState<CandidateField[]>(() => sortByOrder(defaultConfig.fields));
@@ -110,8 +112,8 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
       sections: sections.length > 0 ? sections : undefined,
     };
     dispatch(updateCandidateFieldsConfig({ quizId, config }));
-    showAlert('Candidate fields saved', 'success');
-  }, [dispatch, fields, sections, quizId, showAlert]);
+    showAlert(t('candidateFieldsBuilder.fieldsSaved'), 'success');
+  }, [dispatch, fields, sections, quizId, showAlert, t]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -131,7 +133,7 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
               startIcon={<AddIcon />}
               onClick={handleAddField}
             >
-              Add Field
+              {t('candidateFieldsBuilder.addField')}
             </Button>
           </Box>
         </Box>
@@ -140,37 +142,36 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
           <Stack spacing={3} sx={{ maxWidth: 720 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                Candidate Information
+                {t('candidate.title')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Configure the fields that the candidate fills in before the exam starts. The form
-                shown on <code>/quiz/:id/candidate</code> is generated from this list.
+                {t('candidateFieldsBuilder.pageDesc')}
               </Typography>
             </Box>
 
             <Stack direction="row" spacing={1.5}>
               <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddField}>
-                Add Field
+                {t('candidateFieldsBuilder.addField')}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<SettingsIcon />}
                 onClick={() => setSectionsOpen(true)}
               >
-                Manage Sections
+                {t('candidateFieldsBuilder.manageSections')}
               </Button>
               <Button variant="contained" color="success" onClick={handleSave} sx={{ ml: 'auto' }}>
-                Save Fields
+                {t('candidateFieldsBuilder.saveFields')}
               </Button>
             </Stack>
 
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                Fields ({fields.length})
+                {t('candidateFieldsBuilder.fieldsCountHeader', { count: fields.length })}
               </Typography>
               {fields.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  No fields yet. Click "Add Field" to define one.
+                  {t('candidateFieldsBuilder.noFieldsClickAdd')}
                 </Typography>
               ) : (
                 <Stack spacing={1}>
@@ -188,12 +189,12 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
                       }}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {f.label || '(untitled)'}
+                        {f.label || t('candidateFieldsBuilder.untitled')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {f.type}
                         {f.section ? ` · ${sections.find((s) => s.id === f.section)?.title ?? f.section}` : ''}
-                        {f.required ? ' · required' : ''}
+                        {f.required ? ` · ${t('candidateFieldsBuilder.requiredSuffix')}` : ''}
                       </Typography>
                     </Box>
                   ))}
@@ -217,10 +218,10 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
       <Dialog open={sectionsOpen} onClose={() => setSectionsOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle component="div">
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Manage Sections
+            {t('candidateFieldsBuilder.manageSections')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Sections group fields on the candidate form.
+            {t('candidateFieldsBuilder.manageSectionsDesc')}
           </Typography>
         </DialogTitle>
         <DialogContent>
@@ -228,7 +229,7 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={() => setSectionsOpen(false)}>
-            Done
+            {t('candidateFieldsBuilder.done')}
           </Button>
         </DialogActions>
       </Dialog>

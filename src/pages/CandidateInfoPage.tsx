@@ -7,6 +7,7 @@
  * Redux and navigates to /quiz/:id/exam.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Box,
@@ -40,7 +41,7 @@ export default function CandidateInfoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
+  const { t } = useTranslation();
   const quizzes = useAppSelector(getQuizzes);
   const quiz = quizzes.find((q) => q.id === id);
 
@@ -50,10 +51,10 @@ export default function CandidateInfoPage() {
         <Alert
           severity="error"
           action={
-            <Button onClick={() => navigate('/')}>Home</Button>
+            <Button onClick={() => navigate('/')}>{t('common.home')}</Button>
           }
         >
-          Quiz not found.
+          {t('errors.quizNotFound')}
         </Alert>
       </Box>
     );
@@ -120,6 +121,7 @@ function CandidateInfoForm({
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const storedQuizzes = useAppSelector(getQuizzes);
+  const { t } = useTranslation();
 
   const methods = useForm<CandidateFormValues>({
     mode: 'onBlur',
@@ -143,9 +145,7 @@ function CandidateInfoForm({
       // exam page. The candidate-info "QuizOverview" is metadata-only.
       const fullQuiz = storedQuizzes.find((q) => q.id === quiz.id);
       if (!fullQuiz) {
-        setSubmitError(
-          'Quiz configuration not found. Please go back and pick a quiz from the list.',
-        );
+        setSubmitError(t('errors.quizConfigurationNotFound'));
         return;
       }
 
@@ -190,7 +190,7 @@ function CandidateInfoForm({
                 display: { xs: 'none', md: 'block' },
               }}
             >
-              Candidate Information
+              {t('candidate.title')}
             </Typography>
 
             <Grid container spacing={3}>
@@ -219,7 +219,7 @@ function CandidateInfoForm({
                         display: { xs: 'block', md: 'none' },
                       }}
                     >
-                      Candidate Information
+                      {t('candidate.title')}
                     </Typography>
 
                     <FormProvider {...methods}>
@@ -271,6 +271,7 @@ function CandidateFormFields({
   isLoading,
 }: CandidateFormFieldsProps) {
   const { fields, sections } = fieldsConfig;
+  const { t } = useTranslation();
   const {
     register,
     watch,
@@ -295,7 +296,7 @@ function CandidateFormFields({
     : [
         {
           id: 'default',
-          title: 'Candidate Information',
+          title: t('candidate.title'),
           fields: fields.filter(isFieldVisible),
         },
       ];

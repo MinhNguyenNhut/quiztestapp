@@ -9,6 +9,7 @@ import {
   Button,
   type SelectChangeEvent,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
@@ -74,6 +75,7 @@ export default function EditorToolbar({
   onInsertFormula,
   onInsertBlank,
 }: EditorToolbarProps) {
+  const { t } = useTranslation();
   const [blockType, setBlockType] = useState('p');
   const [active, setActive] = useState<ActiveStates>(EMPTY_ACTIVE);
   const [currentTextColor, setCurrentTextColor] = useState<string>('#000000');
@@ -139,9 +141,9 @@ export default function EditorToolbar({
   }, [onFormat]);
 
   const handleLinkInsert = useCallback(() => {
-    const url = prompt('Enter URL:');
+    const url = prompt(t('richTextEditor.toolbar.insertLinkPrompt'));
     if (url) onFormat('createLink', url);
-  }, [onFormat]);
+  }, [onFormat, t]);
 
   // Wrap onFormat so any toolbar-triggered command refreshes the active state
   // immediately after execCommand finishes (selectionchange may already have fired).
@@ -177,16 +179,16 @@ export default function EditorToolbar({
         onChange={handleBlockChange}
         sx={{ minWidth: 120, mr: 0.5 }}
       >
-        <MenuItem value="p">Normal</MenuItem>
-        <MenuItem value="h1">Heading 1</MenuItem>
-        <MenuItem value="h2">Heading 2</MenuItem>
-        <MenuItem value="h3">Heading 3</MenuItem>
+        <MenuItem value="p">{t('richTextEditor.toolbar.normal')}</MenuItem>
+        <MenuItem value="h1">{t('richTextEditor.toolbar.heading1')}</MenuItem>
+        <MenuItem value="h2">{t('richTextEditor.toolbar.heading2')}</MenuItem>
+        <MenuItem value="h3">{t('richTextEditor.toolbar.heading3')}</MenuItem>
       </Select>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Bold, Italic, Underline */}
-      <Tooltip title="Bold (Ctrl+B)">
+      <Tooltip title={t('richTextEditor.toolbar.bold')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -198,7 +200,7 @@ export default function EditorToolbar({
           <FormatBoldIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Italic (Ctrl+I)">
+      <Tooltip title={t('richTextEditor.toolbar.italic')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -210,7 +212,7 @@ export default function EditorToolbar({
           <FormatItalicIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Underline (Ctrl+U)">
+      <Tooltip title={t('richTextEditor.toolbar.underline')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -228,16 +230,16 @@ export default function EditorToolbar({
       {/* Text Color & Highlight */}
       <ColorPickerPopover
         icon={<FormatColorTextIcon fontSize="small" />}
-        label="Text Color"
-        modeLabel="Text"
+        label={t('richTextEditor.toolbar.textColor')}
+        modeLabel={t('richTextEditor.colorPicker.textMode')}
         currentColor={currentTextColor}
         onApply={c => runFormat('foreColor', c)}
         onRemove={handleRemoveTextColor}
       />
       <ColorPickerPopover
         icon={<BorderColorIcon fontSize="small" />}
-        label="Highlight Color"
-        modeLabel="Highlight"
+        label={t('richTextEditor.toolbar.highlightColor')}
+        modeLabel={t('richTextEditor.colorPicker.highlightMode')}
         currentColor={currentHighlight}
         onApply={c => runFormat('hiliteColor', c)}
         onRemove={handleRemoveHighlight}
@@ -246,7 +248,7 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Subscript, Superscript */}
-      <Tooltip title="Subscript">
+      <Tooltip title={t('richTextEditor.toolbar.subscript')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -258,7 +260,7 @@ export default function EditorToolbar({
           <SubscriptIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Superscript">
+      <Tooltip title={t('richTextEditor.toolbar.superscript')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -274,7 +276,7 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Quote & Code */}
-      <Tooltip title="Quote">
+      <Tooltip title={t('richTextEditor.toolbar.quote')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -286,7 +288,7 @@ export default function EditorToolbar({
           <FormatQuoteIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Code Block">
+      <Tooltip title={t('richTextEditor.toolbar.codeBlock')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -302,7 +304,7 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Lists */}
-      <Tooltip title="Ordered List">
+      <Tooltip title={t('richTextEditor.toolbar.orderedList')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -314,7 +316,7 @@ export default function EditorToolbar({
           <FormatListNumberedIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Bullet List">
+      <Tooltip title={t('richTextEditor.toolbar.bulletList')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -330,7 +332,7 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Alignment */}
-      <Tooltip title="Align Left">
+      <Tooltip title={t('richTextEditor.toolbar.alignLeft')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -342,7 +344,7 @@ export default function EditorToolbar({
           <FormatAlignLeftIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Align Center">
+      <Tooltip title={t('richTextEditor.toolbar.alignCenter')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -354,7 +356,7 @@ export default function EditorToolbar({
           <FormatAlignCenterIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Align Right">
+      <Tooltip title={t('richTextEditor.toolbar.alignRight')}>
         <IconButton
           size="small"
           onMouseDown={e => e.preventDefault()}
@@ -370,22 +372,22 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Insert */}
-      <Tooltip title="Insert Link">
+      <Tooltip title={t('richTextEditor.toolbar.insertLink')}>
         <IconButton size="small" onMouseDown={e => e.preventDefault()} onClick={handleLinkInsert}>
           <InsertLinkIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Insert Image">
+      <Tooltip title={t('richTextEditor.toolbar.insertImage')}>
         <IconButton size="small" onMouseDown={e => e.preventDefault()} onClick={onInsertImage}>
           <ImageIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Insert Table">
+      <Tooltip title={t('richTextEditor.toolbar.insertTable')}>
         <IconButton size="small" onMouseDown={e => e.preventDefault()} onClick={onInsertTable}>
           <TableChartIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Insert Formula">
+      <Tooltip title={t('richTextEditor.toolbar.insertFormula')}>
         <IconButton size="small" onMouseDown={e => e.preventDefault()} onClick={onInsertFormula}>
           <FunctionsIcon fontSize="small" />
         </IconButton>
@@ -395,7 +397,7 @@ export default function EditorToolbar({
         <>
           <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
           <Button size="small" variant="outlined" onClick={onInsertBlank} sx={{ ml: 0.5 }}>
-            + Blank
+            {t('richTextEditor.toolbar.addBlank')}
           </Button>
         </>
       )}

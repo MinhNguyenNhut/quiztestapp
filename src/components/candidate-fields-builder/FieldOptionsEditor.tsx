@@ -1,4 +1,5 @@
 import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +17,8 @@ interface FieldOptionsEditorProps {
  * value.
  */
 export default function FieldOptionsEditor({ options, onChange }: FieldOptionsEditorProps) {
+  const { t } = useTranslation();
+
   const updateOption = (index: number, patch: Partial<CandidateFieldOption>) => {
     const next = [...options];
     next[index] = { ...next[index], ...patch };
@@ -35,21 +38,21 @@ export default function FieldOptionsEditor({ options, onChange }: FieldOptionsEd
   return (
     <Box>
       <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-        Options
+        {t('candidateFieldsBuilder.options')}
       </Typography>
       <Stack spacing={1}>
         {options.map((opt, i) => (
           <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <TextField
               size="small"
-              label="Label"
+              label={t('candidateFieldsBuilder.label')}
               value={opt.label}
               onChange={(e) => updateOption(i, { label: e.target.value })}
               sx={{ flex: 1 }}
             />
             <TextField
               size="small"
-              label="Value"
+              label={t('candidateFieldsBuilder.optionValue')}
               value={opt.value}
               onChange={(e) => updateOption(i, { value: e.target.value })}
               sx={{ flex: 1 }}
@@ -60,7 +63,7 @@ export default function FieldOptionsEditor({ options, onChange }: FieldOptionsEd
           </Box>
         ))}
         <Button startIcon={<AddIcon />} size="small" onClick={addOption} sx={{ alignSelf: 'flex-start' }}>
-          Add option
+          {t('candidateFieldsBuilder.addOption')}
         </Button>
       </Stack>
     </Box>

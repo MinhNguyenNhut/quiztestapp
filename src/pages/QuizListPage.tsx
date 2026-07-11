@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -53,6 +54,7 @@ type ToastState = {
 
 export default function QuizListPage() {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const quizzes = useAppSelector(getQuizzes);
 
   const [search, setSearch] = useState('');
@@ -85,18 +87,18 @@ export default function QuizListPage() {
     });
     clone.title = quiz.title + ' (Copy)';
     dispatch(addQuiz(clone));
-    showToast('Quiz duplicated', 'success');
+    showToast(t('quizList.quizDuplicated'), 'success');
   };
 
   const handleDelete = () => {
     if (!confirmDelete) return;
     dispatch(deleteQuiz(confirmDelete.id));
-    showToast('Quiz deleted', 'success');
+    showToast(t('quizList.quizDeleted'), 'success');
     setConfirmDelete(null);
   };
 
   const handlePreview = (quiz: Quiz) =>
-    showToast('Preview for "' + quiz.title + '" coming soon', 'info');
+    showToast(t('quizList.previewComingSoon', { title: quiz.title }), 'info');
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, sm: 3 } }}>
@@ -106,7 +108,7 @@ export default function QuizListPage() {
         <EmptyState />
       ) : filtered.length === 0 ? (
         <Typography color="text.secondary" sx={{ textAlign: 'center', py: 6 }}>
-          No quizzes match &ldquo;{search}&rdquo;.
+          {t('quizList.noResults', { search })}
         </Typography>
       ) : (
         <Grid container spacing={3}>
@@ -125,9 +127,9 @@ export default function QuizListPage() {
 
       <ConfirmDialog
         open={Boolean(confirmDelete)}
-        title="Delete this quiz?"
-        message={'"' + (confirmDelete?.title ?? '') + '" will be permanently removed. This cannot be undone.'}
-        confirmLabel="Delete"
+        title={t('quizList.deleteConfirmTitle')}
+        message={t('quizList.deleteConfirmMessage', { title: confirmDelete?.title ?? '' })}
+        confirmLabel={t('common.delete')}
         destructive
         onConfirm={handleDelete}
         onCancel={() => setConfirmDelete(null)}
@@ -159,6 +161,7 @@ function PageHeader({
   search: string;
   onSearchChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
@@ -172,7 +175,7 @@ function PageHeader({
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
         <LibraryBooksIcon color="primary" sx={{ fontSize: 32 }} />
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          My Quizzes
+          {t('quizList.title')}
         </Typography>
       </Stack>
 
@@ -183,7 +186,7 @@ function PageHeader({
       >
         <TextField
           size="small"
-          placeholder="Search quizzes..."
+          placeholder={t('quizList.searchPlaceholder')}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           sx={{ minWidth: { sm: 260 } }}
@@ -204,7 +207,7 @@ function PageHeader({
           startIcon={<AddIcon />}
           sx={{ whiteSpace: 'nowrap' }}
         >
-          Create Quiz
+          {t('quizList.createQuiz')}
         </Button>
       </Stack>
     </Stack>
@@ -212,15 +215,16 @@ function PageHeader({
 }
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <Card variant="outlined" sx={{ borderStyle: 'dashed', textAlign: 'center', py: 8 }}>
       <CardContent>
         <LibraryBooksIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
         <Typography variant="h6" sx={{ mb: 1 }}>
-          No quizzes yet
+          {t('quizList.emptyTitle')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Create your first quiz to get started. It only takes a minute.
+          {t('quizList.emptyDescription')}
         </Typography>
         <Button
           variant="contained"
@@ -229,7 +233,7 @@ function EmptyState() {
           to="/quiz/new"
           startIcon={<AddIcon />}
         >
-          Create Quiz
+          {t('quizList.createQuiz')}
         </Button>
       </CardContent>
     </Card>
@@ -247,6 +251,7 @@ function QuizCard({
   onDuplicate: (quiz: Quiz) => void;
   onDelete: (quiz: Quiz) => void;
 }) {
+  const { t } = useTranslation();
   const difficulty = aggregateDifficulty(quiz);
   const minutes = totalEstimatedMinutes(quiz);
   const questionCount = quiz.questions.length;
@@ -267,7 +272,7 @@ function QuizCard({
     >
       <CardContent sx={{ flex: 1 }}>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }} noWrap>
-          {quiz.title || 'Untitled quiz'}
+          {quiz.title || t('quizList.untitledQuiz')}
         </Typography>
         <Typography
           variant="body2"
@@ -280,14 +285,14 @@ function QuizCard({
             overflow: 'hidden',
           }}
         >
-          {quiz.description || 'No description'}
+          {quiz.description || t('quizList.noDescription')}
         </Typography>
 
         <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, flexWrap: "wrap" }}>
           <Chip
             size="small"
             icon={<QuizIcon />}
-            label={questionCount + ' Question' + (questionCount === 1 ? '' : 's')}
+            label={t('quizList.questions', { count: questionCount })}
             variant="outlined"
           />
           {difficulty && (
@@ -305,7 +310,7 @@ function QuizCard({
           <Chip
             size="small"
             icon={<TimerIcon />}
-            label={minutes + ' min' + (minutes === 1 ? '' : 's')}
+            label={t('quizList.minutes', { count: minutes })}
             variant="outlined"
           />
         </Stack>
@@ -313,7 +318,7 @@ function QuizCard({
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
           <UpdateIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
-            Updated {formatRelativeTime(quiz.updatedAt)}
+            {t('quizList.updated', { time: formatRelativeTime(quiz.updatedAt) })}
           </Typography>
         </Stack>
       </CardContent>
@@ -327,7 +332,7 @@ function QuizCard({
             to={'/quiz/' + quiz.id + '/edit'}
             startIcon={<EditIcon />}
           >
-            Edit
+            {t('common.edit')}
           </Button>
           <Button
             size="small"
@@ -335,44 +340,44 @@ function QuizCard({
             component={RouterLink}
             to={`/quiz/${quiz.id}/candidate`}
           >
-            Start
+            {t('quizList.start')}
           </Button>
         </Stack>
         <Stack direction="row" spacing={0.5}>
-          <Tooltip title="Submissions">
+          <Tooltip title={t('quizList.submissions')}>
             <IconButton
               size="small"
               component={RouterLink}
               to={`/quiz/${quiz.id}/submissions`}
-              aria-label={'View submissions for ' + quiz.title}
+              aria-label={t('quizList.ariaViewSubmissions', { title: quiz.title })}
             >
               <AssessmentIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Preview">
+          <Tooltip title={t('common.preview')}>
             <IconButton
               size="small"
               onClick={() => onPreview(quiz)}
-              aria-label={'Preview ' + quiz.title}
+              aria-label={t('quizList.ariaPreview', { title: quiz.title })}
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Duplicate">
+          <Tooltip title={t('common.duplicate')}>
             <IconButton
               size="small"
               onClick={() => onDuplicate(quiz)}
-              aria-label={'Duplicate ' + quiz.title}
+              aria-label={t('quizList.ariaDuplicate', { title: quiz.title })}
             >
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete">
+          <Tooltip title={t('common.delete')}>
             <IconButton
               size="small"
               color="error"
               onClick={() => onDelete(quiz)}
-              aria-label={'Delete ' + quiz.title}
+              aria-label={t('quizList.ariaDelete', { title: quiz.title })}
             >
               <DeleteOutlinedIcon fontSize="small" />
             </IconButton>

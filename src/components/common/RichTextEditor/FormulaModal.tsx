@@ -9,6 +9,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import FunctionsIcon from '@mui/icons-material/Functions';
 
 interface FormulaModalProps {
@@ -18,6 +19,7 @@ interface FormulaModalProps {
 }
 
 export default function FormulaModal({ open, onClose, onInsert }: FormulaModalProps) {
+  const { t } = useTranslation();
   const [latex, setLatex] = useState('');
 
   const handleInsert = () => {
@@ -37,11 +39,11 @@ export default function FormulaModal({ open, onClose, onInsert }: FormulaModalPr
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <FunctionsIcon color="primary" />
-        Insert Math Formula
+        {t('richTextEditor.formulaModal.title')}
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, mt: 1 }}>
-          Enter LaTeX math formula below. A preview will be shown in real time.
+          {t('richTextEditor.formulaModal.description')}
         </Typography>
         <TextField
           autoFocus
@@ -65,7 +67,7 @@ export default function FormulaModal({ open, onClose, onInsert }: FormulaModalPr
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-              Preview:
+              {t('richTextEditor.formulaModal.preview')}
             </Typography>
             <Box
               sx={{
@@ -84,9 +86,9 @@ export default function FormulaModal({ open, onClose, onInsert }: FormulaModalPr
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button variant="contained" onClick={handleInsert} disabled={!latex.trim()}>
-          Insert
+          {t('common.add')}
         </Button>
       </DialogActions>
     </Dialog>

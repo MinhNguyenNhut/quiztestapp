@@ -1,4 +1,13 @@
-import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
 import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
@@ -8,6 +17,7 @@ interface Props {
 }
 
 export const MatchingAnswer = ({ question }: Props) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const session = useAppSelector(getExamSession);
   const answer = session.answers[question.id];
@@ -29,7 +39,7 @@ export const MatchingAnswer = ({ question }: Props) => {
   if (pairs.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No pairs are configured for this question.
+        {t('answer.noPairs')}
       </Typography>
     );
   }
@@ -37,8 +47,9 @@ export const MatchingAnswer = ({ question }: Props) => {
   return (
     <Stack spacing={1.5}>
       <Typography variant="caption" color="text.secondary">
-        Match each item on the left with the correct one on the right.
+        {t('answer.matchingHint')}
       </Typography>
+
       {pairs.map((pair, i) => (
         <Box
           key={pair.id}
@@ -51,17 +62,24 @@ export const MatchingAnswer = ({ question }: Props) => {
             border: '1px solid',
             borderColor: 'divider',
             borderRadius: 1.5,
-            backgroundColor: values[pair.id] ? 'rgba(99,102,241,0.04)' : 'background.paper',
+            backgroundColor: values[pair.id]
+              ? 'rgba(99,102,241,0.04)'
+              : 'background.paper',
           }}
         >
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600 }}
+            >
               {i + 1}.
             </Typography>{' '}
             <Typography variant="body2" component="span">
-              {pair.left || <em>(empty)</em>}
+              {pair.left || <em>{t('common.empty')}</em>}
             </Typography>
           </Box>
+
           <Typography
             sx={{
               fontSize: 18,
@@ -73,18 +91,23 @@ export const MatchingAnswer = ({ question }: Props) => {
           >
             ↔
           </Typography>
+
           <FormControl size="small" fullWidth>
-            <InputLabel id={`match-${pair.id}`}>Match with</InputLabel>
+            <InputLabel id={`match-${pair.id}`}>
+              {t('answer.matchWith')}
+            </InputLabel>
+
             <Select
               labelId={`match-${pair.id}`}
-              label="Match with"
+              label={t('answer.matchWith')}
               value={values[pair.id] ?? ''}
               onChange={(e) => update(pair.id, e.target.value)}
               displayEmpty
             >
               <MenuItem value="">
-                <em>Choose...</em>
+                <em>{t('answer.choose')}</em>
               </MenuItem>
+
               {rightOptions.map((right) => (
                 <MenuItem key={right} value={right}>
                   {right}

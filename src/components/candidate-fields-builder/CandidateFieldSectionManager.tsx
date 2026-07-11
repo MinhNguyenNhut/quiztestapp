@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
@@ -25,6 +26,7 @@ interface CandidateFieldSectionManagerProps {
  * in sync.
  */
 export default function CandidateFieldSectionManager({ sections, onChange }: CandidateFieldSectionManagerProps) {
+  const { t } = useTranslation();
   const [newTitle, setNewTitle] = useState('');
 
   const normalize = (items: CandidateFieldSection[]): CandidateFieldSection[] =>
@@ -57,11 +59,11 @@ export default function CandidateFieldSectionManager({ sections, onChange }: Can
   return (
     <Stack spacing={1.5}>
       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-        Sections
+        {t('candidateFieldsBuilder.sections')}
       </Typography>
       {sections.length === 0 && (
         <Typography variant="caption" color="text.secondary">
-          No sections yet. Add one to group fields on the candidate form.
+          {t('candidateFieldsBuilder.noSectionsYet')}
         </Typography>
       )}
       {sections.map((section, i) => (
@@ -72,18 +74,28 @@ export default function CandidateFieldSectionManager({ sections, onChange }: Can
             onChange={(e) => handleRename(section.id, e.target.value)}
             fullWidth
           />
-          <IconButton size="small" onClick={() => handleMove(i, -1)} disabled={i === 0} aria-label="Move up">
+          <IconButton
+            size="small"
+            onClick={() => handleMove(i, -1)}
+            disabled={i === 0}
+            aria-label={t('candidateFieldsBuilder.moveUp')}
+          >
             <ArrowUpwardIcon fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
             onClick={() => handleMove(i, 1)}
             disabled={i === sections.length - 1}
-            aria-label="Move down"
+            aria-label={t('candidateFieldsBuilder.moveDown')}
           >
             <ArrowDownwardIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => handleDelete(section.id)} aria-label="Delete section" color="error">
+          <IconButton
+            size="small"
+            onClick={() => handleDelete(section.id)}
+            aria-label={t('candidateFieldsBuilder.deleteSection')}
+            color="error"
+          >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -91,7 +103,7 @@ export default function CandidateFieldSectionManager({ sections, onChange }: Can
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
           size="small"
-          placeholder="New section title"
+          placeholder={t('candidateFieldsBuilder.newSectionTitlePlaceholder')}
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => {
@@ -103,7 +115,7 @@ export default function CandidateFieldSectionManager({ sections, onChange }: Can
           fullWidth
         />
         <Button variant="outlined" startIcon={<AddIcon />} onClick={handleAdd} disabled={!newTitle.trim()}>
-          Add
+          {t('common.add')}
         </Button>
       </Box>
     </Stack>

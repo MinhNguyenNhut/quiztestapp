@@ -2,6 +2,7 @@ import { Box, Stack, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
 import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   question: Question;
@@ -9,6 +10,7 @@ interface Props {
 
 export const FillInBlankAnswer = ({ question }: Props) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const session = useAppSelector(getExamSession);
   const answer = session.answers[question.id];
   const blanks = question.blanks ?? [];
@@ -27,7 +29,7 @@ export const FillInBlankAnswer = ({ question }: Props) => {
   if (blanks.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No blanks are configured for this question.
+        {t("answer.noBlanks")}
       </Typography>
     );
   }
@@ -54,7 +56,7 @@ export const FillInBlankAnswer = ({ question }: Props) => {
             size="small"
             value={values[blank.id] ?? ''}
             onChange={(e) => update(blank.id, e.target.value)}
-            placeholder="Type your answer..."
+            placeholder={t("answer.fillBlankPlaceholder")}
           />
         </Box>
       ))}

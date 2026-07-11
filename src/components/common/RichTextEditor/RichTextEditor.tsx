@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect, useMemo, type KeyboardEvent } from 'react';
 import { Box, FormHelperText, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import EditorToolbar from './EditorToolbar.tsx';
 import FormulaModal from './FormulaModal.tsx';
 import ImageUploadModal from './ImageUploadModal.tsx';
@@ -32,7 +33,7 @@ interface RichTextEditorProps {
 export default function RichTextEditor({
   value,
   onChange,
-  placeholder = 'Enter question content...',
+  placeholder,
   minHeight = 250,
   maxHeight,
   disabled = false,
@@ -42,6 +43,8 @@ export default function RichTextEditor({
   error,
   helperText,
 }: RichTextEditorProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('richTextEditor.defaultPlaceholder');
   const editorRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   const debounceRef = useRef<number | null>(null);
@@ -191,7 +194,7 @@ export default function RichTextEditor({
       cursor: disabled ? 'not-allowed' : 'text',
       overflowY: 'auto' as const,
       '&:empty:before': {
-        content: `"${placeholder}"`,
+        content: `"${resolvedPlaceholder}"`,
         color: '#9ca3af',
         fontStyle: 'italic',
       },
@@ -215,7 +218,7 @@ export default function RichTextEditor({
       },
       '& a': { color: 'primary.main', textDecoration: 'underline' },
     }),
-    [minHeight, maxHeight, disabled, placeholder],
+    [minHeight, maxHeight, disabled, resolvedPlaceholder],
   );
 
   const wrapperSx = useMemo(
@@ -259,7 +262,7 @@ export default function RichTextEditor({
           onKeyDown={handleKeyDown}
           role="textbox"
           aria-multiline="true"
-          aria-label={label || placeholder}
+          aria-label={label || resolvedPlaceholder}
           sx={editorSx}
         />
       </Box>
