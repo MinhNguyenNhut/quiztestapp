@@ -1,4 +1,5 @@
 import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -33,6 +34,8 @@ export default function QuestionListItem({
   onDuplicate,
   onDelete,
 }: QuestionListItemProps) {
+  const { t } = useTranslation();
+
   return (
     <Box
       role="button"
@@ -95,7 +98,7 @@ export default function QuestionListItem({
             color: isSelected ? 'primary.main' : 'text.primary',
           }}
         >
-          {question.title || `Question ${index + 1}`}
+          {question.title || t('questionBuilder.questionFallback', { number: index + 1 })}
         </Typography>
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           <Chip
@@ -127,17 +130,17 @@ export default function QuestionListItem({
 
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0, opacity: 0.6, '&:hover': { opacity: 1 } }}>
-        <Tooltip title="Edit">
+        <Tooltip title={t('common.edit')}>
           <IconButton size="small" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Duplicate">
+        <Tooltip title={t('common.duplicate')}>
           <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDuplicate(); }}>
             <ContentCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
+        <Tooltip title={t('common.delete')}>
           <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDelete(); }} color="error">
             <DeleteIcon fontSize="small" />
           </IconButton>

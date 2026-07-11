@@ -1,4 +1,5 @@
 import { Box, Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import FlagIcon from '@mui/icons-material/Flag';
 import type { PaletteStatus } from './QuestionPalette';
@@ -36,15 +37,20 @@ export const PaletteCell = ({
   isCurrent,
   onClick,
 }: PaletteCellProps) => {
+  const { t } = useTranslation();
   const bg = isCurrent ? '#3b82f6' : bgForStatus[status];
   const fg = isCurrent ? '#fff' : colorForStatus[status];
+  const ariaLabel = flagged
+    ? t('examUi.goToQuestionFlagged', { number: index + 1 })
+    : t('examUi.goToQuestion', { number: index + 1 });
+
   return (
     <Tooltip title={tooltip} arrow placement="top">
       <Box
         component="button"
         type="button"
         onClick={onClick}
-        aria-label={`Go to question ${index + 1}${flagged ? ' (flagged)' : ''}`}
+        aria-label={ariaLabel}
         aria-current={isCurrent ? 'true' : undefined}
         sx={{
           position: 'relative',

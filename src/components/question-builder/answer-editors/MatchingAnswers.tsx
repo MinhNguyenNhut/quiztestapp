@@ -1,4 +1,5 @@
 import { Box, TextField, IconButton, Button, Typography, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function MatchingAnswers({ control, watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   useFieldArray({
     control,
     name: `questions.${index}.matchingPairs` as const,
@@ -40,10 +42,10 @@ export default function MatchingAnswers({ control, watch, setValue, index }: Pro
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
-          Matching Pairs
+          {t('answerEditors.matching.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Create pairs of items that students will match. Left items are matched to right items.
+          {t('answerEditors.matching.description')}
         </Typography>
         {pairs.map((pair, pairIdx) => (
           <Box
@@ -64,7 +66,7 @@ export default function MatchingAnswers({ control, watch, setValue, index }: Pro
             </Typography>
             <TextField
               size="small"
-              placeholder="Left item"
+              placeholder={t('answerEditors.matching.leftPlaceholder')}
               value={pair.left || ''}
               onChange={(e) =>
                 setValue(`questions.${index}.matchingPairs.${pairIdx}.left`, e.target.value, {
@@ -76,7 +78,7 @@ export default function MatchingAnswers({ control, watch, setValue, index }: Pro
             <Typography variant="body2" color="text.secondary">↔</Typography>
             <TextField
               size="small"
-              placeholder="Right item"
+              placeholder={t('answerEditors.matching.rightPlaceholder')}
               value={pair.right || ''}
               onChange={(e) =>
                 setValue(`questions.${index}.matchingPairs.${pairIdx}.right`, e.target.value, {
@@ -93,7 +95,7 @@ export default function MatchingAnswers({ control, watch, setValue, index }: Pro
           </Box>
         ))}
         <Button startIcon={<AddIcon />} size="small" onClick={handleAdd} sx={{ mt: 1 }}>
-          Add Pair
+          {t('answerEditors.matching.addPair')}
         </Button>
       </CardContent>
     </Card>

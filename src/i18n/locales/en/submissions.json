@@ -1,0 +1,24 @@
+{
+   "title": "Submissions",
+   "noSubmissions": "No submissions yet",
+   "filter": "Filter",
+   "searchPlaceholder": "Search by candidate name or email...",
+   "export": "Export",
+   "selectedCount": "{{count}} selected",
+   "deleteSelected": "Delete selected",
+   "deleteBulkTitle": "Delete {{count}} submissions?",
+   "deleteSingleTitle": "Delete submission?",
+   "deleteBulkMessage": "This will permanently remove {{count}} submissions from \"{{title}}\". This action cannot be undone.",
+   "deleteSingleMessage": "This will permanently remove the submission from \"{{title}}\". This action cannot be undone.",
+   "columns": {
+      "candidate": "Candidate",
+      "score": "Score",
+      "date": "Date",
+      "status": "Status"
+   },
+   "status": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "abandoned": "Abandoned"
+   }
+}

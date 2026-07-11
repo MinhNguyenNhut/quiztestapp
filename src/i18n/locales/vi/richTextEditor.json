@@ -1,0 +1,62 @@
+{
+   "defaultPlaceholder": "Nhập nội dung câu hỏi...",
+   "toolbar": {
+      "normal": "Bình thường",
+      "heading1": "Tiêu đề 1",
+      "heading2": "Tiêu đề 2",
+      "heading3": "Tiêu đề 3",
+      "bold": "In đậm (Ctrl+B)",
+      "italic": "In nghiêng (Ctrl+I)",
+      "underline": "Gạch chân (Ctrl+U)",
+      "textColor": "Màu chữ",
+      "highlightColor": "Màu tô sáng",
+      "subscript": "Chỉ số dưới",
+      "superscript": "Chỉ số trên",
+      "quote": "Trích dẫn",
+      "codeBlock": "Khối mã",
+      "orderedList": "Danh sách có thứ tự",
+      "bulletList": "Danh sách dấu đầu dòng",
+      "alignLeft": "Căn trái",
+      "alignCenter": "Căn giữa",
+      "alignRight": "Căn phải",
+      "insertLink": "Chèn liên kết",
+      "insertLinkPrompt": "Nhập URL:",
+      "insertImage": "Chèn hình ảnh",
+      "insertTable": "Chèn bảng",
+      "insertFormula": "Chèn công thức",
+      "addBlank": "+ Chỗ trống"
+   },
+   "colorPicker": {
+      "modeColorSuffix": "Màu {{mode}}",
+      "noSelectionHint": "Chưa chọn văn bản — màu sẽ áp dụng cho văn bản gõ tiếp theo",
+      "applyColorAria": "Áp dụng màu {{color}}",
+      "customColorAria": "Màu {{mode}} tùy chỉnh",
+      "apply": "Áp dụng",
+      "removeColor": "Xóa màu {{mode}}",
+      "textMode": "chữ",
+      "highlightMode": "tô sáng"
+   },
+   "formulaModal": {
+      "title": "Chèn công thức toán học",
+      "description": "Nhập công thức LaTeX bên dưới. Bản xem trước sẽ hiển thị theo thời gian thực.",
+      "preview": "Xem trước:"
+   },
+   "imageModal": {
+      "title": "Chèn hình ảnh",
+      "description": "Cung cấp URL hình ảnh hoặc tải lên tệp.",
+      "urlLabel": "URL hình ảnh",
+      "urlPlaceholder": "https://example.com/image.png",
+      "uploadHint": "Nhấp để tải lên hoặc kéo và thả",
+      "uploadFileTypes": "PNG, JPG, GIF tối đa 10MB",
+      "uploadAria": "Tải lên hình ảnh",
+      "altLabel": "Văn bản thay thế",
+      "altPlaceholder": "Mô tả hình ảnh",
+      "previewAlt": "Xem trước"
+   },
+   "tableModal": {
+      "title": "Chèn bảng",
+      "rows": "Số hàng",
+      "columns": "Số cột",
+      "preview": "Xem trước: {{rows}} × {{cols}}"
+   }
+}

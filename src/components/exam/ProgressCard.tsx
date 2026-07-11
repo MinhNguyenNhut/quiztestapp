@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface ProgressCardProps {
@@ -9,6 +10,7 @@ interface ProgressCardProps {
 }
 
 export const ProgressCard = ({ answered, total, flagged, remaining }: ProgressCardProps) => {
+  const { t } = useTranslation();
   const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
   return (
     <Card variant="outlined" sx={{ borderRadius: 2 }}>
@@ -16,13 +18,13 @@ export const ProgressCard = ({ answered, total, flagged, remaining }: ProgressCa
         <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: "center" }}>
           <CheckCircleIcon fontSize="small" color="primary" />
           <Typography variant="overline" sx={{ fontWeight: 600 }}>
-            Progress
+            {t('examUi.progress')}
           </Typography>
         </Stack>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
           {answered}
           <Box component="span" sx={{ color: 'text.secondary', fontSize: '0.7em', fontWeight: 500 }}>
-            {' '}/ {total} answered
+            {' '}{t('examUi.answeredOf', { total })}
           </Box>
         </Typography>
         <LinearProgress
@@ -32,14 +34,14 @@ export const ProgressCard = ({ answered, total, flagged, remaining }: ProgressCa
         />
         <Stack direction="row" sx={{ justifyContent: "space-between" }}>
           <Typography variant="caption" color="text.secondary">
-            {pct}% complete
+            {t('examUi.percentComplete', { percent: pct })}
           </Typography>
           <Stack direction="row" spacing={1.5}>
             <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
-              {flagged} flagged
+              {t('examUi.flaggedCount', { count: flagged })}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {remaining} left
+              {t('examUi.leftCount', { count: remaining })}
             </Typography>
           </Stack>
         </Stack>

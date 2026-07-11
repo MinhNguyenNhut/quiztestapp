@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useExamTimer } from '../../shared/hooks/useExamTimer';
 
 interface TimerCardProps {
@@ -14,6 +15,7 @@ const colorMap = {
 } as const;
 
 export const TimerCard = ({ remainingSeconds, onExpire, dense = false }: TimerCardProps) => {
+  const { t } = useTranslation();
   const { formatted, color, pulse } = useExamTimer(remainingSeconds, onExpire);
   const palette = colorMap[color];
 
@@ -35,7 +37,7 @@ export const TimerCard = ({ remainingSeconds, onExpire, dense = false }: TimerCa
       }}
     >
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
-        Time Left
+        {t('examUi.timeLeftLabel')}
       </Typography>
       <Typography
         variant={dense ? 'h5' : 'h3'}

@@ -1,0 +1,28 @@
+{
+   "title": "Candidate Information",
+   "startExam": "Start Exam",
+   "required": "Required",
+   "optional": "Optional",
+   "estimatedTime": "Estimated Time",
+   "minutesUnit": "{{count}} minute",
+   "minutesUnit_plural": "{{count}} minutes",
+   "questionsLabel": "Questions",
+   "passingScore": "Passing Score",
+   "difficultyLabel": "Difficulty",
+   "createdBy": "Created By",
+   "createdLabel": "Created",
+   "startQuiz": "Start Quiz",
+   "startingQuiz": "Starting Quiz...",
+   "fields": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "company": "Company",
+      "position": "Position",
+      "department": "Department"
+   },
+   "quizOverview": "Quiz Overview",
+   "questions": "Questions",
+   "timeLimit": "Time Limit",
+   "difficulty": "Difficulty"
+}

@@ -1,4 +1,5 @@
 import { TextField, Typography, Card, CardContent, Alert } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import InfoIcon from '@mui/icons-material/Info';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
@@ -13,23 +14,24 @@ interface Props {
 }
 
 export default function EssayAnswers({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const scoringGuide = watch(`questions.${index}.scoringGuide`);
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
-          Essay Configuration
+          {t('answerEditors.essay.configTitle')}
         </Typography>
         <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 2 }}>
-          Essay questions require manual grading. Provide a scoring guide and rubric to assist graders.
+          {t('answerEditors.essay.manualGradingAlert')}
         </Alert>
         <TextField
           fullWidth
           multiline
           rows={4}
-          label="Scoring Guide"
-          placeholder="Describe how to score this essay question. Include criteria for full credit, partial credit, etc."
+          label={t('answerEditors.essay.scoringGuideLabel')}
+          placeholder={t('answerEditors.essay.scoringGuidePlaceholder')}
           value={scoringGuide || ''}
           onChange={(e) =>
             setValue(`questions.${index}.scoringGuide`, e.target.value, {
@@ -39,7 +41,7 @@ export default function EssayAnswers({ watch, setValue, index }: Props) {
           sx={{ mb: 2 }}
         />
         <Typography variant="caption" color="text.secondary">
-          Tip: Include specific criteria such as thesis quality, evidence use, organization, and grammar.
+          {t('answerEditors.essay.tip')}
         </Typography>
       </CardContent>
     </Card>

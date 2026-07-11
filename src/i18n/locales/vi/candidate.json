@@ -1,0 +1,27 @@
+{
+   "title": "Thông tin thí sinh",
+   "startExam": "Bắt đầu bài thi",
+   "required": "Bắt buộc",
+   "optional": "Tùy chọn",
+   "estimatedTime": "Thời gian dự kiến",
+   "minutesUnit": "{{count}} phút",
+   "questionsLabel": "Số câu hỏi",
+   "passingScore": "Điểm đạt",
+   "difficultyLabel": "Độ khó",
+   "createdBy": "Người tạo",
+   "createdLabel": "Ngày tạo",
+   "startQuiz": "Bắt đầu bài thi",
+   "startingQuiz": "Đang bắt đầu...",
+   "fields": {
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "company": "Công ty",
+      "position": "Chức vụ",
+      "department": "Phòng ban"
+   },
+   "quizOverview": "Tổng quan bài kiểm tra",
+   "questions": "Số câu hỏi",
+   "timeLimit": "Giới hạn thời gian",
+   "difficulty": "Độ khó"
+}

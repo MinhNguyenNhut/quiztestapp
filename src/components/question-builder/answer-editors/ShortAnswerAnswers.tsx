@@ -1,4 +1,5 @@
 import { TextField, Typography, Card, CardContent, FormControlLabel, Switch } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const expectedAnswer = watch(`questions.${index}.expectedAnswer`);
   const caseSensitive = watch(`questions.${index}.caseSensitive`);
 
@@ -19,14 +21,14 @@ export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
-          Short Answer Configuration
+          {t('answerEditors.shortAnswer.title')}
         </Typography>
         <TextField
           fullWidth
           multiline
           rows={3}
-          label="Expected Answer"
-          placeholder="Enter the expected correct answer"
+          label={t('answerEditors.shortAnswer.expectedAnswerLabel')}
+          placeholder={t('answerEditors.shortAnswer.expectedAnswerPlaceholder')}
           value={expectedAnswer || ''}
           onChange={(e) =>
             setValue(`questions.${index}.expectedAnswer`, e.target.value, {
@@ -46,10 +48,10 @@ export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
               }
             />
           }
-          label="Case sensitive matching"
+          label={t('answerEditors.shortAnswer.caseSensitiveLabel')}
         />
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          When enabled, student answers must match the expected answer exactly including capitalization.
+          {t('answerEditors.shortAnswer.caseSensitiveHelper')}
         </Typography>
       </CardContent>
     </Card>

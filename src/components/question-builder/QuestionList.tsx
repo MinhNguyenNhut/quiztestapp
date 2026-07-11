@@ -12,6 +12,7 @@ import {
   InputAdornment,
   Badge,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import QuestionListItem from './QuestionListItem.tsx';
@@ -43,6 +44,7 @@ export default function QuestionList({
   onQuizTitleChange,
   isSaving
 }: QuestionListProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
@@ -73,27 +75,27 @@ export default function QuestionList({
           variant="subtitle2"
           sx={{ mb: 1, fontWeight: 600 }}
         >
-          Quiz Information
+          {t('questionBuilder.quizInformation')}
         </Typography>
 
         <TextField
           fullWidth
           size="small"
-          label="Quiz Title"
+          label={t('quizEditor.quizTitle')}
           value={quizTitle}
           onChange={(e) => onQuizTitleChange(e.target.value)}
           sx={{ mb: 2 }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-            Questions
+            {t('questionBuilder.questionsHeader')}
           </Typography>
           <Badge badgeContent={questions.length} color="primary" sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }} />
         </Box>
         <TextField
           size="small"
           fullWidth
-          placeholder="Search question..."
+          placeholder={t('questionBuilder.searchQuestionPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{
@@ -108,21 +110,21 @@ export default function QuestionList({
           sx={{ mb: 1.5 }}
         />
         <FormControl size="small" fullWidth>
-          <InputLabel>Type</InputLabel>
+          <InputLabel>{t('questionBuilder.typeLabel')}</InputLabel>
           <Select
             value={typeFilter}
-            label="Type"
+            label={t('questionBuilder.typeLabel')}
             onChange={(e) => setTypeFilter(e.target.value)}
           >
-            <MenuItem value="all">All Types</MenuItem>
-            <MenuItem value="single_choice">Single Choice</MenuItem>
-            <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-            <MenuItem value="true_false">True / False</MenuItem>
-            <MenuItem value="fill_in_blank">Fill in the Blank</MenuItem>
-            <MenuItem value="matching">Matching</MenuItem>
-            <MenuItem value="reading_comprehension">Reading Comprehension</MenuItem>
-            <MenuItem value="short_answer">Short Answer</MenuItem>
-            <MenuItem value="essay">Essay</MenuItem>
+            <MenuItem value="all">{t('questionBuilder.allTypes')}</MenuItem>
+            <MenuItem value="single_choice">{t('questionTypes.singleChoice')}</MenuItem>
+            <MenuItem value="multiple_choice">{t('questionTypes.multipleChoice')}</MenuItem>
+            <MenuItem value="true_false">{t('questionTypes.trueFalse')}</MenuItem>
+            <MenuItem value="fill_in_blank">{t('questionTypes.fillInBlank')}</MenuItem>
+            <MenuItem value="matching">{t('questionTypes.matching')}</MenuItem>
+            <MenuItem value="reading_comprehension">{t('questionTypes.readingComprehension')}</MenuItem>
+            <MenuItem value="short_answer">{t('questionTypes.shortAnswer')}</MenuItem>
+            <MenuItem value="essay">{t('questionTypes.essay')}</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -143,12 +145,12 @@ export default function QuestionList({
             }}
           >
             <Typography variant="h4" sx={{ mb: 1, opacity: 0.3 }}>?</Typography>
-            <Typography variant="body2">No questions yet</Typography>
-            <Typography variant="caption">Click "Add Question" to get started</Typography>
+            <Typography variant="body2">{t('questionBuilder.noQuestionsYet')}</Typography>
+            <Typography variant="caption">{t('questionBuilder.clickAddQuestion')}</Typography>
           </Box>
         ) : filtered.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4, color: 'text.disabled' }}>
-            <Typography variant="body2">No matching questions</Typography>
+            <Typography variant="body2">{t('questionBuilder.noMatchingQuestions')}</Typography>
           </Box>
         ) : (
           filtered.map((question) => {
@@ -177,7 +179,7 @@ export default function QuestionList({
           onClick={onAddQuestion}
           sx={{ mb: 1 }}
         >
-          Add Question
+          {t('questionBuilder.addQuestion')}
         </Button>
 
         <Button
@@ -186,7 +188,7 @@ export default function QuestionList({
           onClick={onSaveQuiz}
           disabled={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Quiz'}
+          {isSaving ? t('questionBuilder.saving') : t('quizEditor.saveQuiz')}
         </Button>
       </Box>
     </Paper>

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useForm, FormProvider, useFieldArray, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   QuizFormValues,
@@ -21,19 +22,6 @@ import { addQuiz } from '../../features/quiz/quizSlice.ts';
 import { useAlert } from '../../hooks/useAlert.ts';
 import AppAlert from '../common/AppAlert/AppAlert.tsx';
 
-/**
- * QuestionBuilder is a reusable form for editing a quiz's question set.
- *
- * It is intentionally mode-agnostic: it owns the form, validation, and
- * selection state, but knows nothing about how the persisted quiz is
- * stored or where to navigate afterwards. The page supplies the mode
- * (`create` vs `edit`) and an `onSave` callback that decides what to do
- * with the validated values (dispatch + navigate, etc.).
- *
- * In `edit` mode the caller must provide `defaultValues` (already mapped
- * from a persisted `Quiz`) and `originalQuiz`. The component mounts only
- * once `defaultValues` is defined — see `QuizEditorPage`.
- */
 type QuestionBuilderProps =
   | {
     mode: 'create';
@@ -52,6 +40,7 @@ type QuestionBuilderProps =
 
 export default function QuestionBuilder(props: QuestionBuilderProps) {
   const { onSave, onDirtyChange } = props;
+  const { t } = useTranslation();
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,7 +65,6 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     name: 'questions',
   });
 
-  // Fire `onDirtyChange` only on transitions, not per keystroke.
   const prevDirtyRef = useRef(isDirty);
   useEffect(() => {
     if (isDirty !== prevDirtyRef.current) {
@@ -89,7 +77,6 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     const difficulties = data.questions.map((q) => q.difficulty);
 
     const difficulty = difficulties.includes('hard') ? 'hard' : difficulties.includes('medium') ? 'medium' : 'easy';
-    // In step 2 the dispatch lives in the builder. Step 3 moves it to the page.
     const mapQuestionToQuestion = (
       question: QuestionFormValues,
       index: number
@@ -131,9 +118,9 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
         await onSave?.(data);
       }
 
-      showAlert('Quiz saved successfully!', 'success');
+      showAlert(t('quizEditor.quizSaved'), 'success');
     } catch (err) {
-      showAlert(err instanceof Error ? err.message : 'Save failed', 'error');
+      showAlert(err instanceof Error ? err.message : t('questionBuilder.saveFailed'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -142,7 +129,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
       const message = getFirstErrorMessage(errors);
 
       showAlert(
-        message ?? 'Please fix validation errors',
+        message ?? t('questionBuilder.fixValidationErrors'),
         'error'
       );
     }
@@ -150,16 +137,13 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
   function getFirstErrorMessage(errors: any): string | undefined {
     if (!errors) return undefined;
 
-    // string or direct message
     if (typeof errors === 'string') return errors;
 
-    // RHF field error
     if (typeof errors === 'object') {
       if ('message' in errors && typeof errors.message === 'string') {
         return errors.message;
       }
 
-      // nested object → search first value
       for (const value of Object.values(errors)) {
         const msg = getFirstErrorMessage(value);
         if (msg) return msg;
@@ -169,7 +153,6 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     return undefined;
   }
 
-  // Auto-select first question when list changes to non-empty
   useEffect(() => {
     if (fields.length > 0 && selectedIndex === null) {
       setSelectedIndex(0);
@@ -287,13 +270,13 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
                   ?
                 </Typography>
                 <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                  No question selected
+                  {t('questionBuilder.noQuestionSelected')}
                 </Typography>
                 <Typography variant="body2" color="text.disabled" sx={{ mb: 3 }}>
-                  Select a question from the list or add a new one
+                  {t('questionBuilder.selectQuestionHint')}
                 </Typography>
                 <Button variant="contained" onClick={() => setModalOpen(true)}>
-                  Add Question
+                  {t('questionBuilder.addQuestion')}
                 </Button>
               </Box>
             )}

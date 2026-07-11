@@ -1,0 +1,10 @@
+{
+   "requiredField": "{{label}} là bắt buộc",
+   "invalidEmail": "Vui lòng nhập địa chỉ email hợp lệ",
+   "invalidPhone": "Vui lòng nhập số điện thoại hợp lệ",
+   "minValue": "Giá trị tối thiểu là {{min}}",
+   "maxValue": "Giá trị tối đa là {{max}}",
+   "minLength": "Yêu cầu tối thiểu {{count}} ký tự",
+   "maxLength": "Cho phép tối đa {{count}} ký tự",
+   "invalidFormat": "Định dạng không hợp lệ"
+}

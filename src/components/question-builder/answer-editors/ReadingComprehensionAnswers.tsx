@@ -1,4 +1,5 @@
 import { Box, Typography, Card, CardContent, Button, Select, MenuItem, TextField, IconButton, FormControl } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
@@ -17,7 +18,14 @@ interface Props {
 
 const CHILD_TYPES: QuestionType[] = ['single_choice', 'multiple_choice', 'short_answer'];
 
+const CHILD_TYPE_LABEL_KEYS: Record<string, string> = {
+  single_choice: 'singleChoice',
+  multiple_choice: 'multipleChoice',
+  short_answer: 'shortAnswer',
+};
+
 export default function ReadingComprehensionAnswers({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const childQuestions = watch(`questions.${index}.childQuestions`) || [];
   const setChildValue = setValue as unknown as (path: string, value: unknown, options?: { shouldValidate?: boolean }) => void;
   const handleAddChild = useCallback(() => {
@@ -54,15 +62,15 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2 }}>
-          Reading Comprehension
+          {t('answerEditors.readingComprehension.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Enter the reading passage in the Question Content editor above. Add child questions below.
+          {t('answerEditors.readingComprehension.description')}
         </Typography>
 
         {childQuestions.length === 0 && (
           <Typography variant="body2" color="text.disabled" sx={{ mb: 2, fontStyle: 'italic' }}>
-            No child questions yet. Click below to add one.
+            {t('answerEditors.readingComprehension.noChildQuestions')}
           </Typography>
         )}
 
@@ -90,9 +98,9 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
                     })
                   }
                 >
-                  {CHILD_TYPES.map((t) => (
-                    <MenuItem key={t} value={t}>
-                      {t === 'single_choice' ? 'Single Choice' : t === 'multiple_choice' ? 'Multiple Choice' : 'Short Answer'}
+                  {CHILD_TYPES.map((ct) => (
+                    <MenuItem key={ct} value={ct}>
+                      {t(`questionTypes.${CHILD_TYPE_LABEL_KEYS[ct]}`)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -104,7 +112,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
             <TextField
               size="small"
               fullWidth
-              placeholder="Question title"
+              placeholder={t('answerEditors.readingComprehension.questionTitlePlaceholder')}
               value={child.title || ''}
               onChange={(e) =>
                 setChildValue(`questions.${index}.childQuestions.${childIdx}.title`, e.target.value, {
@@ -119,7 +127,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
                     key={optIdx}
                     size="small"
                     fullWidth
-                    placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
+                    placeholder={t('answerEditors.optionPlaceholder', { letter: String.fromCharCode(65 + optIdx) })}
                     value={opt.text || ''}
                     onChange={(e) =>
                       setChildValue(
@@ -136,7 +144,7 @@ export default function ReadingComprehensionAnswers({ watch, setValue, index }: 
           </Box>
         ))}
         <Button startIcon={<AddIcon />} size="small" onClick={handleAddChild}>
-          Add Child Question
+          {t('answerEditors.readingComprehension.addChildQuestion')}
         </Button>
       </CardContent>
     </Card>

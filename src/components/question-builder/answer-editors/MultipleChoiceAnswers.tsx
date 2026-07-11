@@ -10,6 +10,7 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
@@ -28,6 +29,7 @@ interface Props {
 const LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function MultipleChoiceAnswers({ control, watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
     control,
     name: `questions.${index}.options` as const,
@@ -55,7 +57,7 @@ export default function MultipleChoiceAnswers({ control, watch, setValue, index 
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
-          Select all correct answers
+          {t('answerEditors.multipleChoice.hint')}
         </Typography>
         {fields.map((field, optIdx) => (
           <Box
@@ -80,7 +82,7 @@ export default function MultipleChoiceAnswers({ control, watch, setValue, index 
             <TextField
               size="small"
               fullWidth
-              placeholder={`Option ${LABELS[optIdx] || optIdx + 1}`}
+              placeholder={t('answerEditors.optionPlaceholder', { letter: LABELS[optIdx] || optIdx + 1 })}
               value={watchOptions?.[optIdx]?.text || ''}
               onChange={(e) =>
                 setValue(`questions.${index}.options.${optIdx}.text`, e.target.value, {
@@ -108,7 +110,7 @@ export default function MultipleChoiceAnswers({ control, watch, setValue, index 
         ))}
         {fields.length < 6 && (
           <Button startIcon={<AddIcon />} size="small" onClick={handleAdd} sx={{ mt: 1 }}>
-            Add Option
+            {t('answerEditors.addOption')}
           </Button>
         )}
       </CardContent>

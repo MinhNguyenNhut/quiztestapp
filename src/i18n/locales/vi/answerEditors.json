@@ -1,0 +1,48 @@
+{
+   "optionPlaceholder": "Đáp án {{letter}}",
+   "addOption": "Thêm đáp án",
+   "singleChoice": {
+      "title": "Các đáp án"
+   },
+   "multipleChoice": {
+      "hint": "Chọn tất cả đáp án đúng"
+   },
+   "trueFalse": {
+      "hint": "Chọn đáp án đúng"
+   },
+   "essay": {
+      "configTitle": "Cấu hình bài luận",
+      "manualGradingAlert": "Câu hỏi tự luận cần được chấm điểm thủ công. Cung cấp hướng dẫn chấm điểm và tiêu chí để hỗ trợ người chấm.",
+      "scoringGuideLabel": "Hướng dẫn chấm điểm",
+      "scoringGuidePlaceholder": "Mô tả cách chấm điểm câu hỏi tự luận này. Bao gồm tiêu chí cho điểm tối đa, điểm một phần, v.v.",
+      "tip": "Mẹo: Bao gồm các tiêu chí cụ thể như chất lượng luận điểm, việc sử dụng dẫn chứng, cách tổ chức và ngữ pháp."
+   },
+   "fillBlank": {
+      "title": "Điền vào chỗ trống",
+      "description": "Dùng nút \"Thêm chỗ trống\" trong trình soạn thảo để chèn chỗ trống vào nội dung câu hỏi. Cấu hình đáp án đúng bên dưới.",
+      "blankLabel": "Chỗ trống {{number}}",
+      "correctAnswerPlaceholder": "Đáp án đúng",
+      "addBlank": "Thêm chỗ trống"
+   },
+   "matching": {
+      "title": "Các cặp ghép",
+      "description": "Tạo các cặp mục mà thí sinh sẽ ghép với nhau. Mục bên trái được ghép với mục bên phải.",
+      "leftPlaceholder": "Mục bên trái",
+      "rightPlaceholder": "Mục bên phải",
+      "addPair": "Thêm cặp"
+   },
+   "readingComprehension": {
+      "title": "Đọc hiểu",
+      "description": "Nhập đoạn văn đọc hiểu trong trình soạn thảo nội dung câu hỏi ở trên. Thêm các câu hỏi con bên dưới.",
+      "noChildQuestions": "Chưa có câu hỏi con nào. Nhấp bên dưới để thêm một câu.",
+      "questionTitlePlaceholder": "Tiêu đề câu hỏi",
+      "addChildQuestion": "Thêm câu hỏi con"
+   },
+   "shortAnswer": {
+      "title": "Cấu hình trả lời ngắn",
+      "expectedAnswerLabel": "Đáp án mong đợi",
+      "expectedAnswerPlaceholder": "Nhập đáp án đúng mong đợi",
+      "caseSensitiveLabel": "Phân biệt chữ hoa/thường",
+      "caseSensitiveHelper": "Khi bật, câu trả lời của thí sinh phải khớp chính xác với đáp án mong đợi, kể cả chữ hoa/thường."
+   }
+}

@@ -1,4 +1,5 @@
 import { Box, TextField, IconButton, Button, Typography, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
@@ -16,12 +17,17 @@ interface Props {
 }
 
 export default function FillInBlankAnswers({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const blanks = watch(`questions.${index}.blanks`) || [];
 
   const handleAddBlank = useCallback(() => {
-    const newBlank = { id: uuidv4(), label: `Blank ${blanks.length + 1}`, correctAnswer: '' };
+    const newBlank = {
+      id: uuidv4(),
+      label: t('answerEditors.fillBlank.blankLabel', { number: blanks.length + 1 }),
+      correctAnswer: '',
+    };
     setValue(`questions.${index}.blanks`, [...blanks, newBlank], { shouldValidate: false });
-  }, [blanks, setValue, index]);
+  }, [blanks, setValue, index, t]);
 
   const handleRemoveBlank = useCallback(
     (blankIdx: number) => {
@@ -35,10 +41,10 @@ export default function FillInBlankAnswers({ watch, setValue, index }: Props) {
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Fill in the Blanks
+          {t('answerEditors.fillBlank.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Use the "Add Blank" button in the editor to insert blanks into your question text. Configure correct answers below.
+          {t('answerEditors.fillBlank.description')}
         </Typography>
         {blanks.map((blank, blankIdx) => (
           <Box
@@ -63,7 +69,7 @@ export default function FillInBlankAnswers({ watch, setValue, index }: Props) {
             <TextField
               size="small"
               fullWidth
-              placeholder="Correct answer"
+              placeholder={t('answerEditors.fillBlank.correctAnswerPlaceholder')}
               value={blank.correctAnswer || ''}
               onChange={(e) =>
                 setValue(`questions.${index}.blanks.${blankIdx}.correctAnswer`, e.target.value, {
@@ -77,7 +83,7 @@ export default function FillInBlankAnswers({ watch, setValue, index }: Props) {
           </Box>
         ))}
         <Button startIcon={<AddIcon />} size="small" onClick={handleAddBlank} sx={{ mt: 1 }}>
-          Add Blank
+          {t('answerEditors.fillBlank.addBlank')}
         </Button>
       </CardContent>
     </Card>

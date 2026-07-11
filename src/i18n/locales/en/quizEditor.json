@@ -1,0 +1,18 @@
+{
+   "title": "Quiz Editor",
+   "newQuiz": "New Quiz",
+   "quizTitle": "Quiz Title",
+   "quizDescription": "Description",
+   "timeLimit": "Time Limit",
+   "minutes": "minutes",
+   "addQuestion": "Add Question",
+   "saveQuiz": "Save Quiz",
+   "publishQuiz": "Publish Quiz",
+   "discardChanges": "Discard Changes",
+   "unsavedChanges": "You have unsaved changes",
+   "discardConfirm": "Are you sure you want to discard your changes?",
+   "quizSaved": "Quiz saved successfully",
+   "quizPublished": "Quiz published successfully",
+   "tabQuestions": "Questions",
+   "tabCandidateFields": "Candidate Fields"
+}

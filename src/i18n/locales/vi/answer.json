@@ -1,0 +1,20 @@
+{
+   "essayPlaceholder": "Viết bài luận của bạn...",
+   "essayManualGrading": "Bài luận sẽ được chấm thủ công sau khi nộp.",
+   "shortAnswerPlaceholder": "Nhập câu trả lời ngắn...",
+   "shortAnswerHint": "Câu trả lời ngắn (tối đa vài câu).",
+   "fillBlank": "Chỗ trống {{index}}",
+   "fillBlankPlaceholder": "Nhập đáp án...",
+   "noBlanks": "Chưa cấu hình chỗ trống cho câu hỏi này.",
+   "matchingHint": "Ghép mỗi mục bên trái với đáp án đúng bên phải.",
+   "matchWith": "Ghép với",
+   "choose": "Chọn...",
+   "noPairs": "Chưa cấu hình các cặp ghép.",
+   "true": "Đúng",
+   "false": "Sai",
+   "reference": "Tham khảo",
+   "readingPassage": "Đoạn văn",
+   "noSubQuestions": "Chưa có câu hỏi con.",
+   "question": "Câu hỏi",
+   "subQuestion": "Câu hỏi con"
+}

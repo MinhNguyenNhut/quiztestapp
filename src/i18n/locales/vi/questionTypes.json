@@ -1,0 +1,20 @@
+{
+   "singleChoice": "Chọn một đáp án",
+   "multipleChoice": "Chọn nhiều đáp án",
+   "trueFalse": "Đúng/Sai",
+   "fillInBlank": "Điền vào chỗ trống",
+   "essay": "Tự luận",
+   "shortAnswer": "Trả lời ngắn",
+   "matching": "Ghép nối",
+   "readingComprehension": "Đọc hiểu",
+   "descriptions": {
+      "singleChoice": "Chọn một đáp án đúng trong các lựa chọn",
+      "multipleChoice": "Chọn nhiều đáp án đúng",
+      "trueFalse": "Câu phát biểu đúng hoặc sai",
+      "fillInBlank": "Điền các từ còn thiếu",
+      "matching": "Ghép các mục bên trái với bên phải",
+      "readingComprehension": "Đoạn văn đọc hiểu kèm câu hỏi",
+      "shortAnswer": "Trả lời bằng đoạn văn bản ngắn",
+      "essay": "Bài viết tự luận dài"
+   }
+}

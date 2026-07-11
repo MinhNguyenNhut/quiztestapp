@@ -1,0 +1,24 @@
+{
+   "title": "Bài nộp",
+   "noSubmissions": "Chưa có bài nộp",
+   "filter": "Lọc",
+   "searchPlaceholder": "Tìm theo tên hoặc email thí sinh...",
+   "export": "Xuất dữ liệu",
+   "selectedCount": "Đã chọn {{count}}",
+   "deleteSelected": "Xóa mục đã chọn",
+   "deleteBulkTitle": "Xóa {{count}} bài nộp?",
+   "deleteSingleTitle": "Xóa bài nộp?",
+   "deleteBulkMessage": "Thao tác này sẽ xóa vĩnh viễn {{count}} bài nộp khỏi \"{{title}}\". Hành động này không thể hoàn tác.",
+   "deleteSingleMessage": "Thao tác này sẽ xóa vĩnh viễn bài nộp khỏi \"{{title}}\". Hành động này không thể hoàn tác.",
+   "columns": {
+      "candidate": "Thí sinh",
+      "score": "Điểm",
+      "date": "Ngày",
+      "status": "Trạng thái"
+   },
+   "status": {
+      "completed": "Hoàn thành",
+      "inProgress": "Đang làm",
+      "abandoned": "Đã bỏ dở"
+   }
+}

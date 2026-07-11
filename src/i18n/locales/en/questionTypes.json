@@ -1,0 +1,20 @@
+{
+   "singleChoice": "Single Choice",
+   "multipleChoice": "Multiple Choice",
+   "trueFalse": "True/False",
+   "fillInBlank": "Fill in the Blank",
+   "essay": "Essay",
+   "shortAnswer": "Short Answer",
+   "matching": "Matching",
+   "readingComprehension": "Reading Comprehension",
+   "descriptions": {
+      "singleChoice": "Select one correct answer from options",
+      "multipleChoice": "Select multiple correct answers",
+      "trueFalse": "True or false statement",
+      "fillInBlank": "Fill in missing words",
+      "matching": "Match left and right items",
+      "readingComprehension": "Reading passage with questions",
+      "shortAnswer": "Short text response",
+      "essay": "Long-form written response"
+   }
+}

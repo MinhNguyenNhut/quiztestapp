@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, Stack, Typography, Divider, Chip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { DifficultyChip } from '../../shared/components/DifficultyChip';
 import { PointsBadge } from '../../shared/components/PointsBadge';
 import { QUESTION_TYPE_LABELS } from '../../types/quiz';
@@ -13,15 +14,17 @@ interface QuestionCardProps {
   contentHtml: string;
 }
 
-const formatTime = (seconds?: number): string | null => {
-  if (!seconds) return null;
-  if (seconds < 60) return `~${seconds}s`;
-  const m = Math.round(seconds / 60);
-  return `~${m} min`;
-};
-
 export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCardProps) => {
-  const timeLabel = formatTime(question.estimatedTime);
+  const { t } = useTranslation();
+
+  const timeLabel = (() => {
+    const seconds = question.estimatedTime;
+    if (!seconds) return null;
+    if (seconds < 60) return t('examUi.estimatedTimeShort', { seconds });
+    const m = Math.round(seconds / 60);
+    return t('examUi.estimatedTimeMinShort', { minutes: m });
+  })();
+
   return (
     <Card
       elevation={0}
@@ -47,7 +50,7 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
       >
         <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ alignItems: { sm: 'center' } }} spacing={1.5}>
           <Typography variant="overline" sx={{ fontWeight: 700, color: 'primary.main' }}>
-            Question {index + 1} of {total}
+            {t('examUi.questionOf', { current: index + 1, total })}
           </Typography>
           <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }} useFlexGap>
             <Chip

@@ -1,0 +1,20 @@
+{
+   "essayPlaceholder": "Write your essay here...",
+   "essayManualGrading": "Essays are graded manually after submission.",
+   "shortAnswerPlaceholder": "Type a brief answer...",
+   "shortAnswerHint": "Short answer (a few sentences max).",
+   "fillBlank": "Blank {{index}}",
+   "fillBlankPlaceholder": "Type your answer...",
+   "noBlanks": "No blanks are configured for this question.",
+   "matchingHint": "Match each item on the left with the correct one on the right.",
+   "matchWith": "Match with",
+   "choose": "Choose...",
+   "noPairs": "No pairs are configured for this question.",
+   "true": "True",
+   "false": "False",
+   "reference": "Reference",
+   "readingPassage": "Reading passage",
+   "noSubQuestions": "No sub-questions configured.",
+   "question": "Question",
+   "subQuestion": "Sub-question"
+}

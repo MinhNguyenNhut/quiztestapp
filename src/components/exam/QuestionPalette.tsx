@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { PaletteCell } from './PaletteCell';
 import type { AnyAnswer } from '../../types/answer';
 import { isAnswered } from '../../types/answer';
@@ -22,6 +23,8 @@ export const QuestionPalette = ({
   questions,
   onJump,
 }: QuestionPaletteProps) => {
+  const { t } = useTranslation();
+
   const statusFor = (index: number, id: string): PaletteStatus => {
     if (index === currentIndex) return 'current';
     if (flags.includes(id) && !isAnswered(answers[id] ?? null)) return 'flagged';
@@ -34,10 +37,10 @@ export const QuestionPalette = ({
       <CardContent sx={{ pb: '16px !important' }}>
         <Stack direction="row" sx={{ mb: 1.5, alignItems: "center", justifyContent: "space-between" }}>
           <Typography variant="overline" sx={{ fontWeight: 600 }}>
-            Question Palette
+            {t('examUi.questionPalette')}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {total} {total === 1 ? 'question' : 'questions'}
+            {t('examUi.questionCount', { count: total })}
           </Typography>
         </Stack>
         <Box
@@ -50,7 +53,10 @@ export const QuestionPalette = ({
         >
           {questions.map((q, i) => {
             const status = statusFor(i, q.id);
-            const tooltip = `Q${i + 1}: ${q.title || 'Untitled question'}`;
+            const tooltip = t('examUi.questionShort', {
+              number: i + 1,
+              title: q.title || t('examUi.untitledQuestion'),
+            });
             return (
               <PaletteCell
                 key={q.id}
@@ -70,15 +76,18 @@ export const QuestionPalette = ({
   );
 };
 
-const Legend = () => (
-  <Stack spacing={0.75}>
-    <LegendRow color="#e2e8f0" label="Unanswered" border />
-    <LegendRow color="#3b82f6" label="Current" />
-    <LegendRow color="#22c55e" label="Answered" />
-    <LegendRow color="#f97316" label="Flagged" />
-    <LegendRow color="#ef4444" label="Required, unanswered" />
-  </Stack>
-);
+const Legend = () => {
+  const { t } = useTranslation();
+  return (
+    <Stack spacing={0.75}>
+      <LegendRow color="#e2e8f0" label={t('examUi.legend.unanswered')} border />
+      <LegendRow color="#3b82f6" label={t('examUi.legend.current')} />
+      <LegendRow color="#22c55e" label={t('examUi.legend.answered')} />
+      <LegendRow color="#f97316" label={t('examUi.legend.flagged')} />
+      <LegendRow color="#ef4444" label={t('examUi.legend.requiredUnanswered')} />
+    </Stack>
+  );
+};
 
 const LegendRow = ({ color, label, border }: { color: string; label: string; border?: boolean }) => (
   <Stack direction="row" sx={{ alignItems: "center" }} spacing={1}>

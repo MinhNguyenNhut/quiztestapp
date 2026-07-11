@@ -1,0 +1,62 @@
+{
+   "defaultPlaceholder": "Enter question content...",
+   "toolbar": {
+      "normal": "Normal",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "underline": "Underline (Ctrl+U)",
+      "textColor": "Text Color",
+      "highlightColor": "Highlight Color",
+      "subscript": "Subscript",
+      "superscript": "Superscript",
+      "quote": "Quote",
+      "codeBlock": "Code Block",
+      "orderedList": "Ordered List",
+      "bulletList": "Bullet List",
+      "alignLeft": "Align Left",
+      "alignCenter": "Align Center",
+      "alignRight": "Align Right",
+      "insertLink": "Insert Link",
+      "insertLinkPrompt": "Enter URL:",
+      "insertImage": "Insert Image",
+      "insertTable": "Insert Table",
+      "insertFormula": "Insert Formula",
+      "addBlank": "+ Blank"
+   },
+   "colorPicker": {
+      "modeColorSuffix": "{{mode}} color",
+      "noSelectionHint": "No text selected — color applies to next typed text",
+      "applyColorAria": "Apply color {{color}}",
+      "customColorAria": "Custom {{mode}} color",
+      "apply": "Apply",
+      "removeColor": "Remove {{mode}} color",
+      "textMode": "Text",
+      "highlightMode": "Highlight"
+   },
+   "formulaModal": {
+      "title": "Insert Math Formula",
+      "description": "Enter LaTeX math formula below. A preview will be shown in real time.",
+      "preview": "Preview:"
+   },
+   "imageModal": {
+      "title": "Insert Image",
+      "description": "Provide an image URL or upload a file.",
+      "urlLabel": "Image URL",
+      "urlPlaceholder": "https://example.com/image.png",
+      "uploadHint": "Click to upload or drag and drop",
+      "uploadFileTypes": "PNG, JPG, GIF up to 10MB",
+      "uploadAria": "Upload image",
+      "altLabel": "Alt Text",
+      "altPlaceholder": "Description of the image",
+      "previewAlt": "Preview"
+   },
+   "tableModal": {
+      "title": "Insert Table",
+      "rows": "Rows",
+      "columns": "Columns",
+      "preview": "Preview: {{rows}} × {{cols}}"
+   }
+}

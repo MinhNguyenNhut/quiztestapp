@@ -1,4 +1,5 @@
 import { Box, Button, Divider, Stack, Tooltip, useMediaQuery, useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -33,6 +34,7 @@ export const ExamFooter = ({
   onSaveNow,
 }: ExamFooterProps) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
@@ -65,7 +67,7 @@ export const ExamFooter = ({
             startIcon={<NavigateBeforeIcon />}
             sx={{ minWidth: 110 }}
           >
-            Previous
+            {t('examUi.previous')}
           </Button>
           <Button
             variant={isLast ? 'outlined' : 'contained'}
@@ -74,22 +76,22 @@ export const ExamFooter = ({
             endIcon={<NavigateNextIcon />}
             sx={{ minWidth: 110 }}
           >
-            Next
+            {t('examUi.next')}
           </Button>
         </Stack>
 
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-          <Tooltip title={isFlagged ? 'Remove flag' : 'Flag for review'}>
+          <Tooltip title={isFlagged ? t('examUi.removeFlag') : t('examUi.flagForReview')}>
             <Button
               variant="outlined"
               color={isFlagged ? 'warning' : 'inherit'}
               onClick={onToggleFlag}
               startIcon={isFlagged ? <BookmarkIcon /> : <BookmarkBorderIcon />}
             >
-              {isFlagged ? 'Flagged' : 'Flag'}
+              {isFlagged ? t('examUi.flagged') : t('examUi.flag')}
             </Button>
           </Tooltip>
-          <Tooltip title="Clear answer">
+          <Tooltip title={t('examUi.clearAnswer')}>
             <span>
               <Button
                 variant="outlined"
@@ -98,7 +100,7 @@ export const ExamFooter = ({
                 disabled={!hasAnswer}
                 startIcon={<DeleteSweepIcon />}
               >
-                Clear
+                {t('examUi.clear')}
               </Button>
             </span>
           </Tooltip>
@@ -107,7 +109,7 @@ export const ExamFooter = ({
             onClick={onSaveNow}
             startIcon={<SaveIcon />}
           >
-            Save
+            {t('examUi.save')}
           </Button>
           <Button
             variant="contained"
@@ -116,7 +118,7 @@ export const ExamFooter = ({
             startIcon={<CheckCircleIcon />}
             sx={{ ml: { sm: 'auto' } }}
           >
-            Submit Exam
+            {t('examUi.submitExam')}
           </Button>
         </Stack>
       </Stack>

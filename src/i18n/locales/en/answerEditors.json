@@ -1,0 +1,48 @@
+{
+   "optionPlaceholder": "Option {{letter}}",
+   "addOption": "Add Option",
+   "singleChoice": {
+      "title": "Options"
+   },
+   "multipleChoice": {
+      "hint": "Select all correct answers"
+   },
+   "trueFalse": {
+      "hint": "Select the correct answer"
+   },
+   "essay": {
+      "configTitle": "Essay Configuration",
+      "manualGradingAlert": "Essay questions require manual grading. Provide a scoring guide and rubric to assist graders.",
+      "scoringGuideLabel": "Scoring Guide",
+      "scoringGuidePlaceholder": "Describe how to score this essay question. Include criteria for full credit, partial credit, etc.",
+      "tip": "Tip: Include specific criteria such as thesis quality, evidence use, organization, and grammar."
+   },
+   "fillBlank": {
+      "title": "Fill in the Blanks",
+      "description": "Use the \"Add Blank\" button in the editor to insert blanks into your question text. Configure correct answers below.",
+      "blankLabel": "Blank {{number}}",
+      "correctAnswerPlaceholder": "Correct answer",
+      "addBlank": "Add Blank"
+   },
+   "matching": {
+      "title": "Matching Pairs",
+      "description": "Create pairs of items that students will match. Left items are matched to right items.",
+      "leftPlaceholder": "Left item",
+      "rightPlaceholder": "Right item",
+      "addPair": "Add Pair"
+   },
+   "readingComprehension": {
+      "title": "Reading Comprehension",
+      "description": "Enter the reading passage in the Question Content editor above. Add child questions below.",
+      "noChildQuestions": "No child questions yet. Click below to add one.",
+      "questionTitlePlaceholder": "Question title",
+      "addChildQuestion": "Add Child Question"
+   },
+   "shortAnswer": {
+      "title": "Short Answer Configuration",
+      "expectedAnswerLabel": "Expected Answer",
+      "expectedAnswerPlaceholder": "Enter the expected correct answer",
+      "caseSensitiveLabel": "Case sensitive matching",
+      "caseSensitiveHelper": "When enabled, student answers must match the expected answer exactly including capitalization."
+   }
+}

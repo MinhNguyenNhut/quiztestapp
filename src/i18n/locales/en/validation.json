@@ -1,0 +1,10 @@
+{
+   "requiredField": "{{label}} is required",
+   "invalidEmail": "Please enter a valid email address",
+   "invalidPhone": "Please enter a valid phone number",
+   "minValue": "Minimum value is {{min}}",
+   "maxValue": "Maximum value is {{max}}",
+   "minLength": "Minimum {{count}} characters required",
+   "maxLength": "Maximum {{count}} characters allowed",
+   "invalidFormat": "Invalid format"
+}

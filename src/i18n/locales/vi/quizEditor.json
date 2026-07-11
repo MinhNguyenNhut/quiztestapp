@@ -1,0 +1,18 @@
+{
+   "title": "Trình chỉnh sửa bài kiểm tra",
+   "newQuiz": "Bài kiểm tra mới",
+   "quizTitle": "Tiêu đề bài kiểm tra",
+   "quizDescription": "Mô tả",
+   "timeLimit": "Giới hạn thời gian",
+   "minutes": "phút",
+   "addQuestion": "Thêm câu hỏi",
+   "saveQuiz": "Lưu bài kiểm tra",
+   "publishQuiz": "Xuất bản bài kiểm tra",
+   "discardChanges": "Hủy thay đổi",
+   "unsavedChanges": "Bạn có thay đổi chưa được lưu",
+   "discardConfirm": "Bạn có chắc chắn muốn hủy các thay đổi không?",
+   "quizSaved": "Đã lưu bài kiểm tra thành công",
+   "quizPublished": "Đã xuất bản bài kiểm tra thành công",
+   "tabQuestions": "Câu hỏi",
+   "tabCandidateFields": "Trường thông tin thí sinh"
+}

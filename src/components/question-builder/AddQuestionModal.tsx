@@ -11,6 +11,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { QuestionType } from '../../types/index.ts';
 import {
   QUESTION_TYPE_LABELS,
@@ -23,17 +24,6 @@ interface AddQuestionModalProps {
   onSelect: (type: QuestionType) => void;
 }
 
-const DESCRIPTIONS: Record<QuestionType, string> = {
-  single_choice: 'Select one correct answer from options',
-  multiple_choice: 'Select multiple correct answers',
-  true_false: 'True or false statement',
-  fill_in_blank: 'Fill in missing words',
-  matching: 'Match left and right items',
-  reading_comprehension: 'Reading passage with questions',
-  short_answer: 'Short text response',
-  essay: 'Long-form written response',
-};
-
 const TYPES: QuestionType[] = [
   'single_choice',
   'multiple_choice',
@@ -45,7 +35,19 @@ const TYPES: QuestionType[] = [
   'essay',
 ];
 
+const DESCRIPTION_KEYS: Record<QuestionType, string> = {
+  single_choice: 'singleChoice',
+  multiple_choice: 'multipleChoice',
+  true_false: 'trueFalse',
+  fill_in_blank: 'fillInBlank',
+  matching: 'matching',
+  reading_comprehension: 'readingComprehension',
+  short_answer: 'shortAnswer',
+  essay: 'essay',
+};
+
 export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestionModalProps) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<QuestionType | null>(null);
 
   const handleContinue = () => {
@@ -76,10 +78,10 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle component="div" sx={{ pb: 0 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.25rem' }}>
-          Create New Question
+          {t('questionBuilder.createNewQuestion')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Choose question type
+          {t('questionBuilder.chooseQuestionType')}
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
@@ -130,7 +132,7 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
                         {QUESTION_TYPE_LABELS[type]}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                        {DESCRIPTIONS[type]}
+                        {t(`questionTypes.descriptions.${DESCRIPTION_KEYS[type]}`)}
                       </Typography>
                     </Box>
                   </CardContent>
@@ -141,9 +143,9 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
         </Grid>
       </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button variant="contained" disabled={!selected} onClick={handleContinue}>
-          Continue
+          {t('questionBuilder.continue')}
         </Button>
       </DialogActions>
     </Dialog>
