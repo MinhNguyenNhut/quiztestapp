@@ -1,4 +1,5 @@
 import { Chip, Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 import SaveIcon from '@mui/icons-material/Save';
@@ -9,23 +10,33 @@ interface AutoSaveStatusProps {
   online: boolean;
 }
 
-const labelMap: Record<AutoSaveStatus, { label: string; color: 'default' | 'primary' | 'success' | 'warning' | 'error' }> = {
-  idle: { label: 'Ready', color: 'default' },
-  saving: { label: 'Saving...', color: 'primary' },
-  saved: { label: 'Saved', color: 'success' },
-  error: { label: 'Save failed', color: 'error' },
-};
-
 export const AutoSaveStatusChip = ({ status, online }: AutoSaveStatusProps) => {
-  const { label, color } = labelMap[status];
+  const { t } = useTranslation();
+
+  const getStatusConfig = (): { label: string; color: 'default' | 'primary' | 'success' | 'warning' | 'error' } => {
+    switch (status) {
+      case 'idle':
+        return { label: t('common.ready'), color: 'default' };
+      case 'saving':
+        return { label: t('common.saving'), color: 'primary' };
+      case 'saved':
+        return { label: t('common.saved'), color: 'success' };
+      case 'error':
+        return { label: t('common.saveFailed'), color: 'error' };
+      default:
+        return { label: t('common.ready'), color: 'default' };
+    }
+  };
+
+  const { label, color } = getStatusConfig();
   const icon = !online ? <CloudOffIcon fontSize="small" /> : status === 'saving' ? <SaveIcon fontSize="small" /> : <CloudDoneIcon fontSize="small" />;
   const tip = !online
-    ? 'You are offline. Answers will be saved locally until you reconnect.'
+    ? t('common.offlineMessage')
     : status === 'saved'
-    ? 'All your answers are saved'
+    ? t('common.allSavedMessage')
     : status === 'saving'
-    ? 'Saving your answers...'
-    : 'Auto-save ready';
+    ? t('common.savingAnswersMessage')
+    : t('common.autoSaveReady');
 
   return (
     <Tooltip title={tip}>

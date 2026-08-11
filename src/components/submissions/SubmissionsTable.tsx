@@ -13,6 +13,7 @@ import {
    Tooltip,
    Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { CandidateFieldsConfig } from '../../types/candidate';
 import type { Submission, SubmissionStatus } from '../../types/submission';
@@ -53,6 +54,7 @@ export function SubmissionsTable({
    onPageChange,
    onRowsPerPageChange,
 }: SubmissionsTableProps) {
+   const { t } = useTranslation();
    const sortedFields = [...fieldsConfig.fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
    const colCount = sortedFields.length + 6; // checkbox + fields + score + status + time + submitted + actions
 
@@ -80,12 +82,12 @@ export function SubmissionsTable({
                            {field.label}
                         </TableCell>
                      ))}
-                     <TableCell sx={{ fontWeight: 600 }}>Score</TableCell>
-                     <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                     <TableCell sx={{ fontWeight: 600 }}>Time Spent</TableCell>
-                     <TableCell sx={{ fontWeight: 600 }}>Submitted</TableCell>
+                     <TableCell sx={{ fontWeight: 600 }}>{t('common.score')}</TableCell>
+                     <TableCell sx={{ fontWeight: 600 }}>{t('common.status')}</TableCell>
+                     <TableCell sx={{ fontWeight: 600 }}>{t('common.timeSpent')}</TableCell>
+                     <TableCell sx={{ fontWeight: 600 }}>{t('common.submitted')}</TableCell>
                      <TableCell sx={{ fontWeight: 600 }} align="right">
-                        Actions
+                        {t('common.actions')}
                      </TableCell>
                   </TableRow>
                </TableHead>
@@ -94,7 +96,7 @@ export function SubmissionsTable({
                      <TableRow>
                         <TableCell colSpan={colCount} align="center" sx={{ py: 4 }}>
                            <Typography variant="body2" color="text.secondary">
-                              No submissions found.
+                              {t('common.noSubmissionsFound')}
                            </Typography>
                         </TableCell>
                      </TableRow>
@@ -133,7 +135,7 @@ export function SubmissionsTable({
                               <TableCell>{formatSeconds(s.timeSpentSeconds)}</TableCell>
                               <TableCell>{formatDate(s.submittedAt)}</TableCell>
                               <TableCell align="right">
-                                 <Tooltip title="Delete submission">
+                                 <Tooltip title={t('common.delete')}>
                                     <IconButton
                                        size="small"
                                        color="error"

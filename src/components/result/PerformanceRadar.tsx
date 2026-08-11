@@ -1,4 +1,5 @@
 import { Card, CardContent, Typography, Box, Stack } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { BreakdownStat } from '../../shared/utils/resultStats';
 
 interface PerformanceRadarProps {
@@ -34,19 +35,19 @@ const polygonPath = (axes: AxisSpec[]): string =>
       return `${i === 0 ? 'M' : 'L'}${x},${y}`;
     })
     .join(' ')
-    .concat(' Z');
+    .concat('common. Z');
 
 export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participation }: PerformanceRadarProps) => {
-  // Compose 5 axes: easy, medium, hard, accuracy, participation.
+  const { t } = useTranslation();
   const byDiff = (label: string) =>
     difficulty.find((d) => d.label.toLowerCase() === label)?.accuracy ?? 0;
 
   const axes: AxisSpec[] = [
-    { label: 'Easy', value: byDiff('easy'), color: '#22c55e' },
-    { label: 'Medium', value: byDiff('medium'), color: '#eab308' },
-    { label: 'Hard', value: byDiff('hard'), color: '#ef4444' },
-    { label: 'Accuracy', value: accuracyOverall, color: '#6366f1' },
-    { label: 'Participation', value: participation, color: '#0ea5e9' },
+    { label: t('difficulty.easy'), value: byDiff('easy'), color: '#22c55e' },
+    { label: t('difficulty.medium'), value: byDiff('medium'), color: '#eab308' },
+    { label: t('difficulty.hard'), value: byDiff('hard'), color: '#ef4444' },
+    { label: t('common.accuracy'), value: accuracyOverall, color: '#6366f1' },
+    { label: t('common.timeUsed'), value: participation, color: '#0ea5e9' },
   ];
 
   // If topic data is empty, hide the topic subtitle.
@@ -56,7 +57,7 @@ export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participa
     <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
       <CardContent>
         <Typography variant="overline" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-          Performance radar
+          {t('common.performanceRadar')}
         </Typography>
         <Stack sx={{ mt: 1, alignItems: "center" }}>
           <Box sx={{ width: SIZE, height: SIZE }}>
@@ -115,7 +116,7 @@ export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participa
           </Box>
           {hasTopic && (
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-              {topic.length} topic{topic.length === 1 ? '' : 's'} covered in this quiz.
+              {topic.length} {t('common.topicsCovered')}
             </Typography>
           )}
         </Stack>

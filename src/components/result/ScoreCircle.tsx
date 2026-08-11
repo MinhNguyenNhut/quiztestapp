@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -12,13 +13,15 @@ interface ScoreCircleProps {
 const colorFor = (passed: boolean): string => (passed ? '#22c55e' : '#ef4444');
 
 export const ScoreCircle = ({ percentage, passed, score, total }: ScoreCircleProps) => {
+  const { t } = useTranslation();
   const clamped = Math.max(0, Math.min(100, percentage));
   const color = colorFor(passed);
+
   return (
     <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
       <CardContent>
         <Typography variant="overline" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-          Overall score
+          {t('common.overallScore')}
         </Typography>
         <Stack spacing={1} sx={{ my: 1.5, alignItems: "center" }}>
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
@@ -53,7 +56,7 @@ export const ScoreCircle = ({ percentage, passed, score, total }: ScoreCirclePro
                 {clamped}%
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {Math.round(score * 10) / 10} / {total} pts
+                {Math.round(score * 10) / 10} / {total} {t('common.pointsAbbrev')}
               </Typography>
             </Box>
           </Box>
@@ -64,7 +67,7 @@ export const ScoreCircle = ({ percentage, passed, score, total }: ScoreCirclePro
               <CancelIcon fontSize="small" sx={{ color }} />
             )}
             <Typography variant="body2" sx={{ fontWeight: 600, color }}>
-              {passed ? 'Passed' : 'Did not pass'}
+              {passed ? t('common.passed') : t('common.didNotPass')}
             </Typography>
           </Stack>
         </Stack>

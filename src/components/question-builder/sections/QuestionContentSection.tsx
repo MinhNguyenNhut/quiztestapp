@@ -1,4 +1,5 @@
 ﻿import { TextField, Typography, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 import { RichTextEditor } from '../../common/RichTextEditor/index.ts';
@@ -13,13 +14,14 @@ interface Props {
 }
 
 export default function QuestionContentSection({ control, watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const question = watch(`questions.${index}`);
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-          Question Content
+          {t('questionBuilder.questionContent')}
         </Typography>
         <Controller
           name={`questions.${index}.title`}
@@ -28,8 +30,8 @@ export default function QuestionContentSection({ control, watch, setValue, index
             <TextField
               {...field}
               fullWidth
-              label="Question Title"
-              placeholder="Enter a short question title"
+              label={t('questionBuilder.questionTitleLabel')}
+              placeholder={t('questionBuilder.questionTitlePlaceholder')}
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               sx={{ mb: 3 }}
@@ -37,12 +39,12 @@ export default function QuestionContentSection({ control, watch, setValue, index
           )}
         />
         <RichTextEditor
-          label="Question Content"
+          label={t('questionBuilder.questionContent')}
           value={question?.content || { html: '', text: '' }}
           onChange={(content) =>
             setValue(`questions.${index}.content`, content, { shouldValidate: true })
           }
-          placeholder="Enter question content..."
+          placeholder={t('questionBuilder.questionContent')}
           minHeight={250}
           showBlanks={question?.type === 'fill_in_blank'}
         />

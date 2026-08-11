@@ -84,7 +84,7 @@ export default function AddCandidateFieldModal({
       </DialogTitle>
 
       <DialogContent sx={{ mt: 1 }}>
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{padding: 1}}>
           <FieldBasicsForm field={draft} sections={sections} onChange={update} />
 
           {supportsOptions && (

@@ -318,7 +318,7 @@ function QuizCard({
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
           <UpdateIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
-            {t('quizList.updated', { time: formatRelativeTime(quiz.updatedAt) })}
+            {t('quizList.updated', { time: formatRelativeTime(quiz.updatedAt, t) })}
           </Typography>
         </Stack>
       </CardContent>

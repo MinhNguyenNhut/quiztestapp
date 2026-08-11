@@ -12,6 +12,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues, Difficulty } from '../../../types/index.ts';
 import { DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '../../../types/index.ts';
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function MetadataSection({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const question = watch(`questions.${index}`);
   const [tagInput, setTagInput] = useState('');
 
@@ -55,14 +57,14 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-          Question Settings
+          {t('questionBuilder.questionSettings')}
         </Typography>
         <Stack spacing={2}>
           <FormControl size="small" fullWidth>
-            <InputLabel>Difficulty</InputLabel>
+            <InputLabel>{t('questionBuilder.difficulty')}</InputLabel>
             <Select
               value={difficulty}
-              label="Difficulty"
+              label={t('questionBuilder.difficulty')}
               onChange={(e) =>
                 setValue(`questions.${index}.difficulty`, e.target.value as Difficulty, {
                   shouldValidate: true,
@@ -96,7 +98,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
           <TextField
             size="small"
             fullWidth
-            label="Points"
+            label={t('questionBuilder.points')}
             type="number"
             value={question?.points || 1}
             onChange={(e) =>
@@ -110,8 +112,8 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
           <TextField
             size="small"
             fullWidth
-            label="Topic"
-            placeholder="e.g., Algebra, Grammar, History"
+            label={t('questionBuilder.topicLabel')}
+            placeholder={t('questionBuilder.topicPlaceholder')}
             value={question?.topic || ''}
             onChange={(e) =>
               setValue(`questions.${index}.topic`, e.target.value, { shouldValidate: false })
@@ -122,8 +124,8 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
             <TextField
               size="small"
               fullWidth
-              label="Tags"
-              placeholder="Type and press Enter to add"
+              label={t('questionBuilder.tagsLabel')}
+              placeholder={t('questionBuilder.tagsPlaceholder')}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
@@ -146,7 +148,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
           <TextField
             size="small"
             fullWidth
-            label="Estimated Time"
+            label={t('questionBuilder.estimatedTimeLabel')}
             type="number"
             placeholder="Minutes"
             value={question?.estimatedTime || ''}
@@ -159,7 +161,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
               input: {
                 endAdornment: (
                   <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                    min
+                    {t('questionBuilder.minAdornment')}
                   </Typography>
                 ),
               },

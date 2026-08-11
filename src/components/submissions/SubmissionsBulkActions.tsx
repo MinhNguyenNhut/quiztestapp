@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '../../features/store';
 import { deleteSubmission } from '../../features/submissions/submissionSlice';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -22,6 +23,7 @@ export function SubmissionsBulkActions({
   fieldsConfig,
   quiz,
 }: SubmissionsBulkActionsProps) {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -31,11 +33,11 @@ export function SubmissionsBulkActions({
     // Build CSV header
     const headers = [
       ...sortedFields.map((f) => f.label),
-      'Score',
-      'Percentage',
-      'Status',
-      'Time Spent (seconds)',
-      'Submitted At',
+      t('common.score'),
+      t('common.percentage'),
+      t('common.status'),
+      t('common.timeSpent'),
+      t('common.submitted'),
     ];
 
     // Build CSV rows
@@ -55,7 +57,7 @@ export function SubmissionsBulkActions({
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const link = document.createElement('common.a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', `${quiz.title}_submissions.csv`);
@@ -79,24 +81,24 @@ export function SubmissionsBulkActions({
           onClick={handleExportCSV}
           disabled={submissions.length === 0}
         >
-          Export CSV
+          {t('common.exportCsv')}
         </Button>
       </Stack>
 
       {/* Delete confirmation dialog (if needed in future) */}
       <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle>Delete Submission?</DialogTitle>
+        <DialogTitle>{t('common.deleteSubmission')}</DialogTitle>
         <DialogContent>
-          This action cannot be undone. The submission and all its data will be permanently deleted.
+          {t('common.deleteSubmissionMessage')}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</Button>
           <Button
             color="error"
             variant="contained"
             onClick={() => deleteTarget && handleDelete(deleteTarget)}
           >
-            Delete
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

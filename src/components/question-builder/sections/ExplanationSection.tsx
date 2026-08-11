@@ -1,4 +1,5 @@
 import { Typography, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 import { RichTextEditor } from '../../common/RichTextEditor/index.ts';
@@ -12,23 +13,24 @@ interface Props {
 }
 
 export default function ExplanationSection({ watch, setValue, index }: Props) {
+  const { t } = useTranslation();
   const explanation = watch(`questions.${index}.explanation`);
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-          Explanation
+          {t('questionBuilder.explanation')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Explain why the correct answer is right and optionally why incorrect answers are wrong
+          {t('questionBuilder.explanationDescription')}
         </Typography>
         <RichTextEditor
           value={explanation || { html: '', text: '' }}
           onChange={(content) =>
             setValue(`questions.${index}.explanation`, content, { shouldValidate: false })
           }
-          placeholder="Enter explanation..."
+          placeholder={t('questionBuilder.explanationEditorPlaceholder')}
           minHeight={150}
           showToolbar={true}
         />

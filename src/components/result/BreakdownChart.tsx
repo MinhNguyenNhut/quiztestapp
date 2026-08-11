@@ -1,4 +1,5 @@
 import { Card, CardContent, Stack, Typography, Box, LinearProgress } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { BreakdownStat } from '../../shared/utils/resultStats';
 
 interface BreakdownChartProps {
@@ -13,6 +14,7 @@ const colorOf = (acc: number): string => {
 };
 
 export const BreakdownChart = ({ title, stats }: BreakdownChartProps) => {
+  const { t } = useTranslation();
   const maxTotal = Math.max(1, ...stats.map((s) => s.total));
   return (
     <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
@@ -23,7 +25,7 @@ export const BreakdownChart = ({ title, stats }: BreakdownChartProps) => {
         <Stack spacing={1.5} sx={{ mt: 1.5 }}>
           {stats.length === 0 && (
             <Typography variant="body2" color="text.secondary">
-              No data.
+              {t('common.noData')}
             </Typography>
           )}
           {stats.map((s) => {

@@ -18,6 +18,7 @@ import richTextEditor from './richTextEditor.json';
 import answer from './answer.json';
 import answerEditors from './answerEditors.json';
 import examUi from './examUi.json';
+import time from './time.json';
 
 export default {
    common,
@@ -40,4 +41,5 @@ export default {
    answer,
    answerEditors,
    examUi,
+   time
 };

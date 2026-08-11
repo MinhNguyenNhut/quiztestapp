@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { CandidateFormValues, CandidateFieldsConfig } from '../../types/candidate';
 import type { CandidateFieldSection } from '../../types/candidate';
 
@@ -12,6 +13,7 @@ interface CandidateSummaryCardProps {
  * field's value to its label from the fieldsConfig. Organizes by section.
  */
 export const CandidateSummaryCard = ({ candidate, fieldsConfig }: CandidateSummaryCardProps) => {
+  const { t } = useTranslation();
   const sections = fieldsConfig.sections ?? [];
   const fieldsBySection = fieldsConfig.fields.reduce<Record<string, typeof fieldsConfig.fields>>(
     (acc, field) => {
@@ -33,7 +35,7 @@ export const CandidateSummaryCard = ({ candidate, fieldsConfig }: CandidateSumma
     <Card variant="outlined" sx={{ borderRadius: 3 }}>
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-          Candidate Information
+          {t('common.candidateInformation')}
         </Typography>
 
         <Stack spacing={2.5}>

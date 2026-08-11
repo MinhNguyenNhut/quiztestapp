@@ -5,12 +5,12 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
-import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
 import type { QuizFormValues } from '../types';
 import type { RootState } from '../features/store.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import { addQuiz, updateQuiz } from '../features/quiz/quizSlice.ts';
 import { v4 as uuidv4 } from 'uuid';
+import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields.ts';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,7 +44,7 @@ function TabPanel(props: TabPanelProps) {
 export default function QuizEditorPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const quiz = useSelector((state: RootState) =>
     state.quiz.quizzes.find((q) => q.id === id)
@@ -116,12 +116,12 @@ export default function QuizEditorPage() {
           {quiz ? (
             <CandidateFieldsBuilder
               quizId={quiz.id}
-              defaultConfig={quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG}
+              defaultConfig={quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language)}
             />
           ) : (
             <CandidateFieldsBuilder
               quizId={quizId}
-              defaultConfig={DEFAULT_CANDIDATE_FIELDS_CONFIG}
+              defaultConfig={getDefaultCandidateFieldsConfig(i18n.language)}
             />
           )}
         </TabPanel>

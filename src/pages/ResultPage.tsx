@@ -36,7 +36,6 @@ import { PerformanceRadar } from '../components/result/PerformanceRadar';
 import { QuestionReviewAccordion } from '../components/result/QuestionReviewAccordion';
 import { CandidateSummaryCard } from '../components/result/CandidateSummaryCard';
 import { computeScore } from '../shared/utils/scoring';
-import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
 import {
   difficultyBreakdown,
   estimateRankPercentile,
@@ -45,6 +44,7 @@ import {
 } from '../shared/utils/resultStats';
 import type { Quiz, Submission } from '../types';
 import { isAnswered } from '../types/answer';
+import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 
 export default function ResultPage() {
   const { id, submissionId } = useParams<{ id: string; submissionId: string }>();
@@ -112,7 +112,7 @@ interface ResultViewProps {
 function ResultView({ quiz, submission }: ResultViewProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const summary = useMemo(
@@ -229,7 +229,7 @@ function ResultView({ quiz, submission }: ResultViewProps) {
           <CandidateSummaryCard
             candidate={submission.candidate}
             fieldsConfig={
-              quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG
+              quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language)
             }
           />
           <Grid container spacing={2}>

@@ -27,21 +27,19 @@ import { getQuizzes } from '../features/quiz/quizSlice';
 import { startSession } from '../features/exam/examSlice';
 import { QuizOverviewCard, StartExamButton } from '../components/candidate-info';
 import DynamicFieldRenderer from '../components/candidate-info/DynamicFieldRenderer';
-import {
-  DEFAULT_CANDIDATE_FIELDS_CONFIG,
-} from '../shared/constants/defaultCandidateFields';
 import type {
   CandidateField,
   CandidateFieldsConfig,
   CandidateFormValues,
   QuizOverview,
 } from '../types/candidate';
+import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 
 export default function CandidateInfoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const quizzes = useAppSelector(getQuizzes);
   const quiz = quizzes.find((q) => q.id === id);
 
@@ -73,8 +71,7 @@ export default function CandidateInfoPage() {
     createdAt: quiz.createdAt,
   };
 
-  const fieldsConfig =
-    quiz.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG;
+  const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
 
   const handleStartQuiz = (candidate: CandidateFormValues) => {
     dispatch(
@@ -287,19 +284,19 @@ function CandidateFormFields({
 
   const groupedFields = sections?.length
     ? sections.map((section) => ({
-        ...section,
-        fields: fields
-          .filter((f) => f.section === section.id)
-          .filter(isFieldVisible)
-          .sort((a, b) => (a.order || 0) - (b.order || 0)),
-      }))
+      ...section,
+      fields: fields
+        .filter((f) => f.section === section.id)
+        .filter(isFieldVisible)
+        .sort((a, b) => (a.order || 0) - (b.order || 0)),
+    }))
     : [
-        {
-          id: 'default',
-          title: t('candidate.title'),
-          fields: fields.filter(isFieldVisible),
-        },
-      ];
+      {
+        id: 'default',
+        title: t('candidate.title'),
+        fields: fields.filter(isFieldVisible),
+      },
+    ];
 
   if (isLoading) {
     return (

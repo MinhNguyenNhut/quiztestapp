@@ -1,5 +1,6 @@
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Quiz } from '../../types/quiz';
 import type { Submission } from '../../types/submission';
 
@@ -12,6 +13,7 @@ interface SubmissionsSummaryHeaderProps {
  * Header summary showing total attempts, average score, pass rate, and average time.
  */
 export function SubmissionsSummaryHeader({ quiz, submissions }: SubmissionsSummaryHeaderProps) {
+  const { t } = useTranslation();
   const totalAttempts = submissions.length;
   const avgPercentage =
     totalAttempts === 0
@@ -65,13 +67,13 @@ export function SubmissionsSummaryHeader({ quiz, submissions }: SubmissionsSumma
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-        {quiz.title} — Submissions
+        {quiz.title} — {t('common.submissions')}
       </Typography>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
-        <StatBox label="Total Attempts" value={totalAttempts} />
-        <StatBox label="Avg. Score" value={`${avgPercentage}%`} />
-        <StatBox label="Pass Rate" value={`${passRate}%`} />
-        <StatBox label="Avg. Time" value={formatSeconds(avgTime)} />
+        <StatBox label={t('common.totalAttempts')} value={totalAttempts} />
+        <StatBox label={t('common.averageScore')} value={`${avgPercentage}%`} />
+        <StatBox label={t('common.passRate')} value={`${passRate}%`} />
+        <StatBox label={t('common.averageTime')} value={formatSeconds(avgTime)} />
       </Stack>
     </Box>
   );

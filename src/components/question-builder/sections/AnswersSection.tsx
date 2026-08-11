@@ -1,4 +1,5 @@
 import { Typography, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../../types/index.ts';
 import DynamicAnswerEditor from '../answer-editors/DynamicAnswerEditor.tsx';
@@ -22,14 +23,16 @@ export default function AnswersSection({
   questionType,
   index,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-          Answers
+          {t('questionBuilder.answers')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Configure the correct answer(s) for this question
+          {t('questionBuilder.answersDescription')}
         </Typography>
         <DynamicAnswerEditor
           control={control}

@@ -1,5 +1,6 @@
 import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ClearIcon from '@mui/icons-material/Clear';
 import type { SubmissionStatus } from '../../types/submission';
 
@@ -38,6 +39,7 @@ export function SubmissionsFilterBar({
   sortOrder,
   onSortOrderChange,
 }: SubmissionsFilterBarProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const hasFilters =
@@ -60,18 +62,18 @@ export function SubmissionsFilterBar({
       {/* Search and sort row */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} useFlexGap>
         <TextField
-          placeholder="Search by name, email..."
+          placeholder={t('common.searchByNameEmail')}
           size="small"
           value={searchText}
           onChange={(e) => onSearchChange(e.target.value)}
           sx={{ flex: 1, minWidth: 200 }}
         />
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Sort by</InputLabel>
-          <Select value={sortBy} label="Sort by" onChange={(e) => onSortByChange(e.target.value as any)}>
-            <MenuItem value="submitted">Date submitted</MenuItem>
-            <MenuItem value="score">Score</MenuItem>
-            <MenuItem value="time">Time spent</MenuItem>
+          <InputLabel>{t('common.sortBy')}</InputLabel>
+          <Select value={sortBy} label={t('common.sortBy')} onChange={(e) => onSortByChange(e.target.value as any)}>
+            <MenuItem value="submitted">{t('common.dateSubmitted')}</MenuItem>
+            <MenuItem value="score">{t('common.score')}</MenuItem>
+            <MenuItem value="time">{t('common.timeSpent')}</MenuItem>
           </Select>
         </FormControl>
         <Button
@@ -80,14 +82,14 @@ export function SubmissionsFilterBar({
           onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
           sx={{ minWidth: 80 }}
         >
-          {sortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
+          {sortOrder === 'asc' ? t('common.ascending') : t('common.descending')}
         </Button>
         <Button size="small" onClick={() => setExpanded(!expanded)} variant="outlined">
-          {expanded ? 'Hide Filters' : 'Show Filters'}
+          {expanded ? t('common.hideFilters') : t('common.showFilters')}
         </Button>
         {hasFilters && (
           <Button size="small" onClick={handleClearFilters} startIcon={<ClearIcon />}>
-            Clear
+            {t('common.clear')}
           </Button>
         )}
       </Stack>
@@ -119,7 +121,7 @@ export function SubmissionsFilterBar({
           <Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                label="Min score"
+                label={t('common.minScore')}
                 type="number"
                 size="small"
                 value={scoreRange[0]}
@@ -129,7 +131,7 @@ export function SubmissionsFilterBar({
               />
               <span>—</span>
               <TextField
-                label="Max score"
+                label={t('common.maxScore')}
                 type="number"
                 size="small"
                 value={scoreRange[1]}
@@ -145,7 +147,7 @@ export function SubmissionsFilterBar({
           <Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                label="From"
+                label={t('common.from')}
                 type="date"
                 size="small"
                 value={dateRange[0]}
@@ -155,7 +157,7 @@ export function SubmissionsFilterBar({
               />
               <span>—</span>
               <TextField
-                label="To"
+                label={t('common.to')}
                 type="date"
                 size="small"
                 value={dateRange[1]}

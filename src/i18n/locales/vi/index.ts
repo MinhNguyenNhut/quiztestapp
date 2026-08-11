@@ -18,6 +18,7 @@ import richTextEditor from './richTextEditor.json';
 import answer from './answer.json';
 import answerEditors from './answerEditors.json';
 import examUi from './examUi.json';
+import time from './time.json';
 
 // Reassembled into the same shape the old single vi.json had, so every
 // existing t('quizList.title') / t('examUi.progress') call keeps working
@@ -43,4 +44,5 @@ export default {
    answer,
    answerEditors,
    examUi,
+   time
 };

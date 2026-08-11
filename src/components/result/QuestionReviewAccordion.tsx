@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -27,25 +28,26 @@ const statusMeta = (
   isCorrect: boolean,
   isSkipped: boolean,
   ungraded: boolean,
+  t: (key: string, options?: { count?: number }) => string,
 ): { color: 'success' | 'error' | 'default' | 'warning'; icon: React.ReactNode; label: string } => {
-  if (ungraded) return { color: 'warning', icon: <PendingIcon fontSize="small" />, label: 'Pending review' };
-  if (isCorrect) return { color: 'success', icon: <CheckCircleIcon fontSize="small" />, label: 'Correct' };
-  if (isSkipped) return { color: 'default', icon: <HelpIcon fontSize="small" />, label: 'Skipped' };
-  return { color: 'error', icon: <CancelIcon fontSize="small" />, label: 'Incorrect' };
+  if (ungraded) return { color: 'warning', icon: <PendingIcon fontSize="small" />, label: t('common.pendingReview') };
+  if (isCorrect) return { color: 'success', icon: <CheckCircleIcon fontSize="small" />, label: t('common.correct') };
+  if (isSkipped) return { color: 'default', icon: <HelpIcon fontSize="small" />, label: t('common.skipped') };
+  return { color: 'error', icon: <CancelIcon fontSize="small" />, label: t('common.incorrect') };
 };
 
-const formatAnswer = (question: import('../../types/quiz').Question, answer: import('../../types/answer').AnyAnswer): string => {
+const formatAnswer = (question: import('../../types/quiz').Question, answer: import('../../types/answer').AnyAnswer, t: (key: string, options?: { count?: number }) => string): string => {
   if (!answer) return '—';
   switch (answer.type) {
     case 'single_choice': {
       const opt = question.options.find((o) => o.id === answer.optionId);
-      return opt?.text ?? '(unknown)';
+      return opt?.text ?? t('common.unknown');
     }
     case 'multiple_choice': {
-      return question.options.filter((o) => answer.optionIds.includes(o.id)).map((o) => o.text).join(', ') || '(none)';
+      return question.options.filter((o) => answer.optionIds.includes(o.id)).map((o) => o.text).join(', ') || t('common.none');
     }
     case 'true_false':
-      return answer.value ? 'True' : 'False';
+      return answer.value ? t('common.true') : t('common.false');
     case 'fill_in_blank': {
       const blanks = question.blanks ?? [];
       return blanks.map((b, i) => `${i + 1}. ${answer.values[b.id] ?? ''}`).join('\n');
@@ -59,14 +61,14 @@ const formatAnswer = (question: import('../../types/quiz').Question, answer: imp
       return answer.text;
     case 'reading_comprehension': {
       const childCount = Object.keys(answer.childAnswers).length;
-      return `(see ${childCount} sub-question${childCount === 1 ? '' : 's'} below)`;
+      return t('common.seeSubQuestions', { count: childCount });
     }
     default:
       return '—';
   }
 };
 
-const formatCorrectAnswer = (question: import('../../types/quiz').Question): string => {
+const formatCorrectAnswer = (question: import('../../types/quiz').Question, t: (key: string, options?: { count?: number }) => string): string => {
   switch (question.type) {
     case 'single_choice':
     case 'multiple_choice': {
@@ -84,21 +86,23 @@ const formatCorrectAnswer = (question: import('../../types/quiz').Question): str
       return (question.matchingPairs ?? []).map((p) => `${p.left} → ${p.right}`).join('\n');
     }
     case 'short_answer':
-      return question.expectedAnswer ?? '(manual grading)';
+      return question.expectedAnswer ?? t('common.manualGrading');
     case 'essay':
-      return '(manual grading — see rubric)';
+      return t('common.manualGradingRubric');
     case 'reading_comprehension':
-      return '(see sub-questions)';
+      return t('common.seeSubQuestionsOnly');
     default:
       return '—';
   }
 };
 
 export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionReviewAccordionProps) => {
+  const { t } = useTranslation();
+
   if (results.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No questions to review.
+        {t('common.noQuestionsToReview')}
       </Typography>
     );
   }
@@ -106,7 +110,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
   return (
     <Box>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1.5 }}>
-        Question review
+        {t('common.questionReview')}
       </Typography>
       <Stack spacing={1}>
         {results.map((r, i) => {
@@ -114,9 +118,10 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
             r.result.isCorrect,
             candidateAnswers[r.questionId] === null || candidateAnswers[r.questionId] === undefined,
             r.result.ungraded ?? false,
+            t,
           );
-          const candidateText = formatAnswer(r.question, candidateAnswers[r.questionId] ?? null);
-          const correctText = formatCorrectAnswer(r.question);
+          const candidateText = formatAnswer(r.question, candidateAnswers[r.questionId] ?? null, t);
+          const correctText = formatCorrectAnswer(r.question, t);
           return (
             <Accordion
               key={r.questionId}
@@ -146,7 +151,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                     Q{i + 1}
                   </Typography>
                   <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }} noWrap>
-                    {r.question.title || 'Untitled question'}
+                    {r.question.title || t('common.untitledQuestion')}
                   </Typography>
                   <Stack direction="row" spacing={0.75} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: "center" }}>
                     <Chip
@@ -156,7 +161,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                       icon={meta.icon as React.ReactElement}
                     />
                     <Typography variant="caption" color="text.secondary">
-                      {r.pointsEarned}/{r.pointsPossible} pts
+                      {r.pointsEarned}/{r.pointsPossible} {t('common.pointsAbbrev')}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -191,7 +196,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      Your answer
+                      {t('common.yourAnswer')}
                     </Typography>
                     <Box
                       sx={{
@@ -206,12 +211,12 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                         minHeight: 40,
                       }}
                     >
-                      {candidateText || <em>(no answer)</em>}
+                      {candidateText || <em>{t('common.noAnswer')}</em>}
                     </Box>
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      Correct answer
+                      {t('common.correctAnswer')}
                     </Typography>
                     <Box
                       sx={{
@@ -233,7 +238,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                 {r.question.explanation && (
                   <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, backgroundColor: 'rgba(99,102,241,0.06)' }}>
                     <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
-                      Explanation
+                      {t('common.explanation')}
                     </Typography>
                     <Box
                       sx={{ mt: 0.5, fontSize: '0.9rem' }}

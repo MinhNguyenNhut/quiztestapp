@@ -17,12 +17,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
 import { getQuizzes } from '../features/quiz/quizSlice';
 import { deleteSubmission, getSubmissionHistory } from '../features/submissions/submissionSlice';
-import { DEFAULT_CANDIDATE_FIELDS_CONFIG } from '../shared/constants/defaultCandidateFields';
 import { SubmissionsSummaryHeader } from '../components/submissions/SubmissionsSummaryHeader';
 import { SubmissionsFilterBar } from '../components/submissions/SubmissionsFilterBar';
 import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
 import { SubmissionsBulkActions } from '../components/submissions/SubmissionsBulkActions';
 import type { Submission } from '../types/submission';
+import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 
 type PendingDelete = { kind: 'single'; submission: Submission } | { kind: 'bulk'; ids: string[] };
 
@@ -30,7 +30,7 @@ export default function SubmissionsDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const quizzes = useAppSelector(getQuizzes);
   const allSubmissions = useAppSelector(getSubmissionHistory);
@@ -41,7 +41,7 @@ export default function SubmissionsDashboardPage() {
     [allSubmissions, quiz]
   );
 
-  const fieldsConfig = quiz?.candidateFieldsConfig ?? DEFAULT_CANDIDATE_FIELDS_CONFIG;
+  const fieldsConfig = quiz?.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
 
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);

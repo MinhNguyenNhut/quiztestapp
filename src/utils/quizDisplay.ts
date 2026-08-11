@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import type { Quiz, Difficulty } from '../types/index.ts';
 
 /**
@@ -40,14 +41,23 @@ export function totalEstimatedMinutes(quiz: Quiz): number {
  * Coarser than Intl.RelativeTimeFormat on purpose: it reads naturally
  * inside card chips and avoids locale divergence between browser engines.
  */
-export function formatRelativeTime(iso: string, now: Date = new Date()): string {
+export function formatRelativeTime(
+  iso: string,
+  t: TFunction,
+  now: Date = new Date()
+): string {
   const diffMs = now.getTime() - new Date(iso).getTime();
-  if (diffMs < 60_000) return 'just now';
+
+  if (diffMs < 60_000) return t('time.justNow');
+
   const mins = Math.floor(diffMs / 60_000);
-  if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
+
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
+
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
-  return new Date(iso).toLocaleDateString();
+  if (days < 7) return t('time.daysAgo', { count: days });
+
+  return new Date(iso).toLocaleDateString(t('common.locale'));
 }
