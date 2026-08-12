@@ -1,0 +1,20 @@
+{
+   "title": "Tạo tài khoản",
+   "subtitle": "Đăng ký để bắt đầu tạo bài kiểm tra",
+   "name": "Họ và tên",
+   "email": "Email",
+   "password": "Mật khẩu",
+   "confirmPassword": "Xác nhận mật khẩu",
+   "submit": "Tạo tài khoản",
+   "haveAccount": "Đã có tài khoản?",
+   "signIn": "Đăng nhập",
+   "nameRequired": "Vui lòng nhập họ tên",
+   "emailRequired": "Vui lòng nhập email",
+   "emailInvalid": "Email không hợp lệ",
+   "passwordRequired": "Vui lòng nhập mật khẩu",
+   "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+   "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+   "passwordMismatch": "Mật khẩu xác nhận không khớp",
+   "emailTaken": "Email này đã được đăng ký",
+   "togglePasswordVisibility": "Hiện/ẩn mật khẩu"
+}

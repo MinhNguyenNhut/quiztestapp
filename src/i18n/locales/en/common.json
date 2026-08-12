@@ -103,5 +103,8 @@
   "status": "Status",
   "submitted": "Submitted",
   "score": "Score",
-  "locale": "en-US"
+  "locale": "en-US",
+  "account": "Account",
+  "profile": "Profile",
+  "logout": "Logout"
 }

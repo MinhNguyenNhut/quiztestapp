@@ -1,0 +1,13 @@
+{
+   "title": "Đăng nhập",
+   "subtitle": "Chào mừng trở lại — nhập thông tin để tiếp tục",
+   "email": "Email",
+   "password": "Mật khẩu",
+   "submit": "Đăng nhập",
+   "noAccount": "Chưa có tài khoản?",
+   "signUp": "Đăng ký",
+   "emailRequired": "Vui lòng nhập email",
+   "emailInvalid": "Email không hợp lệ",
+   "passwordRequired": "Vui lòng nhập mật khẩu",
+   "togglePasswordVisibility": "Hiện/ẩn mật khẩu"
+}

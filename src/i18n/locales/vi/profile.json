@@ -1,0 +1,9 @@
+{
+   "backToQuizzes": "Quay lại danh sách bài kiểm tra",
+   "profileInformation": "Thông tin hồ sơ",
+   "firstName": "Tên",
+   "lastName": "Họ",
+   "email": "Email",
+   "userId": "ID người dùng",
+   "loadFailed": "Không thể tải thông tin hồ sơ"
+}

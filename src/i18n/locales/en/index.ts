@@ -19,6 +19,9 @@ import answer from './answer.json';
 import answerEditors from './answerEditors.json';
 import examUi from './examUi.json';
 import time from './time.json';
+import login from './login.json';
+import register from './register.json';
+import profile from './profile.json';
 
 export default {
    common,
@@ -41,5 +44,8 @@ export default {
    answer,
    answerEditors,
    examUi,
-   time
+   time,
+   login,
+   register,
+   profile
 };

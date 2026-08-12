@@ -1,0 +1,13 @@
+{
+   "title": "Sign In",
+   "subtitle": "Welcome back — enter your details to continue",
+   "email": "Email",
+   "password": "Password",
+   "submit": "Sign In",
+   "noAccount": "Don't have an account?",
+   "signUp": "Sign up",
+   "emailRequired": "Email is required",
+   "emailInvalid": "Enter a valid email address",
+   "passwordRequired": "Password is required",
+   "togglePasswordVisibility": "Toggle password visibility"
+}

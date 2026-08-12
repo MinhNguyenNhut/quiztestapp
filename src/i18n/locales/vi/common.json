@@ -103,5 +103,8 @@
   "status": "Trạng thái",
   "submitted": "Đã nộp",
   "score": "Điểm",
-  "locale": "vi-VN"
+  "locale": "vi-VN",
+  "account": "Tài khoản",
+  "profile": "Hồ sơ",
+  "logout": "Đăng xuất"
 }
