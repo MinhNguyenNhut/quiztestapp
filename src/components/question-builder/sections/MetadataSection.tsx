@@ -15,7 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues, Difficulty } from '../../../types/index.ts';
-import { DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '../../../types/index.ts';
+import { DIFFICULTY_COLORS, getDifficultyLabel } from '../../../types/index.ts';
 
 interface Props {
   control: Control<QuizFormValues>;
@@ -80,7 +80,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
                       bgcolor: DIFFICULTY_COLORS[val],
                     }}
                   />
-                  {DIFFICULTY_LABELS[val]}
+                  {getDifficultyLabel(val, t)}
                 </Box>
               )}
             >
@@ -88,7 +88,7 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
                 <MenuItem key={d} value={d}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: DIFFICULTY_COLORS[d] }} />
-                    {DIFFICULTY_LABELS[d]}
+                    {getDifficultyLabel(d, t)}
                   </Box>
                 </MenuItem>
               ))}

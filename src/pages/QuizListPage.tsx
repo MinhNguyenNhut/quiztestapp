@@ -40,7 +40,7 @@ import {
 } from '../utils/quizDisplay.ts';
 import {
   DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
+  getDifficultyLabel,
   type Quiz,
 } from '../types/index.ts';
 import ConfirmDialog from '../components/common/ConfirmDialog/ConfirmDialog.tsx';
@@ -299,7 +299,7 @@ function QuizCard({
             <Chip
               size="small"
               icon={<StarIcon />}
-              label={DIFFICULTY_LABELS[difficulty]}
+              label={getDifficultyLabel(difficulty, t)}
               sx={{
                 bgcolor: DIFFICULTY_COLORS[difficulty],
                 color: 'common.white',

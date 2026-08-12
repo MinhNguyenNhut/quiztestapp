@@ -17,7 +17,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import type { PerQuestionResult } from '../../shared/utils/scoring';
 import { DifficultyChip } from '../../shared/components/DifficultyChip';
 import { PointsBadge } from '../../shared/components/PointsBadge';
-import { QUESTION_TYPE_LABELS } from '../../types/quiz';
+import { getQuestionTypeLabel } from '../../types';
 
 interface QuestionReviewAccordionProps {
   results: PerQuestionResult[];
@@ -169,7 +169,7 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
               <AccordionDetails>
                 <Divider sx={{ mb: 2 }} />
                 <Stack direction="row" spacing={0.75} useFlexGap sx={{ mb: 1.5, flexWrap: "wrap" }}>
-                  <Chip label={QUESTION_TYPE_LABELS[r.question.type]} size="small" variant="outlined" />
+                  <Chip label={getQuestionTypeLabel(r.question.type, t)} size="small" variant="outlined" />
                   <DifficultyChip difficulty={r.question.difficulty} />
                   <PointsBadge points={r.pointsPossible} />
                   {r.question.topic && (

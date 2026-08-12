@@ -5,6 +5,7 @@
  * `Question` documents. Nothing is hard-coded per page.
  */
 
+import type { TFunction } from 'i18next';
 import type { CandidateFieldsConfig } from './candidate';
 
 /** Question types supported by the platform. */
@@ -105,15 +106,22 @@ export interface Quiz {
 
 // ---- Human-facing labels & colors ----
 
-export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  single_choice: 'Single Choice',
-  multiple_choice: 'Multiple Choice',
-  true_false: 'True / False',
-  fill_in_blank: 'Fill in the Blank',
-  matching: 'Matching',
-  reading_comprehension: 'Reading Comprehension',
-  short_answer: 'Short Answer',
-  essay: 'Essay',
+export const getQuestionTypeLabel = (
+  type: QuestionType,
+  t: TFunction,
+): string => {
+  const labels: Record<QuestionType, string> = {
+    single_choice: t('questionTypes.singleChoice'),
+    multiple_choice: t('questionTypes.multipleChoice'),
+    true_false: t('questionTypes.trueFalse'),
+    fill_in_blank: t('questionTypes.fillInBlank'),
+    matching: t('questionTypes.matching'),
+    reading_comprehension: t('questionTypes.readingComprehension'),
+    short_answer: t('questionTypes.shortAnswer'),
+    essay: t('questionTypes.essay'),
+  };
+
+  return labels[type];
 };
 
 export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
@@ -127,10 +135,17 @@ export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
   essay: 'article',
 };
 
-export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
+export const getDifficultyLabel = (
+  difficulty: Difficulty,
+  t: TFunction,
+): string => {
+  const keys: Record<Difficulty, string> = {
+    easy: 'difficulty.easy',
+    medium: 'difficulty.medium',
+    hard: 'difficulty.hard',
+  };
+
+  return t(keys[difficulty]);
 };
 
 export const DIFFICULTY_COLORS: Record<Difficulty, string> = {

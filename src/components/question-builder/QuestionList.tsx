@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -15,6 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+
 import QuestionListItem from './QuestionListItem.tsx';
 import type { QuestionFormValues } from '../../types/index.ts';
 
@@ -42,17 +43,43 @@ export default function QuestionList({
   onSaveQuiz,
   quizTitle,
   onQuizTitleChange,
-  isSaving
+  isSaving,
 }: QuestionListProps) {
   const { t } = useTranslation();
+
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
+  // Keep the title local so typing does not update the parent
+  // on every keystroke.
+  const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
+
+  // Sync local title if the parent changes it externally.
+  useEffect(() => {
+    setLocalQuizTitle(quizTitle);
+  }, [quizTitle]);
+
   const filtered = questions.filter((q) => {
-    const matchesSearch = q.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
-    const matchesType = typeFilter === 'all' || q.type === typeFilter;
+    const matchesSearch =
+      q.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
+
+    const matchesType =
+      typeFilter === 'all' || q.type === typeFilter;
+
     return matchesSearch && matchesType;
   });
+
+  const handleQuizTitleChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setLocalQuizTitle(event.target.value);
+  };
+
+  const handleQuizTitleBlur = () => {
+    if (localQuizTitle !== quizTitle) {
+      onQuizTitleChange(localQuizTitle);
+    }
+  };
 
   return (
     <Paper
@@ -70,32 +97,71 @@ export default function QuestionList({
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
         <Typography
           variant="subtitle2"
-          sx={{ mb: 1, fontWeight: 600 }}
+          sx={{
+            mb: 1,
+            fontWeight: 600,
+          }}
         >
           {t('questionBuilder.quizInformation')}
         </Typography>
 
+        {/* Quiz title */}
         <TextField
           fullWidth
           size="small"
           label={t('quizEditor.quizTitle')}
-          value={quizTitle}
-          onChange={(e) => onQuizTitleChange(e.target.value)}
+          value={localQuizTitle}
+          onChange={handleQuizTitleChange}
+          onBlur={handleQuizTitleBlur}
           sx={{ mb: 2 }}
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+
+        {/* Questions header */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: '1rem',
+              fontWeight: 600,
+            }}
+          >
             {t('questionBuilder.questionsHeader')}
           </Typography>
-          <Badge badgeContent={questions.length} color="primary" sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }} />
+
+          <Badge
+            badgeContent={questions.length}
+            color="primary"
+            sx={{
+              '& .MuiBadge-badge': {
+                fontSize: '0.7rem',
+              },
+            }}
+          />
         </Box>
+
+        {/* Search */}
         <TextField
           size="small"
           fullWidth
-          placeholder={t('questionBuilder.searchQuestionPlaceholder')}
+          placeholder={t(
+            'questionBuilder.searchQuestionPlaceholder',
+          )}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{
@@ -109,28 +175,65 @@ export default function QuestionList({
           }}
           sx={{ mb: 1.5 }}
         />
+
+        {/* Type filter */}
         <FormControl size="small" fullWidth>
-          <InputLabel>{t('questionBuilder.typeLabel')}</InputLabel>
+          <InputLabel>
+            {t('questionBuilder.typeLabel')}
+          </InputLabel>
+
           <Select
             value={typeFilter}
             label={t('questionBuilder.typeLabel')}
             onChange={(e) => setTypeFilter(e.target.value)}
           >
-            <MenuItem value="all">{t('questionBuilder.allTypes')}</MenuItem>
-            <MenuItem value="single_choice">{t('questionTypes.singleChoice')}</MenuItem>
-            <MenuItem value="multiple_choice">{t('questionTypes.multipleChoice')}</MenuItem>
-            <MenuItem value="true_false">{t('questionTypes.trueFalse')}</MenuItem>
-            <MenuItem value="fill_in_blank">{t('questionTypes.fillInBlank')}</MenuItem>
-            <MenuItem value="matching">{t('questionTypes.matching')}</MenuItem>
-            <MenuItem value="reading_comprehension">{t('questionTypes.readingComprehension')}</MenuItem>
-            <MenuItem value="short_answer">{t('questionTypes.shortAnswer')}</MenuItem>
-            <MenuItem value="essay">{t('questionTypes.essay')}</MenuItem>
+            <MenuItem value="all">
+              {t('questionBuilder.allTypes')}
+            </MenuItem>
+
+            <MenuItem value="single_choice">
+              {t('questionTypes.singleChoice')}
+            </MenuItem>
+
+            <MenuItem value="multiple_choice">
+              {t('questionTypes.multipleChoice')}
+            </MenuItem>
+
+            <MenuItem value="true_false">
+              {t('questionTypes.trueFalse')}
+            </MenuItem>
+
+            <MenuItem value="fill_in_blank">
+              {t('questionTypes.fillInBlank')}
+            </MenuItem>
+
+            <MenuItem value="matching">
+              {t('questionTypes.matching')}
+            </MenuItem>
+
+            <MenuItem value="reading_comprehension">
+              {t('questionTypes.readingComprehension')}
+            </MenuItem>
+
+            <MenuItem value="short_answer">
+              {t('questionTypes.shortAnswer')}
+            </MenuItem>
+
+            <MenuItem value="essay">
+              {t('questionTypes.essay')}
+            </MenuItem>
           </Select>
         </FormControl>
       </Box>
 
       {/* List */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 1 }}>
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          p: 1,
+        }}
+      >
         {questions.length === 0 ? (
           <Box
             sx={{
@@ -144,17 +247,40 @@ export default function QuestionList({
               p: 2,
             }}
           >
-            <Typography variant="h4" sx={{ mb: 1, opacity: 0.3 }}>?</Typography>
-            <Typography variant="body2">{t('questionBuilder.noQuestionsYet')}</Typography>
-            <Typography variant="caption">{t('questionBuilder.clickAddQuestion')}</Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 1,
+                opacity: 0.3,
+              }}
+            >
+              ?
+            </Typography>
+
+            <Typography variant="body2">
+              {t('questionBuilder.noQuestionsYet')}
+            </Typography>
+
+            <Typography variant="caption">
+              {t('questionBuilder.clickAddQuestion')}
+            </Typography>
           </Box>
         ) : filtered.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4, color: 'text.disabled' }}>
-            <Typography variant="body2">{t('questionBuilder.noMatchingQuestions')}</Typography>
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 4,
+              color: 'text.disabled',
+            }}
+          >
+            <Typography variant="body2">
+              {t('questionBuilder.noMatchingQuestions')}
+            </Typography>
           </Box>
         ) : (
           filtered.map((question) => {
             const realIndex = questions.indexOf(question);
+
             return (
               <QuestionListItem
                 key={question.id || realIndex}
@@ -170,8 +296,14 @@ export default function QuestionList({
         )}
       </Box>
 
-      {/* Add Button */}
-      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      {/* Add / Save buttons */}
+      <Box
+        sx={{
+          p: 2,
+          borderTop: 1,
+          borderColor: 'divider',
+        }}
+      >
         <Button
           variant="contained"
           fullWidth
@@ -188,7 +320,9 @@ export default function QuestionList({
           onClick={onSaveQuiz}
           disabled={isSaving}
         >
-          {isSaving ? t('questionBuilder.saving') : t('quizEditor.saveQuiz')}
+          {isSaving
+            ? t('questionBuilder.saving')
+            : t('quizEditor.saveQuiz')}
         </Button>
       </Box>
     </Paper>

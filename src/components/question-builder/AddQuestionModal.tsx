@@ -14,7 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { QuestionType } from '../../types/index.ts';
 import {
-  QUESTION_TYPE_LABELS,
+  getQuestionTypeLabel,
   QUESTION_TYPE_ICONS,
 } from '../../types/index.ts';
 
@@ -129,7 +129,7 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
                     </Box>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {QUESTION_TYPE_LABELS[type]}
+                        {getQuestionTypeLabel(type, t)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                         {t(`questionTypes.descriptions.${DESCRIPTION_KEYS[type]}`)}

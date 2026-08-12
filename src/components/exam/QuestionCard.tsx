@@ -2,7 +2,7 @@ import { Box, Card, CardContent, Stack, Typography, Divider, Chip } from '@mui/m
 import { useTranslation } from 'react-i18next';
 import { DifficultyChip } from '../../shared/components/DifficultyChip';
 import { PointsBadge } from '../../shared/components/PointsBadge';
-import { QUESTION_TYPE_LABELS } from '../../types/quiz';
+import { getQuestionTypeLabel } from '../../types/quiz';
 import type { Question } from '../../types/quiz';
 import { AnswerRenderer } from './renderers/AnswerRenderer';
 
@@ -54,7 +54,7 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
           </Typography>
           <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }} useFlexGap>
             <Chip
-              label={QUESTION_TYPE_LABELS[question.type]}
+              label={getQuestionTypeLabel(question.type, t)}
               size="small"
               variant="outlined"
             />

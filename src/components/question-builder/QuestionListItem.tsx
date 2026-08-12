@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { QuestionFormValues, QuestionType } from '../../types/index.ts';
-import { QUESTION_TYPE_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '../../types/index.ts';
+import { DIFFICULTY_COLORS, getDifficultyLabel, getQuestionTypeLabel } from '../../types/index.ts';
 
 interface QuestionListItemProps {
   question: QuestionFormValues;
@@ -102,7 +102,7 @@ export default function QuestionListItem({
         </Typography>
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           <Chip
-            label={QUESTION_TYPE_LABELS[question.type]}
+            label={getQuestionTypeLabel(question.type, t)}
             size="small"
             sx={{
               height: 22,
@@ -114,7 +114,7 @@ export default function QuestionListItem({
             }}
           />
           <Chip
-            label={DIFFICULTY_LABELS[question.difficulty]}
+            label={getDifficultyLabel(question.difficulty, t)}
             size="small"
             sx={{
               height: 22,
