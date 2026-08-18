@@ -1,16 +1,29 @@
-import { Box, Tabs, Tab, CircularProgress } from '@mui/material';
-import { useState } from 'react';
+import { Alert, Box, Tabs, Tab, CircularProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
+
 import type { QuizFormValues } from '../types';
 import type { RootState } from '../features/store.ts';
-import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
-import { addQuiz, updateQuiz } from '../features/quiz/quizSlice.ts';
+
+import { quizToFormValues } from '../utils/quizMappers.ts';
+
+import {
+  createQuiz,
+  fetchQuizById,
+  updateQuiz,
+} from '../features/quiz/quizSlice.ts';
+
+import { useAppDispatch } from '../features/store.ts';
 import { v4 as uuidv4 } from 'uuid';
+
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields.ts';
+
+import { fetchQuestionsForQuiz } from '../features/questions/questionThunks.ts';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -18,9 +31,12 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({
+  children,
+  value,
+  index,
+  ...other
+}: TabPanelProps) {
   return (
     <Box
       role="tabpanel"
@@ -43,34 +59,115 @@ function TabPanel(props: TabPanelProps) {
 
 export default function QuizEditorPage() {
   const { id } = useParams();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
+
   const [tabValue, setTabValue] = useState(0);
+
   const quiz = useSelector((state: RootState) =>
     state.quiz.quizzes.find((q) => q.id === id)
   );
 
+  const questions = useSelector(
+    (state: RootState) =>
+      id
+        ? state.questions.questionsByQuizId[id] ?? []
+        : []
+  );
+
+  const quizWithQuestions = quiz
+    ? {
+      ...quiz,
+      questions,
+    }
+    : null;
+
+
+  const questionsLoading = useSelector(
+    (state: RootState) => state.questions.isLoading
+  );
+
+  const questionsError = useSelector(
+    (state: RootState) => state.questions.error
+  );
+
+  const isLoading = useSelector(
+    (state: RootState) => state.quiz.isLoading
+  );
+
+  const error = useSelector(
+    (state: RootState) => state.quiz.error
+  );
+
+  useEffect(() => {
+    if (id && !quiz) {
+      void dispatch(fetchQuizById(id));
+    }
+  }, [dispatch, id, quiz]);
+
+  useEffect(() => {
+    if (id) {
+      void dispatch(fetchQuestionsForQuiz(id));
+    }
+  }, [dispatch, id]);
+
   const handleSave = async (data: QuizFormValues) => {
-    const now = new Date().toISOString();
-
     if (id && quiz) {
-      const updatedQuiz = formValuesToQuiz(data, {
-        id: quiz.id,
-        createdAt: quiz.createdAt,
-        updatedAt: now,
-      });
+      const result = await dispatch(
+        updateQuiz({
+          id: quiz.id,
+          patch: {
+            title: data.title,
+            description: data.description,
+          },
+        })
+      );
 
-      dispatch(updateQuiz(updatedQuiz));
+      if (updateQuiz.rejected.match(result)) {
+        throw new Error(
+          result.payload ?? 'Failed to update quiz'
+        );
+      }
     } else {
-      const newQuiz = formValuesToQuiz(data, {
-        id: uuidv4(),
-        createdAt: now,
-        updatedAt: now,
-      });
+      const result = await dispatch(
+        createQuiz({
+          title: data.title,
+          description: data.description,
+        })
+      );
 
-      dispatch(addQuiz(newQuiz));
+      if (createQuiz.rejected.match(result)) {
+        throw new Error(
+          result.payload ?? 'Failed to create quiz'
+        );
+      }
     }
   };
+
+  if (id && !quiz && isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'calc(100vh - 64px)',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (id && !quiz && error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
 
   if (id && !quiz) {
     return (
@@ -89,26 +186,80 @@ export default function QuizEditorPage() {
 
   const quizId = id ?? uuidv4();
 
+  if (id && quiz && questionsLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'calc(100vh - 64px)',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (id && quiz && questionsError) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">
+          {questionsError}
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
-      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tab label={t('quizEditor.tabQuestions')} id="tab-0" aria-controls="tabpanel-0" />
-        <Tab label={t('quizEditor.tabCandidateFields')} id="tab-1" aria-controls="tabpanel-1" />
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100vh - 64px)',
+      }}
+    >
+      <Tabs
+        value={tabValue}
+        onChange={(_, newValue) => setTabValue(newValue)}
+        sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Tab
+          label={t('quizEditor.tabQuestions')}
+          id="tab-0"
+          aria-controls="tabpanel-0"
+        />
+
+        <Tab
+          label={t('quizEditor.tabCandidateFields')}
+          id="tab-1"
+          aria-controls="tabpanel-1"
+        />
       </Tabs>
 
-      <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          minHeight: 0,
+        }}
+      >
         <TabPanel value={tabValue} index={0}>
-          {id ? (
-            quiz && (
-              <QuestionBuilder
-                mode="edit"
-                originalQuiz={quiz}
-                defaultValues={quizToFormValues(quiz)}
-                onSave={handleSave}
-              />
-            )
+          {id && quizWithQuestions ? (
+            <QuestionBuilder
+              mode="edit"
+              originalQuiz={quizWithQuestions}
+              defaultValues={quizToFormValues(quizWithQuestions)}
+              onSave={handleSave}
+            />
           ) : (
-            <QuestionBuilder mode="create" onSave={handleSave} />
+            <QuestionBuilder
+              mode="create"
+              onSave={handleSave}
+            />
           )}
         </TabPanel>
 
@@ -116,12 +267,17 @@ export default function QuizEditorPage() {
           {quiz ? (
             <CandidateFieldsBuilder
               quizId={quiz.id}
-              defaultConfig={quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language)}
+              defaultConfig={
+                quiz.candidateFieldsConfig ??
+                getDefaultCandidateFieldsConfig(i18n.language)
+              }
             />
           ) : (
             <CandidateFieldsBuilder
               quizId={quizId}
-              defaultConfig={getDefaultCandidateFieldsConfig(i18n.language)}
+              defaultConfig={getDefaultCandidateFieldsConfig(
+                i18n.language
+              )}
             />
           )}
         </TabPanel>

@@ -94,7 +94,6 @@ export interface Quiz {
   coverImage?: string;
   estimatedTime?: number;
   passingScore?: number;
-  difficulty: Difficulty;
   createdBy?: string;
   createdAt: string;
   updatedAt: string;

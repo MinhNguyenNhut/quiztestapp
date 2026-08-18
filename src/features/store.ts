@@ -6,15 +6,19 @@ import examReducer from './exam/examSlice';
 import submissionReducer from './submissions/submissionSlice';
 import userReducer from './user/userSlice';
 import authReducer from './auth/authSlice';
+import questionReducer from './questions/questionSlice';
+import { examMiddleware } from './exam/examMiddleware.ts';
 
 export const store = configureStore({
   reducer: {
     quiz: quizReducer,
+    questions: questionReducer,
     exam: examReducer,
     submission: submissionReducer,
     user: userReducer,
     auth: authReducer,
   },
+  middleware: (getDefault) => getDefault().prepend(examMiddleware.middleware),
   devTools: import.meta.env.DEV,
 });
 

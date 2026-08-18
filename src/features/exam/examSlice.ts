@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AnyAnswer, Answer } from '../../types/answer';
 import type { Question } from '../../types/quiz';
+import { saveAnswer, submitSubmission } from '../submissions/submissionSlice.ts';
 
 export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -139,6 +140,24 @@ const examSlice = createSlice({
     resetSession() {
       return initialState;
     },
+  },
+  extraReducers: (builder) => {
+    // Mirror the submission-save lifecycle into the local session so the
+    // autosave chip on the exam page reflects the live API status.
+    builder
+      .addCase(saveAnswer.pending, (state) => {
+        state.autoSaveStatus = 'saving';
+      })
+      .addCase(saveAnswer.fulfilled, (state) => {
+        state.autoSaveStatus = 'saved';
+      })
+      .addCase(saveAnswer.rejected, (state) => {
+        state.autoSaveStatus = 'error';
+      })
+      // Submission completes -> mark the session as submitted locally.
+      .addCase(submitSubmission.fulfilled, (state) => {
+        state.isSubmitted = true;
+      });
   },
 });
 

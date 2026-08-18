@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { RootState } from '../store.ts';
 import type { LoginCredentials, RegisterCredentials } from '../../types/user.ts';
 import { loginRequest, fetchMe, registerRequest } from '../../api/authApi.ts';
@@ -24,9 +24,12 @@ export const loginUser = createAsyncThunk(
    'auth/login',
    async (credentials: LoginCredentials, { rejectWithValue }) => {
       try {
-         return await loginRequest(credentials);
+         const result = await loginRequest(credentials);
+         return result;
       } catch (err) {
-         return rejectWithValue(err instanceof Error ? err.message : 'Login failed');
+         return rejectWithValue(
+            err instanceof Error ? err.message : 'Login failed'
+         );
       }
    },
 );

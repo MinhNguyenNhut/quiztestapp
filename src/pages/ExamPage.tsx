@@ -5,7 +5,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import {
   Alert,
   Box,
@@ -30,8 +29,7 @@ import {
   tickTimer,
   toggleFlag,
 } from '../features/exam/examSlice';
-import { recordSubmission } from '../features/submissions/submissionSlice';
-import { computeScore } from '../shared/utils/scoring';
+import { createSubmission } from '../features/submissions/submissionSlice';
 import { isAnswered, type Quiz, type Submission } from '../types';
 import { useFullscreen } from '../shared/hooks/useFullscreen';
 import { useNetworkStatus } from '../shared/hooks/useNetworkStatus';
@@ -57,11 +55,29 @@ export default function ExamPage() {
 
   const quizzes = useAppSelector(getQuizzes);
   const session = useAppSelector(getExamSession);
+  const submissionCurrent = useAppSelector((s) => s.submission.current);
 
   const quiz: Quiz | null = useMemo(
     () => quizzes.find((q) => q.id === id) ?? null,
     [quizzes, id]
   );
+
+  // Once the local exam session is bound to this quiz, make sure a backend
+  // submission exists so `examMiddleware` can persist `saveAnswer` calls.
+  // We only post once per session — the slice keeps the id.
+  useEffect(() => {
+    if (!quiz) return;
+    if (session.quizId !== quiz.id) return;
+    if (submissionCurrent && submissionCurrent.quizId === quiz.id) return;
+
+    void dispatch(
+      createSubmission({
+        quizId: session.quizId,
+        candidate: (session.candidate ?? {}) as Submission['candidate'],
+        answers: session.answers,
+      }),
+    );
+  }, [dispatch, quiz, session.quizId, session.candidate, session.answers, submissionCurrent]);
 
   useEffect(() => {
     if (!quiz) return;
@@ -70,37 +86,21 @@ export default function ExamPage() {
   }, [quiz, session.quizId, navigate]);
 
   const finalizeSubmission = useCallback(
-    (statusOverride?: Submission['status']) => {
+    async (statusOverride?: Submission['status']) => {
+      void statusOverride;
       if (!quiz) return;
       if (!session.startedAt || !session.quizId) return;
+      if (!submissionCurrent || submissionCurrent.quizId !== quiz.id) {
+        return;
+      }
 
-      const summary = computeScore(quiz, session.answers);
-
-      const submission: Submission = {
-        id: uuidv4(),
-        quizId: session.quizId,
-        candidate: session.candidate ?? {},
-        answers: session.answers,
-        flags: session.flags,
-        bookmarks: session.bookmarks,
-        startedAt: session.startedAt,
-        submittedAt: new Date().toISOString(),
-        timeSpentSeconds: Math.floor(
-          (Date.now() - new Date(session.startedAt).getTime()) / 1000
-        ),
-        score: summary.score,
-        percentage: summary.percentage,
-        status: statusOverride ?? 'submitted',
-      };
-
-      dispatch(recordSubmission(submission));
+      // Mark the session submitted locally; the exam listener middleware
+      // hears `submitSession` and POSTs submit, then records the result.
       dispatch(submitSession());
-
-      navigate(`/quiz/${submission.quizId}/result/${submission.id}`, {
-        replace: true,
-      });
+      const submissionId = submissionCurrent.id;
+      navigate(`/quiz/${quiz.id}/result/${submissionId}`, { replace: true });
     },
-    [dispatch, navigate, quiz, session]
+    [dispatch, navigate, quiz, session, submissionCurrent]
   );
 
   if (!quiz) {

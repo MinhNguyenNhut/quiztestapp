@@ -6,5 +6,12 @@
    "maxValue": "Giá trị tối đa là {{max}}",
    "minLength": "Yêu cầu tối thiểu {{count}} ký tự",
    "maxLength": "Cho phép tối đa {{count}} ký tự",
-   "invalidFormat": "Định dạng không hợp lệ"
+   "invalidFormat": "Định dạng không hợp lệ",
+   "optionTextRequired": "Nội dung đáp án là bắt buộc",
+   "questionTitleRequired": "Tiêu đề câu hỏi là bắt buộc",
+   "pointsMinimum": "Điểm phải ít nhất là 1",
+   "quizTitleRequired": "Tiêu đề bài kiểm tra là bắt buộc",
+   "quizTitleTooLong": "Tiêu đề quá dài",
+   "quizDescriptionTooLong": "Mô tả quá dài",
+   "atLeastOneQuestion": "Phải có ít nhất 1 câu hỏi"
 }

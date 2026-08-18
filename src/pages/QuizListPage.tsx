@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -16,6 +16,7 @@ import {
   Tooltip,
   Snackbar,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -31,7 +32,12 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import { Link as RouterLink } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../features/store.ts';
-import { addQuiz, deleteQuiz, getQuizzes } from '../features/quiz/quizSlice.ts';
+import {
+  addQuiz,
+  deleteQuiz,
+  fetchQuizzes,
+  getQuizzes,
+} from '../features/quiz/quizSlice.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import {
   aggregateDifficulty,
@@ -56,6 +62,12 @@ export default function QuizListPage() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const quizzes = useAppSelector(getQuizzes);
+  const isLoading = useAppSelector((s) => s.quiz.isLoading);
+  const error = useAppSelector((s) => s.quiz.error);
+
+  useEffect(() => {
+    void dispatch(fetchQuizzes());
+  }, [dispatch]);
 
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Quiz | null>(null);
@@ -104,7 +116,17 @@ export default function QuizListPage() {
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, sm: 3 } }}>
       <PageHeader search={search} onSearchChange={setSearch} />
 
-      {quizzes.length === 0 ? (
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {isLoading && quizzes.length === 0 ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : quizzes.length === 0 ? (
         <EmptyState />
       ) : filtered.length === 0 ? (
         <Typography color="text.secondary" sx={{ textAlign: 'center', py: 6 }}>
@@ -252,9 +274,10 @@ function QuizCard({
   onDelete: (quiz: Quiz) => void;
 }) {
   const { t } = useTranslation();
-  const difficulty = aggregateDifficulty(quiz);
-  const minutes = totalEstimatedMinutes(quiz);
-  const questionCount = quiz.questions.length;
+  const questions = quiz.questions ?? [];
+  const difficulty = aggregateDifficulty(questions);
+  const minutes = totalEstimatedMinutes(questions);
+  const questionCount = questions.length;
 
   return (
     <Card

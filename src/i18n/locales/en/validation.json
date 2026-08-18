@@ -6,5 +6,12 @@
    "maxValue": "Maximum value is {{max}}",
    "minLength": "Minimum {{count}} characters required",
    "maxLength": "Maximum {{count}} characters allowed",
-   "invalidFormat": "Invalid format"
+   "invalidFormat": "Invalid format",
+   "optionTextRequired": "Option text is required",
+   "questionTitleRequired": "Question title is required",
+   "pointsMinimum": "Points must be at least 1",
+   "quizTitleRequired": "Quiz title is required",
+   "quizTitleTooLong": "Title too long",
+   "quizDescriptionTooLong": "Description too long",
+   "atLeastOneQuestion": "At least 1 question required"
 }
