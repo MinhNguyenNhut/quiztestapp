@@ -5,7 +5,6 @@ import {
 } from '@reduxjs/toolkit';
 import type { Quiz } from '../../types/index.ts';
 import type { CandidateFieldsConfig } from '../../types/candidate.ts';
-import type { RootState } from '../store.ts';
 import { quizApi } from '../../api/quizApi.ts';
 import {
   fetchQuestionsForQuiz,
@@ -64,7 +63,7 @@ export const fetchQuizById = createAsyncThunk<
 /** POST /api/quizzes. */
 export const createQuiz = createAsyncThunk<
   Quiz,
-  { title: string; description: string; candidateFieldsConfig?: CandidateFieldsConfig },
+  { title: string; description: string; estimatedTime: number; candidateFieldsConfig?: CandidateFieldsConfig },
   { rejectValue: string }
 >('quizzes/create', async (payload, { rejectWithValue }) => {
   try {
@@ -77,7 +76,7 @@ export const createQuiz = createAsyncThunk<
 /** PATCH /api/quizzes/:id. */
 export const updateQuiz = createAsyncThunk<
   Quiz,
-  { id: string; patch: Partial<Pick<Quiz, 'title' | 'description' | 'candidateFieldsConfig'>> },
+  { id: string; patch: Partial<Pick<Quiz, 'title' | 'description' | 'estimatedTime' | 'candidateFieldsConfig'>> },
   { rejectValue: string }
 >('quizzes/update', async ({ id, patch }, { rejectWithValue }) => {
   try {
@@ -287,10 +286,5 @@ export const {
   addQuiz,
   updateCandidateFieldsConfig,
 } = quizSlice.actions;
-
-export const getQuizzes = (state: RootState) => state.quiz.quizzes;
-export const getCurrentQuiz = (state: RootState) => state.quiz.currentQuiz;
-export const getQuizIsLoading = (state: RootState) => state.quiz.isLoading;
-export const getQuizError = (state: RootState) => state.quiz.error;
 
 export default quizSlice.reducer;

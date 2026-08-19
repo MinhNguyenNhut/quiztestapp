@@ -30,6 +30,8 @@ interface QuestionListProps {
   onSaveQuiz: () => void;
   quizTitle: string;
   onQuizTitleChange: (value: string) => void;
+  estimatedTime?: number;
+  onEstimatedTimeChange: (value: number) => void;
   isSaving: boolean;
 }
 
@@ -43,6 +45,8 @@ export default function QuestionList({
   onSaveQuiz,
   quizTitle,
   onQuizTitleChange,
+  estimatedTime,
+  onEstimatedTimeChange,
   isSaving,
 }: QuestionListProps) {
   const { t } = useTranslation();
@@ -53,18 +57,27 @@ export default function QuestionList({
   // Keep the title local so typing does not update the parent
   // on every keystroke.
   const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
+  const [localEstimatedTime, setLocalEstimatedTime] = useState<number>(
+    estimatedTime !== undefined && estimatedTime !== null
+      ? Number(estimatedTime)
+      : 0
+  );
 
   // Sync local title if the parent changes it externally.
   useEffect(() => {
     setLocalQuizTitle(quizTitle);
   }, [quizTitle]);
 
+  // Sync local estimated time if the parent changes it externally.
+  useEffect(() => {
+    setLocalEstimatedTime(estimatedTime ?? 0);
+  }, [estimatedTime]);
+
   const filtered = questions.filter((q) => {
     const matchesSearch =
       q.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
 
-    const matchesType =
-      typeFilter === 'all' || q.type === typeFilter;
+    const matchesType = typeFilter === 'all' || q.type === typeFilter;
 
     return matchesSearch && matchesType;
   });
@@ -80,6 +93,21 @@ export default function QuestionList({
       onQuizTitleChange(localQuizTitle);
     }
   };
+
+  const handleEstimatedTimeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = event.target.value;
+    setLocalEstimatedTime(value === '' ? 0 : Number(value));
+  };
+
+  const handleEstimatedTimeBlur = () => {
+  console.log(localEstimatedTime)
+  if (localEstimatedTime !== (estimatedTime ?? 0)) {
+    console.log(estimatedTime)
+    onEstimatedTimeChange(localEstimatedTime);
+  }
+};
 
   return (
     <Paper
@@ -114,16 +142,27 @@ export default function QuestionList({
           {t('questionBuilder.quizInformation')}
         </Typography>
 
-        {/* Quiz title */}
-        <TextField
-          fullWidth
-          size="small"
-          label={t('quizEditor.quizTitle')}
-          value={localQuizTitle}
-          onChange={handleQuizTitleChange}
-          onBlur={handleQuizTitleBlur}
-          sx={{ mb: 2 }}
-        />
+        {/* Quiz title & Estimated Time */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+          <TextField
+            fullWidth
+            size="small"
+            label={t('quizEditor.quizTitle')}
+            value={localQuizTitle}
+            onChange={handleQuizTitleChange}
+            onBlur={handleQuizTitleBlur}
+          />
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={t('quizEditor.estimatedTime')}
+            value={localEstimatedTime}
+            onChange={handleEstimatedTimeChange}
+            onBlur={handleEstimatedTimeBlur}
+            slotProps={{ htmlInput: { min: 0 } }}
+          />
+        </Box>
 
         {/* Questions header */}
         <Box

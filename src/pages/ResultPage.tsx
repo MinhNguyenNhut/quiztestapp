@@ -22,7 +22,6 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ShareIcon from '@mui/icons-material/Share';
 import HomeIcon from '@mui/icons-material/Home';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { getQuizzes } from '../features/quiz/quizSlice';
 import {
   clearCurrent,
   getSubmissionHistory,
@@ -51,7 +50,7 @@ export default function ResultPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const quizzes = useAppSelector(getQuizzes);
+  const quizzes = useAppSelector(state => state.quiz.quizzes);
   const submissions = useAppSelector(getSubmissionHistory);
 
   const quiz = useMemo(

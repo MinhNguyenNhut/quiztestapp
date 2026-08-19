@@ -49,43 +49,23 @@ export const createQuestionSchemas = (t: TFunction) => {
       'essay',
     ] as const),
 
-    title: z
-      .string()
-      .min(1, t('validation.questionTitleRequired')),
+    title: z.string().min(1, t('validation.questionTitleRequired')),
 
-    content: richTextSchema
-      .optional()
-      .default({ html: '', text: '' }),
+    content: richTextSchema.optional().default({ html: '', text: '' }),
 
     description: z.string().optional(),
 
-    points: z.coerce
-      .number()
-      .min(1, t('validation.pointsMinimum'))
-      .default(1),
+    points: z.coerce.number().min(1, t('validation.pointsMinimum')).default(1),
 
-    difficulty: z
-      .enum(['easy', 'medium', 'hard'] as const)
-      .optional()
-      .default('medium'),
+    difficulty: z.enum(['easy', 'medium', 'hard'] as const).optional().default('medium'),
 
     topic: z.string().optional(),
 
-    tags: z
-      .array(z.string())
-      .optional()
-      .default([]),
+    tags: z.array(z.string()).optional().default([]),
 
-    estimatedTime: z.coerce.number().optional(),
+    options: z.array(questionOptionSchema).optional().default([]),
 
-    options: z
-      .array(questionOptionSchema)
-      .optional()
-      .default([]),
-
-    explanation: richTextSchema
-      .optional()
-      .default({ html: '', text: '' }),
+    explanation: richTextSchema.optional().default({ html: '', text: '' }),
 
     blanks: z.array(blankDefinitionSchema).optional(),
 
@@ -118,20 +98,10 @@ export const createQuestionSchemas = (t: TFunction) => {
     });
 
   const createQuizFormSchema = z.object({
-    title: z
-      .string()
-      .min(1, t('validation.quizTitleRequired'))
-      .max(200, t('validation.quizTitleTooLong')),
-
-    description: z
-      .string()
-      .max(2000, t('validation.quizDescriptionTooLong'))
-      .optional()
-      .default(''),
-
-    questions: z
-      .array(questionSchema)
-      .min(1, t('validation.atLeastOneQuestion')),
+    title: z.string().min(1, t('validation.quizTitleRequired')).max(200, t('validation.quizTitleTooLong')),
+    description: z.string().max(2000, t('validation.quizDescriptionTooLong')).optional().default(''),
+    estimatedTime: z.number().min(0).optional().default(0),
+    questions: z.array(questionSchema).min(1, t('validation.atLeastOneQuestion')),
   });
 
   return {

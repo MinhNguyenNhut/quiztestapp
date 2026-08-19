@@ -14,6 +14,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { Question } from '../../types/quiz';
 import { questionApi, type CreateQuestionPayload, type UpdateQuestionPayload } from '../../api/questionApi.ts';
+import { apiGet } from '../../api/httpClient.ts';
 
 const rejectMessage = (err: unknown, fallback: string): string =>
   err instanceof Error ? err.message : fallback;
@@ -33,47 +34,16 @@ export const createQuestion = createAsyncThunk<
 });
 
 /** GET /api/quizzes/:quizId/questions */
-export const fetchQuestionsForQuiz = createAsyncThunk<
-  {
-    quizId: string;
-    questions: Question[];
-  },
-  string,
-  {
-    rejectValue: string;
-  }
->(
+export const fetchQuestionsForQuiz = createAsyncThunk<{ quizId: string; questions: Question[]; }, string, { rejectValue: string; }>(
   'questions/fetchQuestionsForQuiz',
   async (quizId, { rejectWithValue }) => {
     try {
-      const response = await fetch(
+      const response = await apiGet<{ data: Question[] } | Question[]>(
         `/api/quizzes/${quizId}/questions`
       );
 
-      if (!response.ok) {
-        const text = await response.text();
-
-        throw new Error(
-          `Failed to load questions (${response.status}): ${text.slice(0, 200)}`
-        );
-      }
-
-      const contentType = response.headers.get('content-type');
-
-      if (!contentType?.includes('application/json')) {
-        const text = await response.text();
-
-        throw new Error(
-          `Expected JSON but received ${contentType ?? 'unknown content type'}: ${text.slice(0, 200)}`
-        );
-      }
-
-      const data = await response.json();
-
-      return {
-        quizId,
-        questions: data.data ?? data,
-      };
+      const questions = Array.isArray(response) ? response : response.data;
+      return { quizId, questions };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error
@@ -93,18 +63,9 @@ export const updateQuestion = createAsyncThunk<
   'questions/update',
   async ({ id, patch }, { rejectWithValue }) => {
     try {
-      console.log('=== UPDATE QUESTION ===');
-      console.log('Question ID:', id);
-      console.log('PATCH:', patch);
-
       const result = await questionApi.update(id, patch);
-
-      console.log('UPDATED QUESTION:', result);
-
       return result;
     } catch (err) {
-      console.error('UPDATE QUESTION ERROR:', err);
-
       return rejectWithValue(
         rejectMessage(
           err,

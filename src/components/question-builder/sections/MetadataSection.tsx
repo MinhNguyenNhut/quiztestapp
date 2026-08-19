@@ -1,4 +1,3 @@
-import { useState, useCallback, type KeyboardEvent } from 'react';
 import {
   Box,
   TextField,
@@ -9,7 +8,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Chip,
   Stack,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -28,30 +26,8 @@ interface Props {
 export default function MetadataSection({ watch, setValue, index }: Props) {
   const { t } = useTranslation();
   const question = watch(`questions.${index}`);
-  const [tagInput, setTagInput] = useState('');
-
-  const tags = question?.tags || [];
   const difficulty = question?.difficulty || 'medium';
 
-  const handleAddTag = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && tagInput.trim()) {
-        e.preventDefault();
-        const newTags = [...tags, tagInput.trim()];
-        setValue(`questions.${index}.tags`, newTags, { shouldValidate: false });
-        setTagInput('');
-      }
-    },
-    [tagInput, tags, setValue, index],
-  );
-
-  const handleDeleteTag = useCallback(
-    (tagIdx: number) => {
-      const updated = tags.filter((_: string, i: number) => i !== tagIdx);
-      setValue(`questions.${index}.tags`, updated, { shouldValidate: false });
-    },
-    [tags, setValue, index],
-  );
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
@@ -107,65 +83,6 @@ export default function MetadataSection({ watch, setValue, index }: Props) {
               })
             }
             slotProps={{ htmlInput: { min: 1 } }}
-          />
-
-          <TextField
-            size="small"
-            fullWidth
-            label={t('questionBuilder.topicLabel')}
-            placeholder={t('questionBuilder.topicPlaceholder')}
-            value={question?.topic || ''}
-            onChange={(e) =>
-              setValue(`questions.${index}.topic`, e.target.value, { shouldValidate: false })
-            }
-          />
-
-          <Box>
-            <TextField
-              size="small"
-              fullWidth
-              label={t('questionBuilder.tagsLabel')}
-              placeholder={t('questionBuilder.tagsPlaceholder')}
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleAddTag}
-            />
-            {tags.length > 0 && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                {tags.map((tag, i) => (
-                  <Chip
-                    key={i}
-                    label={tag}
-                    size="small"
-                    onDelete={() => handleDeleteTag(i)}
-                    sx={{ borderRadius: '4px' }}
-                  />
-                ))}
-              </Box>
-            )}
-          </Box>
-
-          <TextField
-            size="small"
-            fullWidth
-            label={t('questionBuilder.estimatedTimeLabel')}
-            type="number"
-            placeholder="Minutes"
-            value={question?.estimatedTime || ''}
-            onChange={(e) =>
-              setValue(`questions.${index}.estimatedTime`, Number(e.target.value), {
-                shouldValidate: false,
-              })
-            }
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                    {t('questionBuilder.minAdornment')}
-                  </Typography>
-                ),
-              },
-            }}
           />
         </Stack>
       </CardContent>

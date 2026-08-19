@@ -15,7 +15,6 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { getQuizzes } from '../features/quiz/quizSlice';
 import { deleteSubmission, getSubmissionHistory } from '../features/submissions/submissionSlice';
 import { SubmissionsSummaryHeader } from '../components/submissions/SubmissionsSummaryHeader';
 import { SubmissionsFilterBar } from '../components/submissions/SubmissionsFilterBar';
@@ -32,7 +31,7 @@ export default function SubmissionsDashboardPage() {
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
 
-  const quizzes = useAppSelector(getQuizzes);
+  const quizzes = useAppSelector(state => state.quiz.quizzes);
   const allSubmissions = useAppSelector(getSubmissionHistory);
 
   const quiz = useMemo(() => quizzes.find((q) => q.id === id), [quizzes, id]);

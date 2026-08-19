@@ -23,7 +23,6 @@ import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import type { UseFormRegister } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { getQuizzes } from '../features/quiz/quizSlice';
 import { startSession } from '../features/exam/examSlice';
 import { QuizOverviewCard, StartExamButton } from '../components/candidate-info';
 import DynamicFieldRenderer from '../components/candidate-info/DynamicFieldRenderer';
@@ -40,7 +39,7 @@ export default function CandidateInfoPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
-  const quizzes = useAppSelector(getQuizzes);
+  const quizzes = useAppSelector(state => state.quiz.quizzes);
   const quiz = quizzes.find((q) => q.id === id);
 
   if (!quiz) {
@@ -117,7 +116,7 @@ function CandidateInfoForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const storedQuizzes = useAppSelector(getQuizzes);
+  const storedQuizzes = useAppSelector(state => state.quiz.quizzes);
   const { t } = useTranslation();
 
   const methods = useForm<CandidateFormValues>({

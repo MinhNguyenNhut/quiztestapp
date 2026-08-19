@@ -68,7 +68,6 @@ export interface Question {
   difficulty: Difficulty;
   topic?: string;
   tags: string[];
-  estimatedTime?: number;
   order: number;
   options: QuestionOption[];
   explanation?: RichTextContent;
@@ -97,8 +96,7 @@ export interface Quiz {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
-  /** Owner-defined candidate-info field config. If absent, the app falls
-   * back to a shared default (first name, last name, email). */
+  difficulty?: "easy" | "medium" | "hard";
   candidateFieldsConfig?: CandidateFieldsConfig;
   questions: Question[];
 }
@@ -158,6 +156,7 @@ export const DIFFICULTY_COLORS: Record<Difficulty, string> = {
 export interface QuizFormValues {
   title: string;
   description: string;
+  estimatedTime?: number;
   questions: QuestionFormValues[];
 }
 
@@ -171,7 +170,6 @@ export interface QuestionFormValues {
   difficulty: Difficulty;
   topic?: string;
   tags: string[];
-  estimatedTime?: number;
   options: { id?: string; text: string; isCorrect: boolean; order?: number }[];
   explanation?: RichTextContent;
   blanks?: BlankDefinition[];

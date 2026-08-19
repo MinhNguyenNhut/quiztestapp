@@ -14,5 +14,6 @@
    "quizSaved": "Quiz saved successfully",
    "quizPublished": "Quiz published successfully",
    "tabQuestions": "Questions",
-   "tabCandidateFields": "Candidate Fields"
+   "tabCandidateFields": "Candidate Fields",
+   "estimatedTime": "Time"
 }

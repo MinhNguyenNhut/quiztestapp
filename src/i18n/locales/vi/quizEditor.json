@@ -14,5 +14,6 @@
    "quizSaved": "Đã lưu bài kiểm tra thành công",
    "quizPublished": "Đã xuất bản bài kiểm tra thành công",
    "tabQuestions": "Câu hỏi",
-   "tabCandidateFields": "Trường thông tin thí sinh"
+   "tabCandidateFields": "Trường thông tin thí sinh",
+   "estimatedTime": "Thời gian làm bài"
 }

@@ -42,29 +42,6 @@ export function aggregateDifficulty(
 }
 
 /**
- * Sum estimated time across questions.
- *
- * Falls back to one minute per question when
- * no question has an estimatedTime.
- */
-export function totalEstimatedMinutes(
-  questions: Question[] = [],
-): number {
-  const explicit = questions.reduce(
-    (sum, question) =>
-      sum +
-      (typeof question.estimatedTime === 'number'
-        ? question.estimatedTime
-        : 0),
-    0,
-  );
-
-  return explicit > 0
-    ? explicit
-    : questions.length;
-}
-
-/**
  * Format an ISO timestamp as a coarse relative-time string.
  */
 export function formatRelativeTime(

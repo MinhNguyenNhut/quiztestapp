@@ -36,13 +36,11 @@ import {
   addQuiz,
   deleteQuiz,
   fetchQuizzes,
-  getQuizzes,
 } from '../features/quiz/quizSlice.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import {
   aggregateDifficulty,
   formatRelativeTime,
-  totalEstimatedMinutes,
 } from '../utils/quizDisplay.ts';
 import {
   DIFFICULTY_COLORS,
@@ -61,7 +59,7 @@ type ToastState = {
 export default function QuizListPage() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const quizzes = useAppSelector(getQuizzes);
+  const quizzes = useAppSelector(state => state.quiz.quizzes);
   const isLoading = useAppSelector((s) => s.quiz.isLoading);
   const error = useAppSelector((s) => s.quiz.error);
 
@@ -276,7 +274,7 @@ function QuizCard({
   const { t } = useTranslation();
   const questions = quiz.questions ?? [];
   const difficulty = aggregateDifficulty(questions);
-  const minutes = totalEstimatedMinutes(questions);
+  const minutes = quiz.estimatedTime ?? 0;
   const questionCount = questions.length;
 
   return (

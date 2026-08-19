@@ -17,14 +17,6 @@ interface QuestionCardProps {
 export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCardProps) => {
   const { t } = useTranslation();
 
-  const timeLabel = (() => {
-    const seconds = question.estimatedTime;
-    if (!seconds) return null;
-    if (seconds < 60) return t('examUi.estimatedTimeShort', { seconds });
-    const m = Math.round(seconds / 60);
-    return t('examUi.estimatedTimeMinShort', { minutes: m });
-  })();
-
   return (
     <Card
       elevation={0}
@@ -60,13 +52,6 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
             />
             <DifficultyChip difficulty={question.difficulty} />
             <PointsBadge points={question.points} />
-            {timeLabel && (
-              <Chip
-                label={timeLabel}
-                size="small"
-                variant="outlined"
-              />
-            )}
             {question.topic && (
               <Chip label={question.topic} size="small" variant="outlined" color="info" />
             )}

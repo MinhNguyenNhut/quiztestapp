@@ -9,7 +9,6 @@ import type {
   QuestionType,
   Quiz,
   QuestionFormValues,
-  Question,
 } from '../../types/index.ts';
 import { createQuestionTemplate } from '../../utils/quizMappers.ts';
 import { createQuestionSchemas } from '../../utils/validation.ts';
@@ -19,7 +18,6 @@ import QuestionEditor from './QuestionEditor.tsx';
 import { useNavigate } from 'react-router-dom';
 import {
   createQuiz,
-  updateQuiz,
 } from '../../features/quiz/quizSlice.ts';
 import {
   createQuestion,
@@ -104,6 +102,7 @@ export default function QuestionBuilder(
       : {
         title: '',
         description: '',
+        estimatedTime: 0,
         questions: [],
       };
 
@@ -161,23 +160,22 @@ export default function QuestionBuilder(
    */
   const submitToStore = async (data: QuizFormValues) => {
     // 1. Create the quiz first
-    const quiz = await dispatch(
-      createQuiz({
-        title: data.title,
-        description: data.description,
-      }),
-    ).unwrap();
-
-    console.log('Quiz created:', quiz);
+    const quiz = await dispatch(createQuiz({
+      title: data.title,
+      description: data.description,
+      estimatedTime: data.estimatedTime ?? 0, // Pass the new field here
+    })).unwrap();
 
     // 2. Create all questions using the newly-created quiz ID
     for (const [index, question] of data.questions.entries()) {
+      console.log(question)
       const payload: CreateQuestionPayload = {
         type: question.type,
         title: question.title,
         content: question.content,
         description: question.description,
         difficulty: question.difficulty,
+        explanation: question.explanation,
         points: question.points,
         order: index,
 
@@ -193,18 +191,8 @@ export default function QuestionBuilder(
         childQuestions: question.childQuestions,
       };
 
-      console.log('Question difficulty:', question.difficulty);
-      console.log('Question payload:', payload);
-
-      await dispatch(
-        createQuestion({
-          quizId: quiz.id,
-          payload,
-        }),
-      ).unwrap();
+      await dispatch(createQuestion({ quizId: quiz.id, payload })).unwrap();
     }
-
-    console.log('Quiz and questions saved successfully');
 
     navigate('/');
   };
@@ -220,7 +208,7 @@ export default function QuestionBuilder(
         if (props.mode === 'create') {
           await submitToStore(data);
         } else {
-          // 1. Update quiz title/description
+          // 1. Update quiz
           await onSave(data);
 
           // 2. Update existing questions
@@ -230,10 +218,7 @@ export default function QuestionBuilder(
           );
         }
 
-        showAlert(
-          t('quizEditor.quizSaved'),
-          'success',
-        );
+        showAlert(t('quizEditor.quizSaved'), 'success');
       } catch (err) {
         console.error('Save failed:', err);
 
@@ -474,6 +459,7 @@ export default function QuestionBuilder(
         content: question.content,
         description: question.description,
         difficulty: question.difficulty,
+        explanation: question.explanation,
         points: question.points,
         order: index,
 
@@ -491,28 +477,12 @@ export default function QuestionBuilder(
 
       // Existing question → UPDATE
       if (question.id && existingQuestionIds.has(question.id)) {
-        console.log('Updating existing question:', question.id);
-        console.log('Payload:', payload);
-
-        await dispatch(
-          updateQuestion({
-            id: question.id,
-            patch: payload,
-          }),
-        ).unwrap();
+        await dispatch(updateQuestion({ id: question.id, patch: payload })).unwrap();
 
         continue;
       }
 
-      // New question → CREATE
-      console.log('Creating new question:', question.id);
-
-      await dispatch(
-        createQuestion({
-          quizId,
-          payload,
-        }),
-      ).unwrap();
+      await dispatch(createQuestion({ quizId, payload })).unwrap();
     }
 
     // -----------------------------------------
@@ -520,16 +490,8 @@ export default function QuestionBuilder(
     // -----------------------------------------
     for (const originalQuestion of originalQuestions) {
       const questionId = originalQuestion.id;
-
-      if (
-        questionId &&
-        !currentQuestionIds.has(questionId)
-      ) {
-        console.log('Deleting question:', questionId);
-
-        await dispatch(
-          deleteQuestion(questionId),
-        ).unwrap();
+      if (questionId && !currentQuestionIds.has(questionId)) {
+        await dispatch(deleteQuestion(questionId),).unwrap();
       }
     }
   };
@@ -575,6 +537,17 @@ export default function QuestionBuilder(
               setValue(
                 'title',
                 value,
+                {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                },
+              )
+            }
+            estimatedTime={watch('estimatedTime') ?? 0}
+            onEstimatedTimeChange={(value) =>
+              setValue(
+                'estimatedTime',
+                value ? Number(value) : 0,
                 {
                   shouldValidate: true,
                   shouldDirty: true,

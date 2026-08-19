@@ -16,7 +16,7 @@ export function quizToFormValues(
   return {
     title: quiz.title ?? '',
     description: quiz.description ?? '',
-
+    estimatedTime: quiz.estimatedTime ?? 0,
     questions: (quiz.questions ?? []).map(
       questionToFormValues,
     ),
@@ -68,7 +68,6 @@ function questionToFormValues(
       questionToFormValues,
     ),
 
-    estimatedTime: question.estimatedTime,
     explanation: question.explanation,
     passage: question.passage,
     expectedAnswer: question.expectedAnswer,
@@ -95,15 +94,11 @@ export function formValuesToQuiz(
 ): Quiz {
   return {
     id: meta.id,
-
     title: values.title,
-
     description: values.description,
-
+    estimatedTime: values.estimatedTime,
     createdAt: meta.createdAt,
-
     updatedAt: meta.updatedAt,
-
     questions: (values.questions ?? []).map(
       (question, index) =>
         formValuesToQuestion(
@@ -134,7 +129,6 @@ function formValuesToQuestion(
     difficulty: question.difficulty ?? 'medium',
     topic: question.topic ?? '',
     tags: question.tags ?? [],
-    estimatedTime: question.estimatedTime,
     order: index,
     options: (
       question.options ?? []

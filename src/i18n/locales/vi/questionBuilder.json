@@ -37,11 +37,6 @@
    "explanationDescription": "Giải thích vì sao đáp án đúng là chính xác, và tùy chọn vì sao các đáp án khác sai",
    "explanationEditorPlaceholder": "Nhập giải thích...",
    "questionSettings": "Cài đặt câu hỏi",
-   "topicLabel": "Chủ đề",
-   "topicPlaceholder": "vd: Đại số, Ngữ pháp, Lịch sử",
-   "tagsLabel": "Thẻ",
-   "tagsPlaceholder": "Nhập và nhấn Enter để thêm",
-   "estimatedTimeLabel": "Thời gian dự kiến",
    "minAdornment": "phút",
    "questionTitleLabel": "Tiêu đề câu hỏi",
    "questionTitlePlaceholder": "Nhập tiêu đề ngắn gọn cho câu hỏi"

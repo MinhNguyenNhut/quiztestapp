@@ -2,12 +2,11 @@ import { Alert, Box, Tabs, Tab, CircularProgress } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
 
-import type { QuizFormValues } from '../types';
+import type { Question, QuizFormValues } from '../types';
 import type { RootState } from '../features/store.ts';
 
 import { quizToFormValues } from '../utils/quizMappers.ts';
@@ -18,7 +17,7 @@ import {
   updateQuiz,
 } from '../features/quiz/quizSlice.ts';
 
-import { useAppDispatch } from '../features/store.ts';
+import { useAppDispatch, useAppSelector } from '../features/store.ts';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields.ts';
@@ -57,6 +56,8 @@ function TabPanel({
   );
 }
 
+const EMPTY_QUESTIONS: Question[] = [];
+
 export default function QuizEditorPage() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
@@ -64,15 +65,15 @@ export default function QuizEditorPage() {
 
   const [tabValue, setTabValue] = useState(0);
 
-  const quiz = useSelector((state: RootState) =>
+  const quiz = useAppSelector((state: RootState) =>
     state.quiz.quizzes.find((q) => q.id === id)
   );
 
-  const questions = useSelector(
+  const questions = useAppSelector(
     (state: RootState) =>
       id
-        ? state.questions.questionsByQuizId[id] ?? []
-        : []
+        ? state.questions.questionsByQuizId[id] ?? EMPTY_QUESTIONS
+        : EMPTY_QUESTIONS
   );
 
   const quizWithQuestions = quiz
@@ -83,19 +84,19 @@ export default function QuizEditorPage() {
     : null;
 
 
-  const questionsLoading = useSelector(
+  const questionsLoading = useAppSelector(
     (state: RootState) => state.questions.isLoading
   );
 
-  const questionsError = useSelector(
+  const questionsError = useAppSelector(
     (state: RootState) => state.questions.error
   );
 
-  const isLoading = useSelector(
+  const isLoading = useAppSelector(
     (state: RootState) => state.quiz.isLoading
   );
 
-  const error = useSelector(
+  const error = useAppSelector(
     (state: RootState) => state.quiz.error
   );
 
@@ -119,6 +120,7 @@ export default function QuizEditorPage() {
           patch: {
             title: data.title,
             description: data.description,
+            estimatedTime: data.estimatedTime ?? 0,
           },
         })
       );
@@ -133,6 +135,7 @@ export default function QuizEditorPage() {
         createQuiz({
           title: data.title,
           description: data.description,
+          estimatedTime: data.estimatedTime ?? 0
         })
       );
 

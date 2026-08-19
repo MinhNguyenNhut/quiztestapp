@@ -1,7 +1,3 @@
-/**
- * Route component for /quiz/:id/exam.
- * ... (unchanged doc comment)
- */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -15,7 +11,6 @@ import {
   useTheme,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { getQuizzes } from '../features/quiz/quizSlice';
 import {
   clearAnswer,
   expireTimer,
@@ -53,7 +48,7 @@ export default function ExamPage() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
-  const quizzes = useAppSelector(getQuizzes);
+  const quizzes = useAppSelector(state => state.quiz.quizzes);
   const session = useAppSelector(getExamSession);
   const submissionCurrent = useAppSelector((s) => s.submission.current);
 

@@ -1,23 +1,7 @@
-/**
- * Question-API client.
- *
- * Matches QuestionController under `/api`. Paths are mixed: question
- * CRUD lives under `/api/questions/:id`, but question collection
- * endpoints (list/create/reorder) sit under `/api/quizzes/:quizId/...`.
- * Splitting them felt artificial — most callers need both — so they
- * share this module.
- *
- * NOTE on route conflict: the backend had two PATCH
- * `/.../questions/reorder` definitions (one on QuizController, one on
- * QuestionController). Only QuestionController's version — `body: {
- * questionIds }` — is wired here. QuizController.reorderQuestions was
- * removed to avoid the duplicate.
- */
 import type {
   Question,
   QuestionType,
   Difficulty,
-  QuestionOption,
   QuestionFormValues,
 } from '../types/quiz';
 import { apiDelete, apiGet, apiPatch, apiPost } from './httpClient';
@@ -37,7 +21,6 @@ export type CreateQuestionPayload = {
   difficulty: Difficulty;
   topic?: string;
   tags?: string[];
-  estimatedTime?: number;
   order: number;
   options?: CreateQuestionOptionPayload[];
   explanation?: Question['explanation'];

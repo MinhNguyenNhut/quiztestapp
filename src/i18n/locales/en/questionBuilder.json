@@ -37,11 +37,6 @@
    "explanationDescription": "Explain why the correct answer is right and optionally why incorrect answers are wrong",
    "explanationEditorPlaceholder": "Enter explanation...",
    "questionSettings": "Question Settings",
-   "topicLabel": "Topic",
-   "topicPlaceholder": "e.g., Algebra, Grammar, History",
-   "tagsLabel": "Tags",
-   "tagsPlaceholder": "Type and press Enter to add",
-   "estimatedTimeLabel": "Estimated Time",
    "minAdornment": "min",
    "questionTitleLabel": "Question Title",
    "questionTitlePlaceholder": "Enter a short question title"
