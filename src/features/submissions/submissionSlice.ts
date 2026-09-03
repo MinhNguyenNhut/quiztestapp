@@ -35,14 +35,13 @@ const upsert = (history: Submission[], submission: Submission): Submission[] => 
 /** POST /api/submissions */
 export const createSubmission = createAsyncThunk<
   Submission,
-  { quizId: string; candidate: CandidateFormValues; answers?: Record<string, AnyAnswer> },
+  { quizId: string; candidate: CandidateFormValues },
   { rejectValue: string }
 >('submissions/create', async (payload, { rejectWithValue }) => {
   try {
     return await submissionApi.create({
       quizId: payload.quizId,
       candidate: payload.candidate,
-      answers: payload.answers ?? {},
     });
   } catch (err) {
     return rejectWithValue(rejectMessage(err, 'Failed to start submission'));
@@ -103,13 +102,13 @@ export const toggleBookmark = createAsyncThunk<
 /** POST /api/submissions/:id/submit */
 export const submitSubmission = createAsyncThunk<
   Submission,
-  { submissionId: string; answers?: Record<string, AnyAnswer>; force?: boolean },
+  { submissionId: string; timeSpentSeconds?: number },
   { rejectValue: string }
 >(
   'submissions/submit',
-  async ({ submissionId, answers, force }, { rejectWithValue }) => {
+  async ({ submissionId, timeSpentSeconds }, { rejectWithValue }) => {
     try {
-      return await submissionApi.submit(submissionId, { answers, force });
+      return await submissionApi.submit(submissionId, { timeSpentSeconds });
     } catch (err) {
       return rejectWithValue(rejectMessage(err, 'Failed to submit'));
     }
@@ -128,6 +127,19 @@ export const fetchSubmissionsByQuiz = createAsyncThunk<Submission[], string, { r
   },
 );
 
+/** DELETE /api/submissions/:id */
+export const deleteSubmission = createAsyncThunk<string, string, { rejectValue: string }>(
+  'submissions/delete',
+  async (id, { rejectWithValue }) => {
+    try {
+      await submissionApi.remove(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(rejectMessage(err, 'Failed to delete submission'));
+    }
+  },
+);
+
 const submissionSlice = createSlice({
   name: 'submission',
   initialState,
@@ -139,11 +151,6 @@ const submissionSlice = createSlice({
     },
     clearCurrent(state) {
       state.current = null;
-    },
-    deleteSubmission(state, action: PayloadAction<string>) {
-      const submissionId = action.payload;
-      state.history = state.history.filter((s) => s.id !== submissionId);
-      if (state.current?.id === submissionId) state.current = null;
     },
     clearSaveError(state) {
       state.saveError = null;
@@ -216,11 +223,21 @@ const submissionSlice = createSlice({
         // Drop the existing entries for this quiz, keep everything else.
         const others = state.history.filter((s) => s.quizId !== quizId);
         state.history = [...others, ...action.payload];
-      });
+      })
+
+      .addCase(deleteSubmission.fulfilled, (state, action) => {
+        const submissionId = action.payload;
+        state.history = state.history.filter((s) => s.id !== submissionId);
+        if (state.current?.id === submissionId) state.current = null;
+      })
+
+      .addCase(deleteSubmission.rejected, (state, action) => {
+        state.saveError = action.payload ?? action.error.message ?? 'Failed to delete submission';
+      })
   },
 });
 
-export const { recordSubmission, clearCurrent, deleteSubmission, clearSaveError } = submissionSlice.actions;
+export const { recordSubmission, clearCurrent, clearSaveError } = submissionSlice.actions;
 
 export const getCurrentSubmission = (state: {
   submission: SubmissionState;

@@ -275,7 +275,7 @@ function QuizCard({
   const questions = quiz.questions ?? [];
   const difficulty = aggregateDifficulty(questions);
   const minutes = quiz.estimatedTime ?? 0;
-  const questionCount = questions.length;
+  const questionCount = quiz.questionCount ?? questions.length ?? 0;
 
   return (
     <Card

@@ -1,21 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-   Alert,
-   Box,
-   Button,
-   Dialog,
-   DialogActions,
-   DialogContent,
-   DialogContentText,
-   DialogTitle,
-   Toolbar,
-   Typography,
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Toolbar,
+  Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { deleteSubmission, getSubmissionHistory } from '../features/submissions/submissionSlice';
+import { deleteSubmission, fetchSubmissionsByQuiz, getSubmissionHistory } from '../features/submissions/submissionSlice';
 import { SubmissionsSummaryHeader } from '../components/submissions/SubmissionsSummaryHeader';
 import { SubmissionsFilterBar } from '../components/submissions/SubmissionsFilterBar';
 import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
@@ -35,6 +35,12 @@ export default function SubmissionsDashboardPage() {
   const allSubmissions = useAppSelector(getSubmissionHistory);
 
   const quiz = useMemo(() => quizzes.find((q) => q.id === id), [quizzes, id]);
+
+  useEffect(() => {
+    if (!id) return;
+    dispatch(fetchSubmissionsByQuiz(id));
+  }, [id, dispatch]);
+
   const submissions = useMemo(
     () => (quiz ? allSubmissions.filter((s) => s.quizId === quiz.id) : []),
     [allSubmissions, quiz]

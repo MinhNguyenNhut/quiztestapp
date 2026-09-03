@@ -71,11 +71,14 @@ startAppListening({
     const session = state.exam;
     if (!submission) return;
 
+    const timeSpentSeconds = session.startedAt
+      ? Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+      : undefined;
+
     const result = await api.dispatch(
       submitSubmission({
         submissionId: submission.id,
-        answers: session.answers,
-        force: false,
+        timeSpentSeconds,
       }),
     );
 

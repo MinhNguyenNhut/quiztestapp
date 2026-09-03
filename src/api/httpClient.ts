@@ -140,6 +140,7 @@ export async function apiRequest<T = unknown>(
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     signal,
+    cache: 'no-store',
   });
 
   if (res.status === 401) {

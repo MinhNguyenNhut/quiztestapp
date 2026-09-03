@@ -1,7 +1,3 @@
-/**
- * Route component for /quiz/:id/result/:submissionId.
- * ... (unchanged doc comment)
- */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -24,6 +20,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import { useAppDispatch, useAppSelector } from '../features/store';
 import {
   clearCurrent,
+  fetchSubmission,
   getSubmissionHistory,
 } from '../features/submissions/submissionSlice';
 import { resetSession } from '../features/exam/examSlice';
@@ -48,6 +45,7 @@ import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCand
 export default function ResultPage() {
   const { id, submissionId } = useParams<{ id: string; submissionId: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
   const quizzes = useAppSelector(state => state.quiz.quizzes);
@@ -62,11 +60,31 @@ export default function ResultPage() {
     [submissions, submissionId]
   );
 
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (submission || !submissionId) return;
+
+    let cancelled = false;
+    setNotFound(false);
+
+    dispatch(fetchSubmission(submissionId))
+      .unwrap()
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [submissionId, submission, dispatch]);
+
   useEffect(() => {
     if (!quiz) return;
     if (submission) return;
+    if (!notFound) return; // don't redirect while still trying to fetch
     navigate(`/quiz/${quiz.id}/candidate`, { replace: true });
-  }, [quiz, submission, navigate]);
+  }, [quiz, submission, notFound, navigate]);
 
   if (!quiz) {
     return (
@@ -114,9 +132,11 @@ function ResultView({ quiz, submission }: ResultViewProps) {
   const { t, i18n } = useTranslation();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
 
+  const safeAnswers = useMemo(() => submission.answers ?? {}, [submission.answers]);
+
   const summary = useMemo(
-    () => computeScore(quiz, submission.answers),
-    [quiz, submission.answers]
+    () => computeScore(quiz, safeAnswers),
+    [quiz, safeAnswers]
   );
   const passed = (submission.percentage ?? 0) >= (quiz.passingScore ?? 0);
 
@@ -124,10 +144,10 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     return summaryStats(
       quiz,
       summary.perQuestion,
-      submission.answers,
+      safeAnswers,
       submission.timeSpentSeconds ?? 0
     );
-  }, [quiz, summary, submission.answers, submission.timeSpentSeconds]);
+  }, [quiz, summary, safeAnswers, submission.timeSpentSeconds]);
 
   const topics = useMemo(
     () => topicBreakdown(quiz, summary.perQuestion),
@@ -139,14 +159,14 @@ function ResultView({ quiz, submission }: ResultViewProps) {
   );
 
   const participation = useMemo(() => {
-    const total = quiz.questions.length;
+    const total = quiz.questionCount ?? quiz.questions.length ?? 0;
     if (total === 0) return 0;
     let n = 0;
     for (const q of quiz.questions) {
-      if (isAnswered(submission.answers[q.id] ?? null)) n += 1;
+      if (isAnswered(safeAnswers[q.id] ?? null)) n += 1;
     }
     return n / total;
-  }, [quiz, submission.answers]);
+  }, [quiz, safeAnswers]);
 
   const rankPercentile = estimateRankPercentile(submission.percentage ?? 0);
 
@@ -262,7 +282,7 @@ function ResultView({ quiz, submission }: ResultViewProps) {
             <CardContent>
               <QuestionReviewAccordion
                 results={summary.perQuestion}
-                candidateAnswers={submission.answers}
+                candidateAnswers={safeAnswers}
               />
             </CardContent>
           </Card>

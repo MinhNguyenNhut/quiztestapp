@@ -10,14 +10,11 @@
 import type { AnyAnswer } from '../types/answer';
 import type { CandidateFormValues } from '../types/candidate';
 import type { Submission } from '../types/submission';
-import { apiGet, apiPatch, apiPost } from './httpClient';
+import { apiDelete, apiGet, apiPatch, apiPost } from './httpClient';
 
 export interface CreateSubmissionPayload {
   quizId: string;
   candidate: CandidateFormValues;
-  answers: Record<string, AnyAnswer>;
-  flags?: string[];
-  bookmarks?: string[];
 }
 
 export interface SaveAnswerPayload {
@@ -47,8 +44,11 @@ export const submissionApi = {
     apiPatch<Submission>(`/api/submissions/${id}/bookmark`, { questionId }, { withAuth: false }),
 
   /** POST /api/submissions/:id/submit — anonymous. */
-  submit: (id: string, payload: { answers?: Record<string, AnyAnswer>; force?: boolean } = {}) =>
+  submit: (id: string, payload: { timeSpentSeconds?: number } = {}) =>
     apiPost<Submission>(`/api/submissions/${id}/submit`, payload, { withAuth: false }),
+
+  remove: (id: string) =>
+    apiDelete<{ success: boolean }>(`/api/submissions/${id}`),
 
   /** GET /api/submissions/quiz/:quizId — admin/submissions dashboard, authenticated. */
   listByQuiz: (quizId: string) =>

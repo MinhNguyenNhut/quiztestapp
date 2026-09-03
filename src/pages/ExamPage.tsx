@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -57,22 +57,22 @@ export default function ExamPage() {
     [quizzes, id]
   );
 
-  // Once the local exam session is bound to this quiz, make sure a backend
-  // submission exists so `examMiddleware` can persist `saveAnswer` calls.
-  // We only post once per session — the slice keeps the id.
+  const submissionRequestedRef = useRef(false);
+
   useEffect(() => {
     if (!quiz) return;
     if (session.quizId !== quiz.id) return;
     if (submissionCurrent && submissionCurrent.quizId === quiz.id) return;
+    if (submissionRequestedRef.current) return;
 
+    submissionRequestedRef.current = true;
     void dispatch(
       createSubmission({
         quizId: session.quizId,
         candidate: (session.candidate ?? {}) as Submission['candidate'],
-        answers: session.answers,
       }),
     );
-  }, [dispatch, quiz, session.quizId, session.candidate, session.answers, submissionCurrent]);
+  }, [dispatch, quiz, session.quizId, session.candidate, submissionCurrent]);
 
   useEffect(() => {
     if (!quiz) return;

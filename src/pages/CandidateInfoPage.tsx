@@ -6,12 +6,13 @@
  * the candidate info form. On submit, starts the exam session in
  * Redux and navigates to /quiz/:id/exam.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   Fade,
   Grid,
@@ -24,6 +25,7 @@ import type { UseFormRegister } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
 import { startSession } from '../features/exam/examSlice';
+import { fetchQuizById } from '../features/quiz/quizSlice';
 import { QuizOverviewCard, StartExamButton } from '../components/candidate-info';
 import DynamicFieldRenderer from '../components/candidate-info/DynamicFieldRenderer';
 import type {
@@ -42,17 +44,44 @@ export default function CandidateInfoPage() {
   const quizzes = useAppSelector(state => state.quiz.quizzes);
   const quiz = quizzes.find((q) => q.id === id);
 
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (quiz || !id) return;
+
+    let cancelled = false;
+    setNotFound(false);
+
+    dispatch(fetchQuizById(id))
+      .unwrap()
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, quiz, dispatch]);
+
   if (!quiz) {
+    if (!id || notFound) {
+      return (
+        <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
+          <Alert
+            severity="error"
+            action={
+              <Button onClick={() => navigate('/')}>{t('common.home')}</Button>
+            }
+          >
+            {t('errors.quizNotFound')}
+          </Alert>
+        </Box>
+      );
+    }
+
     return (
-      <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
-        <Alert
-          severity="error"
-          action={
-            <Button onClick={() => navigate('/')}>{t('common.home')}</Button>
-          }
-        >
-          {t('errors.quizNotFound')}
-        </Alert>
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
       </Box>
     );
   }
@@ -63,7 +92,7 @@ export default function CandidateInfoPage() {
     description: quiz.description,
     coverImage: quiz.coverImage,
     estimatedTime: quiz.estimatedTime ?? 30,
-    questionCount: quiz.questions.length,
+    questionCount: quiz.questionCount ?? quiz.questions?.length ?? 0,
     passingScore: quiz.passingScore ?? 0,
     difficulty: quiz.difficulty ?? 'medium',
     createdBy: quiz.createdBy ?? 'Unknown',
@@ -73,15 +102,6 @@ export default function CandidateInfoPage() {
   const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
 
   const handleStartQuiz = (candidate: CandidateFormValues) => {
-    dispatch(
-      startSession({
-        quizId: quiz.id,
-        questions: quiz.questions,
-        estimatedMinutes: quiz.estimatedTime,
-        candidate,
-      })
-    );
-
     navigate(`/quiz/${quiz.id}/exam`);
   };
 
@@ -139,8 +159,17 @@ function CandidateInfoForm({
     try {
       // Locate the full Quiz document (questions, points, etc.) for the
       // exam page. The candidate-info "QuizOverview" is metadata-only.
-      const fullQuiz = storedQuizzes.find((q) => q.id === quiz.id);
-      if (!fullQuiz) {
+      let fullQuiz = storedQuizzes.find((q) => q.id === quiz.id);
+
+      if (!fullQuiz || !fullQuiz.questions) {
+        try {
+          fullQuiz = await dispatch(fetchQuizById(quiz.id)).unwrap();
+        } catch {
+          fullQuiz = undefined;
+        }
+      }
+
+      if (!fullQuiz || !fullQuiz.questions) {
         setSubmitError(t('errors.quizConfigurationNotFound'));
         return;
       }

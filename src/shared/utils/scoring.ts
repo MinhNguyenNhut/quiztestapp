@@ -26,9 +26,10 @@ export interface ScoreSummary {
   ungraded: number;
 }
 
-export const computeScore = (quiz: Quiz, answers: Record<string, AnyAnswer>): ScoreSummary => {
+export const computeScore = (quiz: Quiz, answers: Record<string, AnyAnswer> | null | undefined): ScoreSummary => {
+  const safeAnswers = answers ?? {};
   const perQuestion: PerQuestionResult[] = quiz.questions.map((question) => {
-    const answer = answers[question.id] ?? null;
+    const answer = safeAnswers[question.id] ?? null;
     const result = checkAnswer(question, answer);
     const pointsPossible = question.points;
     return {
@@ -39,18 +40,16 @@ export const computeScore = (quiz: Quiz, answers: Record<string, AnyAnswer>): Sc
       pointsEarned: result.ungraded ? 0 : result.pointsEarned * pointsPossible,
     };
   });
-
   const totalPoints = perQuestion.reduce((sum, p) => sum + p.pointsPossible, 0);
   const earnedPoints = perQuestion.reduce((sum, p) => sum + p.pointsEarned, 0);
   const correct = perQuestion.filter((p) => p.result.isCorrect).length;
   const wrong = perQuestion.filter(
-    (p) => !p.result.isCorrect && !p.result.ungraded && answers[p.questionId] !== null && answers[p.questionId] !== undefined,
+    (p) => !p.result.isCorrect && !p.result.ungraded && safeAnswers[p.questionId] !== null && safeAnswers[p.questionId] !== undefined,
   ).length;
   const skipped = perQuestion.filter(
-    (p) => answers[p.questionId] === null || answers[p.questionId] === undefined,
+    (p) => safeAnswers[p.questionId] === null || safeAnswers[p.questionId] === undefined,
   ).length;
   const ungraded = perQuestion.filter((p) => p.result.ungraded).length;
-
   return {
     score: earnedPoints,
     percentage: totalPoints === 0 ? 0 : Math.round((earnedPoints / totalPoints) * 100),

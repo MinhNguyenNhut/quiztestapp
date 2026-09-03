@@ -35,7 +35,7 @@ const polygonPath = (axes: AxisSpec[]): string =>
       return `${i === 0 ? 'M' : 'L'}${x},${y}`;
     })
     .join(' ')
-    .concat('common. Z');
+    .concat(' Z');
 
 export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participation }: PerformanceRadarProps) => {
   const { t } = useTranslation();

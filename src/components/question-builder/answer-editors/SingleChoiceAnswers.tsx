@@ -36,6 +36,33 @@ interface Props {
 
 const LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+interface OptionCorrectRadioProps {
+  control: Control<QuizFormValues>;
+  index: number;
+  optIdx: number;
+  onChange: (optionIndex: number) => void;
+}
+
+const OptionCorrectRadio = memo(function OptionCorrectRadio({
+  control,
+  index,
+  optIdx,
+  onChange,
+}: OptionCorrectRadioProps) {
+  const { field } = useController({
+    control,
+    name: `questions.${index}.options.${optIdx}.isCorrect`,
+  });
+
+  return (
+    <Radio
+      checked={!!field.value}
+      onChange={() => onChange(optIdx)}
+      size="small"
+    />
+  );
+});
+
 interface OptionTextFieldProps {
   control: Control<QuizFormValues>;
   index: number;
@@ -165,12 +192,11 @@ export default function SingleChoiceAnswers({
 
             <FormControlLabel
               control={
-                <Radio
-                  checked={false}
-                  onChange={() =>
-                    handleCorrectChange(optIdx)
-                  }
-                  size="small"
+                <OptionCorrectRadio
+                  control={control}
+                  index={index}
+                  optIdx={optIdx}
+                  onChange={handleCorrectChange}
                 />
               }
               label=""

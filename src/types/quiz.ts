@@ -90,6 +90,7 @@ export interface Quiz {
   id: string;
   title: string;
   description: string;
+  questionCount?: number;
   coverImage?: string;
   estimatedTime?: number;
   passingScore?: number;
