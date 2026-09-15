@@ -5,7 +5,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { CandidateField, CandidateFieldSection } from '../../types/candidate';
-import { FIELD_TYPE_LABELS } from '../../types/candidate';
+import { FIELD_TYPE_LABEL_KEYS } from '../../types/candidate';
 
 interface CandidateFieldListItemProps {
   field: CandidateField;
@@ -98,7 +98,7 @@ export default function CandidateFieldListItem({
         </Typography>
         <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
           <Chip
-            label={FIELD_TYPE_LABELS[field.type]}
+            label={t(FIELD_TYPE_LABEL_KEYS[field.type])}
             size="small"
             sx={{
               height: 22,

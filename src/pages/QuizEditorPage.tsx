@@ -1,5 +1,5 @@
 import { Alert, Box, Tabs, Tab, CircularProgress } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -49,7 +49,8 @@ function TabPanel({
         minHeight: 0,
       }}
     >
-      <Box sx={{ flex: 1, minHeight: 0 }}>
+      {/* Keep children mounted to prevent form re-initialization lag */}
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         {children}
       </Box>
     </Box>
@@ -75,14 +76,6 @@ export default function QuizEditorPage() {
         ? state.questions.questionsByQuizId[id] ?? EMPTY_QUESTIONS
         : EMPTY_QUESTIONS
   );
-
-  const quizWithQuestions = quiz
-    ? {
-      ...quiz,
-      questions,
-    }
-    : null;
-
 
   const questionsLoading = useAppSelector(
     (state: RootState) => state.questions.isLoading
@@ -112,7 +105,15 @@ export default function QuizEditorPage() {
     }
   }, [dispatch, id]);
 
-  const handleSave = async (data: QuizFormValues) => {
+  const quizWithQuestions = useMemo(() => {
+    return quiz ? { ...quiz, questions } : null;
+  }, [quiz, questions]);
+
+  const defaultFormValues = useMemo(() => {
+    return quizWithQuestions ? quizToFormValues(quizWithQuestions) : null;
+  }, [quizWithQuestions]);
+
+  const handleSave = useCallback(async (data: QuizFormValues) => {
     if (id && quiz) {
       const result = await dispatch(
         updateQuiz({
@@ -126,9 +127,7 @@ export default function QuizEditorPage() {
       );
 
       if (updateQuiz.rejected.match(result)) {
-        throw new Error(
-          result.payload ?? 'Failed to update quiz'
-        );
+        throw new Error(result.payload ?? 'Failed to update quiz');
       }
     } else {
       const result = await dispatch(
@@ -140,23 +139,19 @@ export default function QuizEditorPage() {
       );
 
       if (createQuiz.rejected.match(result)) {
-        throw new Error(
-          result.payload ?? 'Failed to create quiz'
-        );
+        throw new Error(result.payload ?? 'Failed to create quiz');
       }
     }
-  };
+  }, [dispatch, id, quiz]);
+
+  const defaultCandidateConfig = useMemo(() => getDefaultCandidateFieldsConfig(i18n.language), [i18n.language]);
+  const candidateConfig = useMemo(() => {
+    return quiz?.candidateFieldsConfig ?? defaultCandidateConfig;
+  }, [quiz?.candidateFieldsConfig, defaultCandidateConfig]);
 
   if (id && !quiz && isLoading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 64px)',
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
         <CircularProgress />
       </Box>
     );
@@ -165,23 +160,14 @@ export default function QuizEditorPage() {
   if (id && !quiz && error) {
     return (
       <Box sx={{ p: 4 }}>
-        <Alert severity="error">
-          {error}
-        </Alert>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
   }
 
   if (id && !quiz) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 64px)',
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
         <CircularProgress />
       </Box>
     );
@@ -191,14 +177,7 @@ export default function QuizEditorPage() {
 
   if (id && quiz && questionsLoading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 64px)',
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
         <CircularProgress />
       </Box>
     );
@@ -207,55 +186,29 @@ export default function QuizEditorPage() {
   if (id && quiz && questionsError) {
     return (
       <Box sx={{ p: 4 }}>
-        <Alert severity="error">
-          {questionsError}
-        </Alert>
+        <Alert severity="error">{questionsError}</Alert>
       </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'calc(100vh - 64px)',
-      }}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
       <Tabs
         value={tabValue}
         onChange={(_, newValue) => setTabValue(newValue)}
-        sx={{
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tab
-          label={t('quizEditor.tabQuestions')}
-          id="tab-0"
-          aria-controls="tabpanel-0"
-        />
-
-        <Tab
-          label={t('quizEditor.tabCandidateFields')}
-          id="tab-1"
-          aria-controls="tabpanel-1"
-        />
+        <Tab label={t('quizEditor.tabQuestions')} id="tab-0" aria-controls="tabpanel-0" />
+        <Tab label={t('quizEditor.tabCandidateFields')} id="tab-1" aria-controls="tabpanel-1" />
       </Tabs>
 
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          minHeight: 0,
-        }}
-      >
+      <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
         <TabPanel value={tabValue} index={0}>
-          {id && quizWithQuestions ? (
+          {id && quizWithQuestions && defaultFormValues ? (
             <QuestionBuilder
               mode="edit"
               originalQuiz={quizWithQuestions}
-              defaultValues={quizToFormValues(quizWithQuestions)}
+              defaultValues={defaultFormValues}
               onSave={handleSave}
             />
           ) : (
@@ -270,17 +223,12 @@ export default function QuizEditorPage() {
           {quiz ? (
             <CandidateFieldsBuilder
               quizId={quiz.id}
-              defaultConfig={
-                quiz.candidateFieldsConfig ??
-                getDefaultCandidateFieldsConfig(i18n.language)
-              }
+              defaultConfig={candidateConfig}
             />
           ) : (
             <CandidateFieldsBuilder
               quizId={quizId}
-              defaultConfig={getDefaultCandidateFieldsConfig(
-                i18n.language
-              )}
+              defaultConfig={defaultCandidateConfig}
             />
           )}
         </TabPanel>

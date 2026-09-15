@@ -1,28 +1,19 @@
+import { memo } from 'react';
 import { Typography, Card, CardContent } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
+import type { Control, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../../types/index.ts';
 import DynamicAnswerEditor from '../answer-editors/DynamicAnswerEditor.tsx';
 
 interface Props {
   control: Control<QuizFormValues>;
-  errors: FieldErrors<QuizFormValues>;
-  watch: UseFormWatch<QuizFormValues>;
   setValue: UseFormSetValue<QuizFormValues>;
   getValues: UseFormGetValues<QuizFormValues>;
   questionType: QuestionType;
   index: number;
 }
 
-export default function AnswersSection({
-  control,
-  errors,
-  watch,
-  setValue,
-  getValues,
-  questionType,
-  index,
-}: Props) {
+function AnswersSection({ control, setValue, getValues, questionType, index }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -36,8 +27,6 @@ export default function AnswersSection({
         </Typography>
         <DynamicAnswerEditor
           control={control}
-          errors={errors}
-          watch={watch}
           setValue={setValue}
           getValues={getValues}
           type={questionType}
@@ -47,3 +36,5 @@ export default function AnswersSection({
     </Card>
   );
 }
+
+export default memo(AnswersSection);

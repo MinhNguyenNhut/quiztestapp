@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box, Stack } from '@mui/material';
+import { Card, CardContent, Typography, Box, Stack, LinearProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { BreakdownStat } from '../../shared/utils/resultStats';
 
@@ -7,50 +7,28 @@ interface PerformanceRadarProps {
   topic: BreakdownStat[];
   accuracyOverall: number; // 0..1
   participation: number; // 0..1
+  timeUsedRatio: number; // 0..1
 }
 
-interface AxisSpec {
+interface MetricRow {
   label: string;
   value: number; // 0..1
   color: string;
 }
 
-const SIZE = 260;
-const RADIUS = 110;
-const CENTER = SIZE / 2;
-const AXES = 5;
-
-const toCartesian = (i: number, value: number): { x: number; y: number } => {
-  const angle = (Math.PI * 2 * i) / AXES - Math.PI / 2;
-  return {
-    x: CENTER + RADIUS * value * Math.cos(angle),
-    y: CENTER + RADIUS * value * Math.sin(angle),
-  };
-};
-
-const polygonPath = (axes: AxisSpec[]): string =>
-  axes
-    .map((axis, i) => {
-      const { x, y } = toCartesian(i, axis.value);
-      return `${i === 0 ? 'M' : 'L'}${x},${y}`;
-    })
-    .join(' ')
-    .concat(' Z');
-
-export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participation }: PerformanceRadarProps) => {
+export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, timeUsedRatio }: PerformanceRadarProps) => {
   const { t } = useTranslation();
   const byDiff = (label: string) =>
     difficulty.find((d) => d.label.toLowerCase() === label)?.accuracy ?? 0;
 
-  const axes: AxisSpec[] = [
+  const metrics: MetricRow[] = [
     { label: t('difficulty.easy'), value: byDiff('easy'), color: '#22c55e' },
     { label: t('difficulty.medium'), value: byDiff('medium'), color: '#eab308' },
     { label: t('difficulty.hard'), value: byDiff('hard'), color: '#ef4444' },
     { label: t('common.accuracy'), value: accuracyOverall, color: '#6366f1' },
-    { label: t('common.timeUsed'), value: participation, color: '#0ea5e9' },
+    { label: t('common.timeUsed'), value: timeUsedRatio, color: '#0ea5e9' },
   ];
 
-  // If topic data is empty, hide the topic subtitle.
   const hasTopic = topic.length > 0;
 
   return (
@@ -59,67 +37,38 @@ export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, participa
         <Typography variant="overline" sx={{ fontWeight: 600, color: 'text.secondary' }}>
           {t('common.performanceRadar')}
         </Typography>
-        <Stack sx={{ mt: 1, alignItems: "center" }}>
-          <Box sx={{ width: SIZE, height: SIZE }}>
-            <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
-              {/* Gridlines */}
-              {[0.25, 0.5, 0.75, 1].map((scale) => (
-                <polygon
-                  key={scale}
-                  points={Array.from({ length: AXES })
-                    .map((_, i) => {
-                      const { x, y } = toCartesian(i, scale);
-                      return `${x},${y}`;
-                    })
-                    .join(' ')}
-                  fill="none"
-                  stroke="#e2e8f0"
-                  strokeWidth={1}
-                />
-              ))}
-              {/* Axes */}
-              {axes.map((axis, i) => {
-                const { x, y } = toCartesian(i, 1);
-                return (
-                  <line
-                    key={axis.label}
-                    x1={CENTER}
-                    y1={CENTER}
-                    x2={x}
-                    y2={y}
-                    stroke="#e2e8f0"
-                    strokeWidth={1}
-                  />
-                );
-              })}
-              {/* Filled polygon */}
-              <path d={polygonPath(axes)} fill="rgba(99,102,241,0.18)" stroke="#6366f1" strokeWidth={2} />
-              {/* Vertex labels */}
-              {axes.map((axis, i) => {
-                const { x, y } = toCartesian(i, 1.18);
-                return (
-                  <text
-                    key={axis.label}
-                    x={x}
-                    y={y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize={11}
-                    fontWeight={600}
-                    fill="#475569"
-                  >
-                    {axis.label}
-                  </text>
-                );
-              })}
-            </svg>
-          </Box>
-          {hasTopic && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-              {topic.length} {t('common.topicsCovered')}
-            </Typography>
-          )}
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          {metrics.map((metric) => (
+            <Box key={metric.label}>
+              <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {metric.label}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: metric.color }}>
+                  {Math.round(metric.value * 100)}%
+                </Typography>
+              </Stack>
+              <LinearProgress
+                variant="determinate"
+                value={Math.min(100, Math.max(0, metric.value * 100))}
+                sx={{
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: 'action.hover',
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                    backgroundColor: metric.color,
+                  },
+                }}
+              />
+            </Box>
+          ))}
         </Stack>
+        {hasTopic && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+            {topic.length} {t('common.topicsCovered')}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );

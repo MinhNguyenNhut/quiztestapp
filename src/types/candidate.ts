@@ -86,16 +86,16 @@ export interface CandidateFormValues {
   [key: string]: string | number | boolean | string[] | undefined;
 }
 
-export const FIELD_TYPE_LABELS: Record<CandidateFieldType, string> = {
-  text: 'Text',
-  email: 'Email',
-  phone: 'Phone',
-  select: 'Dropdown',
-  radio: 'Radio Group',
-  checkbox: 'Checkbox',
-  textarea: 'Text Area',
-  date: 'Date',
-  number: 'Number',
+export const FIELD_TYPE_LABEL_KEYS: Record<CandidateFieldType, string> = {
+  text: 'candidateFieldsBuilder.text',
+  email: 'candidateFieldsBuilder.email',
+  phone: 'candidateFieldsBuilder.phone',
+  select: 'candidateFieldsBuilder.select',
+  radio: 'candidateFieldsBuilder.radio',
+  checkbox: 'candidateFieldsBuilder.checkbox',
+  textarea: 'candidateFieldsBuilder.textarea',
+  date: 'candidateFieldsBuilder.date',
+  number: 'candidateFieldsBuilder.number',
 };
 
 export const FIELD_TYPE_ICONS: Record<CandidateFieldType, string> = {

@@ -31,9 +31,6 @@
    "maxLength": "Độ dài tối đa",
    "minValue": "Giá trị tối thiểu",
    "maxValue": "Giá trị tối đa",
-   "regexPattern": "Mẫu regex",
-   "regexPlaceholder": "vd: ^[A-Z]{2}\\d{4}$",
-   "regexHelper": "Biểu thức chính quy JavaScript được áp dụng khi gửi",
    "customErrorMessage": "Thông báo lỗi tùy chỉnh",
    "showOnlyWhen": "Chỉ hiển thị khi",
    "equalsValue": "Bằng giá trị",
@@ -49,5 +46,26 @@
    "fieldsCountHeader": "Trường ({{count}})",
    "noFieldsClickAdd": "Chưa có trường nào. Nhấp \"Thêm trường\" để tạo một trường.",
    "untitled": "(chưa đặt tên)",
-   "requiredSuffix": "bắt buộc"
+   "requiredSuffix": "bắt buộc",
+   "text": "Văn bản",
+   "email": "Email",
+   "phone": "Số điện thoại",
+   "select": "Danh sách chọn",
+   "radio": "Nhóm lựa chọn",
+   "checkbox": "Hộp kiểm",
+   "textarea": "Vùng văn bản",
+   "date": "Ngày tháng",
+   "number": "Số",
+   "formatRule": "Quy tắc định dạng",
+   "formatRuleHelper": "Chọn định dạng mà trường này cần tuân theo",
+   "patternPreset": {
+      "none": "Không giới hạn",
+      "lettersOnly": "Chỉ chữ cái",
+      "numbersOnly": "Chỉ số",
+      "alphanumeric": "Chỉ chữ và số",
+      "noSpaces": "Không được chứa khoảng trắng",
+      "vietnamesePhone": "Số điện thoại Việt Nam",
+      "nationalId": "Số căn cước công dân",
+      "noSpecialChars": "Không chứa ký tự đặc biệt"
+   }
 }

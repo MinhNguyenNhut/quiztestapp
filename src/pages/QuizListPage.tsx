@@ -111,7 +111,7 @@ export default function QuizListPage() {
     showToast(t('quizList.previewComingSoon', { title: quiz.title }), 'info');
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, sm: 3 } }}>
+    <Box sx={{ mx: 'auto', p: { xs: 2, sm: 3 } }}>
       <PageHeader search={search} onSearchChange={setSearch} />
 
       {error && (

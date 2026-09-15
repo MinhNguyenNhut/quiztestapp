@@ -31,9 +31,6 @@
    "maxLength": "Maximum Length",
    "minValue": "Minimum Value",
    "maxValue": "Maximum Value",
-   "regexPattern": "Regex Pattern",
-   "regexPlaceholder": "e.g. ^[A-Z]{2}\\d{4}$",
-   "regexHelper": "JavaScript regular expression applied when submitting.",
    "customErrorMessage": "Custom Error Message",
    "showOnlyWhen": "Show Only When",
    "equalsValue": "Equals Value",
@@ -49,5 +46,26 @@
    "fieldsCountHeader": "Fields ({{count}})",
    "noFieldsClickAdd": "There are no fields yet. Click \"Add Field\" to create one.",
    "untitled": "(untitled)",
-   "requiredSuffix": "required"
+   "requiredSuffix": "required",
+   "text": "Text",
+   "email": "Email",
+   "phone": "Phone",
+   "select": "Dropdown",
+   "radio": "Radio Group",
+   "checkbox": "Checkbox",
+   "textarea": "Text Area",
+   "date": "Date",
+   "number": "Number",
+   "formatRule": "Format rule",
+   "formatRuleHelper": "Choose the format this field should follow",
+   "patternPreset": {
+      "none": "No restriction",
+      "lettersOnly": "Letters only",
+      "numbersOnly": "Numbers only",
+      "alphanumeric": "Letters and numbers only",
+      "noSpaces": "No spaces allowed",
+      "vietnamesePhone": "Vietnamese phone number",
+      "nationalId": "National ID number",
+      "noSpecialChars": "No special characters"
+   }
 }

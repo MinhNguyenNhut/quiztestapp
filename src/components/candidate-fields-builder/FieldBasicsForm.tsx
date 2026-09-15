@@ -5,7 +5,7 @@ import type {
   CandidateFieldSection,
   CandidateFieldType,
 } from '../../types/candidate';
-import { FIELD_TYPE_LABELS } from '../../types/candidate';
+import { FIELD_TYPE_LABEL_KEYS } from '../../types/candidate';
 
 const ALL_TYPES: CandidateFieldType[] = [
   'text',
@@ -46,7 +46,7 @@ export default function FieldBasicsForm({ field, sections, onChange }: FieldBasi
             >
               {ALL_TYPES.map((type) => (
                 <MenuItem key={type} value={type}>
-                  {FIELD_TYPE_LABELS[type]}
+                  {t(FIELD_TYPE_LABEL_KEYS[type])}
                 </MenuItem>
               ))}
             </Select>

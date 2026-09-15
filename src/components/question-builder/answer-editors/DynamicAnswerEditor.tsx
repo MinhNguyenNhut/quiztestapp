@@ -1,4 +1,5 @@
-import type { Control, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
+import { memo } from 'react';
+import type { Control, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import type { QuizFormValues, QuestionType } from '../../../types/index.ts';
 import SingleChoiceAnswers from './SingleChoiceAnswers.tsx';
 import MultipleChoiceAnswers from './MultipleChoiceAnswers.tsx';
@@ -11,16 +12,14 @@ import EssayAnswers from './EssayAnswers.tsx';
 
 interface Props {
   control: Control<QuizFormValues>;
-  errors: FieldErrors<QuizFormValues>;
-  watch: UseFormWatch<QuizFormValues>;
   setValue: UseFormSetValue<QuizFormValues>;
   getValues: UseFormGetValues<QuizFormValues>;
   type: QuestionType;
   index: number;
 }
 
-export default function DynamicAnswerEditor({ control, errors, watch, setValue, getValues, type, index }: Props) {
-  const sharedProps = { control, errors, watch, setValue, getValues, index };
+function DynamicAnswerEditor({ control, setValue, getValues, type, index }: Props) {
+  const sharedProps = { control, setValue, getValues, index };
 
   switch (type) {
     case 'single_choice':
@@ -43,3 +42,5 @@ export default function DynamicAnswerEditor({ control, errors, watch, setValue, 
       return null;
   }
 }
+
+export default memo(DynamicAnswerEditor);

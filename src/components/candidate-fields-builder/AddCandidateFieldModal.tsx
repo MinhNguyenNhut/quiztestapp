@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -53,12 +53,14 @@ export default function AddCandidateFieldModal({
 }: AddCandidateFieldModalProps) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<CandidateField>(() => emptyTemplate(nextOrder, sections));
+  const [prevOpen, setPrevOpen] = useState(open);
 
-  useEffect(() => {
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setDraft(field ?? emptyTemplate(nextOrder, sections));
     }
-  }, [open, field, nextOrder, sections]);
+  }
 
   const update = (patch: Partial<CandidateField>) => setDraft((d) => ({ ...d, ...patch }));
 
@@ -84,7 +86,7 @@ export default function AddCandidateFieldModal({
       </DialogTitle>
 
       <DialogContent sx={{ mt: 1 }}>
-        <Stack spacing={2} sx={{padding: 1}}>
+        <Stack spacing={2} sx={{ padding: 1 }}>
           <FieldBasicsForm field={draft} sections={sections} onChange={update} />
 
           {supportsOptions && (

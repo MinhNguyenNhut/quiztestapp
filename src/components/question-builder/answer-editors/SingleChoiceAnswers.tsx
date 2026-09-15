@@ -17,8 +17,6 @@ import {
   useFieldArray,
   useController,
   type Control,
-  type FieldErrors,
-  type UseFormWatch,
   type UseFormSetValue,
   type UseFormGetValues,
 } from 'react-hook-form';
@@ -27,8 +25,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   control: Control<QuizFormValues>;
-  errors: FieldErrors<QuizFormValues>;
-  watch: UseFormWatch<QuizFormValues>;
   setValue: UseFormSetValue<QuizFormValues>;
   getValues: UseFormGetValues<QuizFormValues>;
   index: number;
@@ -100,11 +96,7 @@ const OptionTextField = memo(function OptionTextField({
   );
 })
 
-export default function SingleChoiceAnswers({
-  control,
-  setValue,
-  index,
-}: Props) {
+export default memo(function SingleChoiceAnswers({ control, setValue, index }: Props) {
   const { t } = useTranslation();
 
   const {
@@ -232,4 +224,4 @@ export default function SingleChoiceAnswers({
       </CardContent>
     </Card>
   );
-}
+});

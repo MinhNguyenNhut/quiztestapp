@@ -1,21 +1,20 @@
+import { memo } from 'react';
 import { TextField, Typography, Card, CardContent, FormControlLabel, Switch } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
+import { useController, type Control, type UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 
 interface Props {
   control: Control<QuizFormValues>;
-  errors: FieldErrors<QuizFormValues>;
-  watch: UseFormWatch<QuizFormValues>;
   setValue: UseFormSetValue<QuizFormValues>;
   getValues: () => QuizFormValues;
   index: number;
 }
 
-export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
+function ShortAnswerAnswers({ control, index }: Props) {
   const { t } = useTranslation();
-  const expectedAnswer = watch(`questions.${index}.expectedAnswer`);
-  const caseSensitive = watch(`questions.${index}.caseSensitive`);
+  const { field: answerField } = useController({ control, name: `questions.${index}.expectedAnswer` });
+  const { field: caseSensitiveField } = useController({ control, name: `questions.${index}.caseSensitive` });
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2, overflow: 'unset' }}>
@@ -29,23 +28,18 @@ export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
           rows={3}
           label={t('answerEditors.shortAnswer.expectedAnswerLabel')}
           placeholder={t('answerEditors.shortAnswer.expectedAnswerPlaceholder')}
-          value={expectedAnswer || ''}
-          onChange={(e) =>
-            setValue(`questions.${index}.expectedAnswer`, e.target.value, {
-              shouldValidate: true,
-            })
-          }
+          value={answerField.value ?? ''}
+          onChange={answerField.onChange}
+          onBlur={answerField.onBlur}
+          name={answerField.name}
+          inputRef={answerField.ref}
           sx={{ mb: 2 }}
         />
         <FormControlLabel
           control={
             <Switch
-              checked={caseSensitive || false}
-              onChange={(e) =>
-                setValue(`questions.${index}.caseSensitive`, e.target.checked, {
-                  shouldValidate: false,
-                })
-              }
+              checked={!!caseSensitiveField.value}
+              onChange={(e) => caseSensitiveField.onChange(e.target.checked)}
             />
           }
           label={t('answerEditors.shortAnswer.caseSensitiveLabel')}
@@ -57,3 +51,5 @@ export default function ShortAnswerAnswers({ watch, setValue, index }: Props) {
     </Card>
   );
 }
+
+export default memo(ShortAnswerAnswers);

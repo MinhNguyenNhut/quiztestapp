@@ -1,526 +1,268 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { useForm, FormProvider, useFieldArray, type Resolver } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray, useWatch, type Resolver, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  QuizFormValues,
-  QuestionType,
-  Quiz,
-  QuestionFormValues,
-} from '../../types/index.ts';
+import type { QuizFormValues, QuestionType, Quiz, QuestionFormValues } from '../../types/index.ts';
 import { createQuestionTemplate } from '../../utils/quizMappers.ts';
 import { createQuestionSchemas } from '../../utils/validation.ts';
 import AddQuestionModal from './AddQuestionModal.tsx';
 import QuestionList from './QuestionList.tsx';
 import QuestionEditor from './QuestionEditor.tsx';
 import { useNavigate } from 'react-router-dom';
-import {
-  createQuiz,
-} from '../../features/quiz/quizSlice.ts';
-import {
-  createQuestion,
-  deleteQuestion,
-  updateQuestion,
-} from '../../features/questions/questionThunks.ts';
+import { createQuiz } from '../../features/quiz/quizSlice.ts';
+import { createQuestion, deleteQuestion, updateQuestion } from '../../features/questions/questionThunks.ts';
 import { useAlert } from '../../hooks/useAlert.ts';
 import AppAlert from '../common/AppAlert/AppAlert.tsx';
 import type { CreateQuestionPayload } from '../../api/questionApi.ts';
 import { useAppDispatch } from '../../features/store.ts';
 
 type QuestionBuilderProps =
-  | {
-    mode: 'create';
-    onSave: (data: QuizFormValues) => void | Promise<void>;
-    onCancel?: () => void;
-    onDirtyChange?: (isDirty: boolean) => void;
-  }
-  | {
-    mode: 'edit';
-    defaultValues: QuizFormValues;
-    originalQuiz: Quiz;
-    onSave: (data: QuizFormValues) => void | Promise<void>;
-    onCancel?: () => void;
-    onDirtyChange?: (isDirty: boolean) => void;
-  };
+  | { mode: 'create'; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void }
+  | { mode: 'edit'; defaultValues: QuizFormValues; originalQuiz: Quiz; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void };
 
-export default function QuestionBuilder(
-  props: QuestionBuilderProps,
-) {
-  const { onSave, onDirtyChange } = props;
+function getFirstErrorMessage(errors: unknown): string | undefined {
+  if (!errors) return undefined;
+  if (typeof errors === 'string') return errors;
+  if (typeof errors === 'object' && errors !== null) {
+    if ('message' in errors && typeof errors.message === 'string') return errors.message;
+    for (const value of Object.values(errors)) {
+      const message = getFirstErrorMessage(value);
+      if (message) return message;
+    }
+  }
+  return undefined;
+}
+
+const buildPayload = (question: QuestionFormValues, index: number): CreateQuestionPayload => ({
+  type: question.type,
+  title: question.title,
+  content: question.content,
+  description: question.description,
+  difficulty: question.difficulty,
+  explanation: question.explanation,
+  points: question.points,
+  order: index,
+  options: (question.options ?? []).map((option, optionIndex) => ({
+    id: option.id ?? uuidv4(),
+    text: option.text ?? '',
+    isCorrect: option.isCorrect ?? false,
+    order: option.order ?? optionIndex,
+  })),
+  childQuestions: question.childQuestions,
+});
+
+export default function QuestionBuilder(props: QuestionBuilderProps) {
+  const { onSave, onDirtyChange, mode } = props;
+  
+  const defaultValues = mode === 'edit' ? props.defaultValues : undefined;
+  const originalQuiz = mode === 'edit' ? props.originalQuiz : undefined;
 
   const { t } = useTranslation();
-
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [selectedIndex, setSelectedIndex] =
-    useState<number | null>(null);
-
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-
   const [isSaving, setIsSaving] = useState(false);
-
   const { alert, showAlert, closeAlert } = useAlert();
 
-  /**
-   * Create the translated Zod schema.
-   *
-   * The schema is recreated when the translation function changes,
-   * which normally happens when the application language changes.
-   */
-  const quizFormSchema = useMemo(
-    () => createQuestionSchemas(t).createQuizFormSchema,
-    [t],
+  const quizFormSchema = useMemo(() => createQuestionSchemas(t).createQuizFormSchema, [t]);
+
+  const initialValues: QuizFormValues = useMemo(
+    () =>
+      mode === 'edit' && defaultValues
+        ? {
+          ...defaultValues,
+          questions: (defaultValues.questions ?? []).map((question) => ({
+            ...question,
+            options: (question.options ?? []).map((option, optionIndex) => ({
+              ...option,
+              id: option.id ?? uuidv4(),
+              text: option.text ?? '',
+              isCorrect: Boolean(option.isCorrect),
+              order: option.order ?? optionIndex,
+            })),
+          })),
+        }
+        : { title: '', description: '', estimatedTime: 0, questions: [] },
+    [],
   );
 
-  /**
-   * Initial form values.
-   */
-  const initialValues: QuizFormValues =
-    props.mode === 'edit'
-      ? {
-        ...props.defaultValues,
-
-        questions: (props.defaultValues.questions ?? []).map(
-          (question) => ({
-            ...question,
-
-            options: (question.options ?? []).map(
-              (option, optionIndex) => ({
-                ...option,
-                id: option.id ?? uuidv4(),
-                text: option.text ?? '',
-                isCorrect: Boolean(option.isCorrect),
-                order: option.order ?? optionIndex,
-              }),
-            ),
-          }),
-        ),
-      }
-      : {
-        title: '',
-        description: '',
-        estimatedTime: 0,
-        questions: [],
-      };
-
-  /**
-   * React Hook Form.
-   */
   const methods = useForm<QuizFormValues>({
-    resolver: zodResolver(
-      quizFormSchema,
-    ) as Resolver<QuizFormValues>,
+    resolver: zodResolver(quizFormSchema) as Resolver<QuizFormValues>,
     defaultValues: initialValues,
     mode: 'onBlur',
     reValidateMode: 'onBlur',
   });
 
-  const {
-    control,
-    watch,
-    setValue,
-    getValues,
-    formState: {
-      errors,
-      isDirty,
-    },
-  } = methods;
+  const { control, setValue, getValues, formState: { isDirty } } = methods;
+  const { fields, append, remove, move } = useFieldArray({ control, name: 'questions' });
 
-  /**
-   * Question field array.
-   */
-  const {
-    fields,
-    append,
-    remove,
-    move,
-  } = useFieldArray({
-    control,
-    name: 'questions',
-  });
+  const quizTitle = useWatch({ control, name: 'title' });
+  const estimatedTime = useWatch({ control, name: 'estimatedTime' });
 
-  /**
-   * Notify parent when dirty state changes.
-   */
   const prevDirtyRef = useRef(isDirty);
-
   useEffect(() => {
     if (isDirty !== prevDirtyRef.current) {
       prevDirtyRef.current = isDirty;
-
       onDirtyChange?.(isDirty);
     }
   }, [isDirty, onDirtyChange]);
 
-  /**
-   * Create quiz and save it to Redux.
-   */
-  const submitToStore = async (data: QuizFormValues) => {
-    // 1. Create the quiz first
-    const quiz = await dispatch(createQuiz({
-      title: data.title,
-      description: data.description,
-      estimatedTime: data.estimatedTime ?? 0, // Pass the new field here
-    })).unwrap();
-
-    // 2. Create all questions using the newly-created quiz ID
-    for (const [index, question] of data.questions.entries()) {
-      console.log(question)
-      const payload: CreateQuestionPayload = {
-        type: question.type,
-        title: question.title,
-        content: question.content,
-        description: question.description,
-        difficulty: question.difficulty,
-        explanation: question.explanation,
-        points: question.points,
-        order: index,
-
-        options: question.options.map(
-          (option, optionIndex) => ({
-            id: option.id ?? uuidv4(),
-            text: option.text,
-            isCorrect: option.isCorrect ?? false,
-            order: option.order ?? optionIndex,
-          }),
-        ),
-
-        childQuestions: question.childQuestions,
-      };
-
-      await dispatch(createQuestion({ quizId: quiz.id, payload })).unwrap();
+  const [prevFieldsLength, setPrevFieldsLength] = useState(fields.length);
+  if (fields.length !== prevFieldsLength) {
+    setPrevFieldsLength(fields.length);
+    if (fields.length > 0 && selectedIndex === null) {
+      setSelectedIndex(0);
+    } else if (fields.length === 0) {
+      setSelectedIndex(null);
     }
+  }
 
-    navigate('/');
-  };
+  const submitToStore = useCallback(
+    async (data: QuizFormValues) => {
+      const quiz = await dispatch(
+        createQuiz({ title: data.title, description: data.description, estimatedTime: data.estimatedTime ?? 0 }),
+      ).unwrap();
 
-  /**
-   * Save quiz.
-   */
-  const handleSaveQuiz = methods.handleSubmit(
-    async (data) => {
+      for (const [index, question] of data.questions.entries()) {
+        await dispatch(createQuestion({ quizId: quiz.id, payload: buildPayload(question, index) })).unwrap();
+      }
+      navigate('/');
+    },
+    [dispatch, navigate],
+  );
+
+  const updateQuestions = useCallback(
+    async (quizId: string, questions: QuestionFormValues[]) => {
+      if (mode !== 'edit' || !originalQuiz) return;
+      const originalQuestions = originalQuiz.questions ?? [];
+      const existingIds = new Set(originalQuestions.map((q) => q.id).filter(Boolean));
+      const currentIds = new Set(questions.map((q) => q.id).filter(Boolean));
+
+      for (const [index, question] of questions.entries()) {
+        const payload = buildPayload(question, index);
+        if (question.id && existingIds.has(question.id)) {
+          await dispatch(updateQuestion({ id: question.id, patch: payload })).unwrap();
+        } else {
+          await dispatch(createQuestion({ quizId, payload })).unwrap();
+        }
+      }
+
+      for (const original of originalQuestions) {
+        if (original.id && !currentIds.has(original.id)) {
+          await dispatch(deleteQuestion(original.id)).unwrap();
+        }
+      }
+    },
+    [dispatch, mode, originalQuiz],
+  );
+
+  const onValidSubmit = useCallback(
+    async (data: QuizFormValues) => {
       setIsSaving(true);
-
       try {
-        if (props.mode === 'create') {
+        if (mode === 'create') {
           await submitToStore(data);
         } else {
-          // 1. Update quiz
           await onSave(data);
-
-          // 2. Update existing questions
-          await updateQuestions(
-            props.originalQuiz.id,
-            data.questions,
-          );
+          if (originalQuiz) {
+            await updateQuestions(originalQuiz.id, data.questions);
+          }
         }
-
         showAlert(t('quizEditor.quizSaved'), 'success');
       } catch (err) {
         console.error('Save failed:', err);
-
-        showAlert(
-          err instanceof Error
-            ? err.message
-            : t('questionBuilder.saveFailed'),
-          'error',
-        );
+        showAlert(err instanceof Error ? err.message : t('questionBuilder.saveFailed'), 'error');
       } finally {
         setIsSaving(false);
       }
     },
-
-    (errors) => {
-      console.error('Validation errors:', errors);
-
-      const message = getFirstErrorMessage(errors);
-
-      showAlert(
-        message ??
-        t('questionBuilder.fixValidationErrors'),
-        'error',
-      );
-    },
+    [mode, submitToStore, onSave, updateQuestions, originalQuiz, showAlert, t],
   );
 
-  /**
-   * Get the first validation error recursively.
-   */
-  function getFirstErrorMessage(
-    errors: unknown,
-  ): string | undefined {
-    if (!errors) {
-      return undefined;
-    }
+  const onInvalidSubmit = useCallback(
+    (formErrors: FieldErrors<QuizFormValues>) => {
+      console.error('Validation errors:', formErrors);
+      showAlert(getFirstErrorMessage(formErrors) ?? t('questionBuilder.fixValidationErrors'), 'error');
+    },
+    [showAlert, t],
+  );
 
-    if (typeof errors === 'string') {
-      return errors;
-    }
+  const handleSaveQuiz = useCallback(
+    () => methods.handleSubmit(onValidSubmit, onInvalidSubmit)(),
+    [methods, onValidSubmit, onInvalidSubmit],
+  );
 
-    if (
-      typeof errors === 'object' &&
-      errors !== null
-    ) {
-      if (
-        'message' in errors &&
-        typeof errors.message === 'string'
-      ) {
-        return errors.message;
-      }
-
-      for (
-        const value of Object.values(errors)
-      ) {
-        const message =
-          getFirstErrorMessage(value);
-
-        if (message) {
-          return message;
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Automatically select the first question.
-   */
-  useEffect(() => {
-    if (
-      fields.length > 0 &&
-      selectedIndex === null
-    ) {
-      setSelectedIndex(0);
-    } else if (
-      fields.length === 0
-    ) {
-      setSelectedIndex(null);
-    }
-  }, [fields.length, selectedIndex]);
-
-  /**
-   * Add question.
-   */
   const handleAddQuestion = useCallback(
     (type: QuestionType) => {
-      const template =
-        createQuestionTemplate(type);
-
-      append(template);
-
+      append(createQuestionTemplate(type));
       setSelectedIndex(fields.length);
     },
     [append, fields.length],
   );
 
-  /**
-   * Select question.
-   */
-  const handleSelectQuestion =
-    useCallback((index: number) => {
-      setSelectedIndex(index);
-    }, []);
+  const handleSelectQuestion = useCallback((index: number) => setSelectedIndex(index), []);
 
-  /**
-   * Duplicate question.
-   */
   const handleDuplicate = useCallback(
     (index: number) => {
-      const question =
-        getValues(`questions.${index}`);
-
-      if (!question) {
-        return;
-      }
-
-      const cloned = {
-        ...question,
-        id: uuidv4(),
-      };
-
+      const question = getValues(`questions.${index}`);
+      if (!question) return;
+      const cloned = { ...question, id: uuidv4() };
       const newIndex = index + 1;
-
-      const allQuestions =
-        getValues('questions');
-
-      const updated = [
-        ...allQuestions.slice(
-          0,
-          newIndex,
-        ),
-
-        cloned,
-
-        ...allQuestions.slice(newIndex),
-      ];
-
-      setValue(
-        'questions',
-        updated,
-        {
-          shouldValidate: true,
-          shouldDirty: true,
-        },
-      );
-
+      const allQuestions = getValues('questions');
+      const updated = [...allQuestions.slice(0, newIndex), cloned, ...allQuestions.slice(newIndex)];
+      // Removed shouldValidate: true to prevent massive lag
+      setValue('questions', updated, { shouldDirty: true });
       setSelectedIndex(newIndex);
     },
     [getValues, setValue],
   );
 
-  /**
-   * Delete question.
-   */
   const handleDelete = useCallback(
     (index: number) => {
       remove(index);
-
       if (selectedIndex === index) {
-        const remaining =
-          fields.length - 1;
-
-        if (remaining > 0) {
-          setSelectedIndex(
-            Math.min(
-              index,
-              remaining - 1,
-            ),
-          );
-        } else {
-          setSelectedIndex(null);
-        }
-      } else if (
-        selectedIndex !== null &&
-        selectedIndex > index
-      ) {
-        setSelectedIndex(
-          selectedIndex - 1,
-        );
+        const remaining = fields.length - 1;
+        setSelectedIndex(remaining > 0 ? Math.min(index, remaining - 1) : null);
+      } else if (selectedIndex !== null && selectedIndex > index) {
+        setSelectedIndex(selectedIndex - 1);
       }
     },
-    [
-      remove,
-      selectedIndex,
-      fields.length,
-    ],
+    [remove, selectedIndex, fields.length],
   );
 
-  /**
-   * Reorder questions.
-   */
   const handleReorder = useCallback(
     (from: number, to: number) => {
       move(from, to);
-
-      if (selectedIndex === from) {
-        setSelectedIndex(to);
-      } else if (selectedIndex === to) {
-        setSelectedIndex(from);
-      }
+      if (selectedIndex === from) setSelectedIndex(to);
+      else if (selectedIndex === to) setSelectedIndex(from);
     },
     [move, selectedIndex],
   );
 
-  const updateQuestions = async (
-    quizId: string,
-    questions: QuestionFormValues[],
-  ) => {
-    if (props.mode !== 'edit') {
-      return;
-    }
+  // Removed shouldValidate: true so Zod doesn't run on every keystroke
+  const handleQuizTitleChange = useCallback(
+    (value: string) => setValue('title', value, { shouldDirty: true }),
+    [setValue],
+  );
 
-    const originalQuestions = props.originalQuiz.questions ?? [];
+  const handleEstimatedTimeChange = useCallback(
+    (value: number | string) => setValue('estimatedTime', value ? Number(value) : 0, { shouldDirty: true }),
+    [setValue],
+  );
 
-    // IDs that actually exist in MongoDB
-    const existingQuestionIds = new Set(
-      originalQuestions
-        .map((question) => question.id)
-        .filter(Boolean),
-    );
+  const handleOpenModal = useCallback(() => setModalOpen(true), []);
+  const handleCloseModal = useCallback(() => setModalOpen(false), []);
 
-    // IDs currently present in the form
-    const currentQuestionIds = new Set(
-      questions
-        .map((question) => question.id)
-        .filter(Boolean),
-    );
-
-    // -----------------------------------------
-    // 1. CREATE new questions
-    // -----------------------------------------
-    for (const [index, question] of questions.entries()) {
-      const payload: CreateQuestionPayload = {
-        type: question.type,
-        title: question.title,
-        content: question.content,
-        description: question.description,
-        difficulty: question.difficulty,
-        explanation: question.explanation,
-        points: question.points,
-        order: index,
-
-        options: (question.options ?? []).map(
-          (option, optionIndex) => ({
-            id: option.id ?? uuidv4(),
-            text: option.text ?? '',
-            isCorrect: option.isCorrect ?? false,
-            order: option.order ?? optionIndex,
-          }),
-        ),
-
-        childQuestions: question.childQuestions,
-      };
-
-      // Existing question → UPDATE
-      if (question.id && existingQuestionIds.has(question.id)) {
-        await dispatch(updateQuestion({ id: question.id, patch: payload })).unwrap();
-
-        continue;
-      }
-
-      await dispatch(createQuestion({ quizId, payload })).unwrap();
-    }
-
-    // -----------------------------------------
-    // 2. DELETE questions removed from the form
-    // -----------------------------------------
-    for (const originalQuestion of originalQuestions) {
-      const questionId = originalQuestion.id;
-      if (questionId && !currentQuestionIds.has(questionId)) {
-        await dispatch(deleteQuestion(questionId),).unwrap();
-      }
-    }
-  };
-
-  /**
-   * Currently selected question.
-   */
-  const selectedQuestion =
-    selectedIndex !== null
-      ? fields[selectedIndex]
-      : null;
+  const selectedQuestion = selectedIndex !== null ? fields[selectedIndex] : null;
 
   return (
     <FormProvider {...methods}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flex: 1,
-            overflow: 'hidden',
-          }}
-        >
-          {/* Question list */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           <QuestionList
             questions={fields}
             selectedIndex={selectedIndex}
@@ -528,132 +270,38 @@ export default function QuestionBuilder(
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
             onReorder={handleReorder}
-            onAddQuestion={() =>
-              setModalOpen(true)
-            }
+            onAddQuestion={handleOpenModal}
             onSaveQuiz={handleSaveQuiz}
-            quizTitle={watch('title')}
-            onQuizTitleChange={(value) =>
-              setValue(
-                'title',
-                value,
-                {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                },
-              )
-            }
-            estimatedTime={watch('estimatedTime') ?? 0}
-            onEstimatedTimeChange={(value) =>
-              setValue(
-                'estimatedTime',
-                value ? Number(value) : 0,
-                {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                },
-              )
-            }
+            quizTitle={quizTitle}
+            onQuizTitleChange={handleQuizTitleChange}
+            estimatedTime={estimatedTime ?? 0}
+            onEstimatedTimeChange={handleEstimatedTimeChange}
             isSaving={isSaving}
           />
 
-          {/* Question editor */}
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+          <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {selectedQuestion ? (
               <QuestionEditor
                 control={control}
-                errors={errors}
-                watch={watch}
                 setValue={setValue}
                 getValues={getValues}
-                questionType={
-                  selectedQuestion.type
-                }
+                questionType={selectedQuestion.type}
                 index={selectedIndex!}
               />
             ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'text.disabled',
-                  textAlign: 'center',
-                  p: 4,
-                }}
-              >
-                <Typography
-                  variant="h3"
-                  sx={{
-                    mb: 2,
-                    opacity: 0.2,
-                  }}
-                >
-                  ?
-                </Typography>
-
-                <Typography
-                  variant="h6"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  {t(
-                    'questionBuilder.noQuestionSelected',
-                  )}
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  color="text.disabled"
-                  sx={{ mb: 3 }}
-                >
-                  {t(
-                    'questionBuilder.selectQuestionHint',
-                  )}
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  onClick={() =>
-                    setModalOpen(true)
-                  }
-                >
-                  {t(
-                    'questionBuilder.addQuestion',
-                  )}
-                </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.disabled', textAlign: 'center', p: 4 }}>
+                <Typography variant="h3" sx={{ mb: 2, opacity: 0.2 }}>?</Typography>
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>{t('questionBuilder.noQuestionSelected')}</Typography>
+                <Typography variant="body2" color="text.disabled" sx={{ mb: 3 }}>{t('questionBuilder.selectQuestionHint')}</Typography>
+                <Button variant="contained" onClick={handleOpenModal}>{t('questionBuilder.addQuestion')}</Button>
               </Box>
             )}
           </Box>
         </Box>
       </Box>
 
-      {/* Add question modal */}
-      <AddQuestionModal
-        open={modalOpen}
-        onClose={() =>
-          setModalOpen(false)
-        }
-        onSelect={handleAddQuestion}
-      />
-
-      {/* Alert */}
-      <AppAlert
-        open={alert.open}
-        message={alert.message}
-        severity={alert.severity}
-        onClose={closeAlert}
-      />
+      <AddQuestionModal open={modalOpen} onClose={handleCloseModal} onSelect={handleAddQuestion} />
+      <AppAlert open={alert.open} message={alert.message} severity={alert.severity} onClose={closeAlert} />
     </FormProvider>
   );
 }

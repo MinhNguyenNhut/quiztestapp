@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -35,7 +35,7 @@ interface QuestionListProps {
   isSaving: boolean;
 }
 
-export default function QuestionList({
+function QuestionList({
   questions,
   selectedIndex,
   onSelect,
@@ -56,7 +56,10 @@ export default function QuestionList({
 
   // Keep the title local so typing does not update the parent
   // on every keystroke.
+  const [prevQuizTitle, setPrevQuizTitle] = useState(quizTitle);
   const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
+
+  const [prevEstimatedTime, setPrevEstimatedTime] = useState(estimatedTime);
   const [localEstimatedTime, setLocalEstimatedTime] = useState<number>(
     estimatedTime !== undefined && estimatedTime !== null
       ? Number(estimatedTime)
@@ -64,14 +67,17 @@ export default function QuestionList({
   );
 
   // Sync local title if the parent changes it externally.
-  useEffect(() => {
+  // This is the recommended React pattern for adjusting state on prop changes.
+  if (quizTitle !== prevQuizTitle) {
+    setPrevQuizTitle(quizTitle);
     setLocalQuizTitle(quizTitle);
-  }, [quizTitle]);
+  }
 
   // Sync local estimated time if the parent changes it externally.
-  useEffect(() => {
+  if (estimatedTime !== prevEstimatedTime) {
+    setPrevEstimatedTime(estimatedTime);
     setLocalEstimatedTime(estimatedTime ?? 0);
-  }, [estimatedTime]);
+  }
 
   const filtered = questions.filter((q) => {
     const matchesSearch =
@@ -102,12 +108,11 @@ export default function QuestionList({
   };
 
   const handleEstimatedTimeBlur = () => {
-  console.log(localEstimatedTime)
-  if (localEstimatedTime !== (estimatedTime ?? 0)) {
-    console.log(estimatedTime)
-    onEstimatedTimeChange(localEstimatedTime);
-  }
-};
+    if (localEstimatedTime !== (estimatedTime ?? 0)) {
+      console.log(estimatedTime);
+      onEstimatedTimeChange(localEstimatedTime);
+    }
+  };
 
   return (
     <Paper
@@ -367,3 +372,5 @@ export default function QuestionList({
     </Paper>
   );
 }
+
+export default memo(QuestionList);

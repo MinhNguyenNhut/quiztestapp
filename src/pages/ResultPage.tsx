@@ -41,6 +41,7 @@ import {
 import type { Quiz, Submission } from '../types';
 import { isAnswered } from '../types/answer';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
+import { fetchQuizById } from '../features/quiz/quizSlice';
 
 export default function ResultPage() {
   const { id, submissionId } = useParams<{ id: string; submissionId: string }>();
@@ -60,18 +61,18 @@ export default function ResultPage() {
     [submissions, submissionId]
   );
 
-  const [notFound, setNotFound] = useState(false);
+  const [quizLoadFailed, setQuizLoadFailed] = useState(false);
+  const [notFoundId, setNotFoundId] = useState<string | null>(null);
 
   useEffect(() => {
     if (submission || !submissionId) return;
 
     let cancelled = false;
-    setNotFound(false);
 
     dispatch(fetchSubmission(submissionId))
       .unwrap()
       .catch(() => {
-        if (!cancelled) setNotFound(true);
+        if (!cancelled) setNotFoundId(submissionId);
       });
 
     return () => {
@@ -82,17 +83,36 @@ export default function ResultPage() {
   useEffect(() => {
     if (!quiz) return;
     if (submission) return;
-    if (!notFound) return; // don't redirect while still trying to fetch
+    if (notFoundId !== submissionId) return; // hasn't failed for *this* id
     navigate(`/quiz/${quiz.id}/candidate`, { replace: true });
-  }, [quiz, submission, notFound, navigate]);
+  }, [quiz, submission, notFoundId, submissionId, navigate]);
 
-  if (!quiz) {
+  useEffect(() => {
+    if (!id) return;
+    const existing = quizzes.find((q) => q.id === id);
+    if (existing && Array.isArray(existing.questions) && existing.questions.length > 0) return;
+
+    dispatch(fetchQuizById(id))
+      .unwrap()
+      .catch(() => setQuizLoadFailed(true));
+  }, [id, quizzes, dispatch]);
+
+
+  if (quizLoadFailed) {
     return (
       <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
         <Alert severity="error">
           {t('errors.quizNotFound')}{' '}
           <Button onClick={() => navigate('/')}>{t('common.goHome')}</Button>
         </Alert>
+      </Box>
+    );
+  }
+
+  if (!quiz || !Array.isArray(quiz.questions)) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="info">{t('result.loadingResult')}</Alert>
       </Box>
     );
   }
@@ -168,6 +188,11 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     return n / total;
   }, [quiz, safeAnswers]);
 
+  const timeUsedRatio = useMemo(() => {
+    if (!quiz.estimatedTime || quiz.estimatedTime <= 0) return 0;
+    return Math.min(1, (submission.timeSpentSeconds ?? 0) / quiz.estimatedTime);
+  }, [quiz.estimatedTime, submission.timeSpentSeconds]);
+
   const rankPercentile = estimateRankPercentile(submission.percentage ?? 0);
 
   const handleRetry = () => {
@@ -230,7 +255,7 @@ function ResultView({ quiz, submission }: ResultViewProps) {
         py: { xs: 2, md: 4 },
       }}
     >
-      <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, md: 3 } }}>
+      <Box sx={{ mx: 'auto', px: { xs: 2, md: 3 } }}>
         <Stack spacing={3}>
           <ResultHeader
             submission={submission}
@@ -252,7 +277,7 @@ function ResultView({ quiz, submission }: ResultViewProps) {
             }
           />
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <ScoreCircle
                 percentage={submission.percentage ?? 0}
                 passed={passed}
@@ -260,16 +285,14 @@ function ResultView({ quiz, submission }: ResultViewProps) {
                 total={summary.totalPoints}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <PerformanceRadar
                 difficulty={difficulties}
                 topic={topics}
                 accuracyOverall={stats.accuracy}
                 participation={participation}
+                timeUsedRatio={timeUsedRatio}
               />
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <BreakdownChart title={t('result.byDifficulty')} stats={difficulties} />
             </Grid>
           </Grid>
           <Grid container spacing={2}>

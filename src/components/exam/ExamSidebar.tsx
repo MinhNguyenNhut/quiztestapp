@@ -25,7 +25,7 @@ export const ExamSidebar = ({ children }: ExamSidebarProps) => {
           <MenuIcon />
         </IconButton>
         <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 320, p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Stack direction="row" sx={{ mb: 1, alignItems: "center", justifyContent: "space-between" }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 {t('examUi.navigation')}
@@ -45,8 +45,6 @@ export const ExamSidebar = ({ children }: ExamSidebarProps) => {
     <Box
       component="aside"
       sx={{
-        width: 320,
-        minWidth: 320,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',

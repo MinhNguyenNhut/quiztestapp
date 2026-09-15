@@ -28,7 +28,8 @@ export interface ScoreSummary {
 
 export const computeScore = (quiz: Quiz, answers: Record<string, AnyAnswer> | null | undefined): ScoreSummary => {
   const safeAnswers = answers ?? {};
-  const perQuestion: PerQuestionResult[] = quiz.questions.map((question) => {
+  const questions = quiz.questions ?? [];
+  const perQuestion: PerQuestionResult[] = questions.map((question) => {
     const answer = safeAnswers[question.id] ?? null;
     const result = checkAnswer(question, answer);
     const pointsPossible = question.points;

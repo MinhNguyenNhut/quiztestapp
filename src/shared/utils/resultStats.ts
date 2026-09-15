@@ -81,7 +81,8 @@ export const summaryStats = (
   answers: Record<string, AnyAnswer>,
   timeSpentSeconds: number,
 ): SummaryStats => {
-  const total = quiz.questions.length;
+  const questions = quiz.questions ?? [];
+  const total = questions.length;
   const correct = perQuestion.filter((p) => p.result.isCorrect).length;
   const wrong = perQuestion.filter((p) => !p.result.isCorrect && !p.result.ungraded && answers[p.questionId] !== null && answers[p.questionId] !== undefined,).length;
   const skipped = perQuestion.filter((p) => answers[p.questionId] === null || answers[p.questionId] === undefined,).length;

@@ -1,11 +1,3 @@
-/**
- * Route component for /quiz/:id/candidate.
- *
- * Looks up the quiz from Redux, derives a QuizOverview (metadata-only
- * view used by the form), guards against a missing quiz, and renders
- * the candidate info form. On submit, starts the exam session in
- * Redux and navigates to /quiz/:id/exam.
- */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,7 +12,7 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
-import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import type { UseFormRegister } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
@@ -44,18 +36,17 @@ export default function CandidateInfoPage() {
   const quizzes = useAppSelector(state => state.quiz.quizzes);
   const quiz = quizzes.find((q) => q.id === id);
 
-  const [notFound, setNotFound] = useState(false);
+  const [notFoundId, setNotFoundId] = useState<string | null>(null);
+  const notFound = !quiz && notFoundId === id;
 
   useEffect(() => {
     if (quiz || !id) return;
-
     let cancelled = false;
-    setNotFound(false);
 
     dispatch(fetchQuizById(id))
       .unwrap()
       .catch(() => {
-        if (!cancelled) setNotFound(true);
+        if (!cancelled) setNotFoundId(id);
       });
 
     return () => {
@@ -69,16 +60,13 @@ export default function CandidateInfoPage() {
         <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
           <Alert
             severity="error"
-            action={
-              <Button onClick={() => navigate('/')}>{t('common.home')}</Button>
-            }
+            action={<Button onClick={() => navigate('/')}>{t('common.home')}</Button>}
           >
             {t('errors.quizNotFound')}
           </Alert>
         </Box>
       );
     }
-
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress />
@@ -101,7 +89,7 @@ export default function CandidateInfoPage() {
 
   const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
 
-  const handleStartQuiz = (candidate: CandidateFormValues) => {
+  const handleStartQuiz = () => {
     navigate(`/quiz/${quiz.id}/exam`);
   };
 
@@ -121,11 +109,6 @@ interface CandidateInfoFormProps {
   isLoading?: boolean;
 }
 
-/**
- * The candidate-info form. Reads/writes form state via react-hook-form,
- * dispatches `startSession` on submit, and delegates any extra
- * post-submit work (e.g. analytics) to `onStartQuiz`.
- */
 function CandidateInfoForm({
   quiz,
   fieldsConfig,
@@ -150,15 +133,12 @@ function CandidateInfoForm({
     }, {} as CandidateFormValues),
   });
 
-  const { handleSubmit, watch } = methods;
-  const formValues = watch();
+  const { handleSubmit } = methods; // Removed watch() to prevent parent re-renders
 
   const handleFormSubmit = async (data: CandidateFormValues) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      // Locate the full Quiz document (questions, points, etc.) for the
-      // exam page. The candidate-info "QuizOverview" is metadata-only.
       let fullQuiz = storedQuizzes.find((q) => q.id === quiz.id);
 
       if (!fullQuiz || !fullQuiz.questions) {
@@ -201,7 +181,7 @@ function CandidateInfoForm({
         px: { xs: 2, md: 3 },
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <Fade in timeout={600}>
           <Box>
             <Typography
@@ -251,7 +231,6 @@ function CandidateInfoForm({
                       <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
                         <CandidateFormFields
                           fieldsConfig={fieldsConfig}
-                          formValues={formValues}
                           isLoading={isLoading}
                         />
 
@@ -286,23 +265,24 @@ function CandidateInfoForm({
 
 interface CandidateFormFieldsProps {
   fieldsConfig: CandidateFieldsConfig;
-  formValues: CandidateFormValues;
   isLoading?: boolean;
 }
 
 function CandidateFormFields({
   fieldsConfig,
-  formValues,
   isLoading,
 }: CandidateFormFieldsProps) {
   const { fields, sections } = fieldsConfig;
   const { t } = useTranslation();
   const {
     register,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useFormContext<CandidateFormValues>();
+
+  // Subscribe to form values locally so only this component re-renders
+  const formValues = useWatch({ control });
 
   const isFieldVisible = (field: CandidateField): boolean => {
     if (!field.visibleIf) return true;
@@ -364,7 +344,7 @@ function CandidateFormFields({
                 <FieldRenderer
                   field={field}
                   register={register}
-                  watch={watch}
+                  watch={useWatch}
                   setValue={setValue}
                   error={errors[field.id]}
                 />

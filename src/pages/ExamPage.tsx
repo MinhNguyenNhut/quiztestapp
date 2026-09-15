@@ -323,7 +323,6 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
 
       <Box
         sx={{
-          maxWidth: 1400,
           mx: 'auto',
           p: { xs: 1.5, md: 3 },
           overflow: 'auto',

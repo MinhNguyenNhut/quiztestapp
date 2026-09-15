@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, useMemo, type KeyboardEvent } from 'react';
+import { useRef, useState, useCallback, useEffect, useMemo, memo, type KeyboardEvent } from 'react';
 import { Box, FormHelperText, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import EditorToolbar from './EditorToolbar.tsx';
@@ -30,7 +30,7 @@ interface RichTextEditorProps {
   helperText?: string;
 }
 
-export default function RichTextEditor({
+function RichTextEditor({
   value,
   onChange,
   placeholder,
@@ -55,23 +55,21 @@ export default function RichTextEditor({
   const [imageOpen, setImageOpen] = useState(false);
   const [tableOpen, setTableOpen] = useState(false);
 
-  // Keep the latest onChange without retriggering callbacks that depend on it.
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Sync external value into editor (skip while user is typing in it).
+  // Only sync external value into editor if it actually changed, and avoid 
+  // running expensive parseEditorContent inside this effect.
   useEffect(() => {
-    if (editorRef.current) {
-      const current = parseEditorContent(editorRef.current);
-      if (current.html !== value.html && !editorRef.current.contains(document.activeElement)) {
+    if (editorRef.current && value.html !== lastHtmlRef.current) {
+      if (!editorRef.current.contains(document.activeElement)) {
         setEditorContent(editorRef.current, value);
         lastHtmlRef.current = value.html || '';
       }
     }
   }, [value]);
 
-  // Cleanup pending debounce on unmount.
   useEffect(() => {
     return () => {
       if (debounceRef.current !== null) {
@@ -91,16 +89,16 @@ export default function RichTextEditor({
   }, []);
 
   const handleInput = useCallback(() => {
-    const el = editorRef.current;
-    if (!el) return;
-    const html = el.innerHTML;
-    if (html === lastHtmlRef.current) return;          // no-op input event
-    lastHtmlRef.current = html;
     if (debounceRef.current !== null) {
       window.clearTimeout(debounceRef.current);
     }
     debounceRef.current = window.setTimeout(() => {
       debounceRef.current = null;
+      const el = editorRef.current;
+      if (!el) return;
+      const html = el.innerHTML;
+      if (html === lastHtmlRef.current) return;
+      lastHtmlRef.current = html;
       onChangeRef.current(parseEditorContent(el));
     }, 120);
   }, []);
@@ -145,7 +143,6 @@ export default function RichTextEditor({
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         flushChange();
-        // Save is handled by parent form
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
@@ -171,7 +168,6 @@ export default function RichTextEditor({
   const handleBlur = useCallback(() => {
     isFocusedRef.current = false;
     setIsFocused(false);
-    // Flush any pending debounced change so the parent has the final value.
     if (debounceRef.current !== null) {
       window.clearTimeout(debounceRef.current);
       debounceRef.current = null;
@@ -179,7 +175,6 @@ export default function RichTextEditor({
     flushChange();
   }, [flushChange]);
 
-  // Memoize the heavy sx to avoid rebuilding the emotion style on every render.
   const editorSx = useMemo(
     () => ({
       minHeight,
@@ -232,6 +227,10 @@ export default function RichTextEditor({
     [error, isFocused],
   );
 
+  const handleInsertImage = useCallback(() => setImageOpen(true), []);
+  const handleInsertTable = useCallback(() => setTableOpen(true), []);
+  const handleInsertFormula = useCallback(() => setFormulaOpen(true), []);
+
   return (
     <Box>
       {label && (
@@ -246,9 +245,9 @@ export default function RichTextEditor({
         {showToolbar && (
           <EditorToolbar
             onFormat={handleFormat}
-            onInsertImage={() => setImageOpen(true)}
-            onInsertTable={() => setTableOpen(true)}
-            onInsertFormula={() => setFormulaOpen(true)}
+            onInsertImage={handleInsertImage}
+            onInsertTable={handleInsertTable}
+            onInsertFormula={handleInsertFormula}
             onInsertBlank={showBlanks ? handleBlankInsert : undefined}
           />
         )}
@@ -289,3 +288,5 @@ export default function RichTextEditor({
     </Box>
   );
 }
+
+export default memo(RichTextEditor);

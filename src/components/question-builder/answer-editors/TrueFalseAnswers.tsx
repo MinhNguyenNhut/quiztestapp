@@ -1,29 +1,31 @@
+import { memo, useCallback } from 'react';
 import { Typography, Radio, FormControlLabel, Card, CardContent, FormControl, RadioGroup } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import type { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
+import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
-import { useCallback } from 'react';
 
 interface Props {
   control: Control<QuizFormValues>;
-  errors: FieldErrors<QuizFormValues>;
-  watch: UseFormWatch<QuizFormValues>;
   setValue: UseFormSetValue<QuizFormValues>;
   getValues: () => QuizFormValues;
   index: number;
 }
 
-export default function TrueFalseAnswers({ watch, setValue, index }: Props) {
+function TrueFalseAnswers({ control, setValue, index }: Props) {
   const { t } = useTranslation();
-  const currentValue = watch(`questions.${index}.options.0.isCorrect`);
+  const currentValue = useWatch({ control, name: `questions.${index}.options.0.isCorrect` });
 
   const handleChange = useCallback(
     (value: string) => {
       const isTrue = value === 'true';
-      setValue(`questions.${index}.options`, [
-        { text: 'True', isCorrect: isTrue, order: 0 },
-        { text: 'False', isCorrect: !isTrue, order: 1 },
-      ], { shouldValidate: true });
+      setValue(
+        `questions.${index}.options`,
+        [
+          { text: 'True', isCorrect: isTrue, order: 0 },
+          { text: 'False', isCorrect: !isTrue, order: 1 },
+        ],
+        { shouldValidate: false, shouldDirty: true },
+      );
     },
     [setValue, index],
   );
@@ -47,3 +49,5 @@ export default function TrueFalseAnswers({ watch, setValue, index }: Props) {
     </Card>
   );
 }
+
+export default memo(TrueFalseAnswers);
