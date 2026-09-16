@@ -1,18 +1,20 @@
+import { memo, useCallback } from 'react';
 import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useWatch, type Control } from 'react-hook-form';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import type { QuestionFormValues, QuestionType } from '../../types/index.ts';
+import type { QuizFormValues, QuestionType } from '../../types/index.ts';
 import { DIFFICULTY_COLORS, getDifficultyLabel, getQuestionTypeLabel } from '../../types/index.ts';
 
 interface QuestionListItemProps {
-  question: QuestionFormValues;
+  control: Control<QuizFormValues>;
   index: number;
   isSelected: boolean;
-  onSelect: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
+  onSelect: (index: number) => void;
+  onDuplicate: (index: number) => void;
+  onDelete: (index: number) => void;
 }
 
 const TYPE_COLORS: Record<QuestionType, string> = {
@@ -26,8 +28,8 @@ const TYPE_COLORS: Record<QuestionType, string> = {
   essay: '#f97316',
 };
 
-export default function QuestionListItem({
-  question,
+function QuestionListItem({
+  control,
   index,
   isSelected,
   onSelect,
@@ -36,16 +38,39 @@ export default function QuestionListItem({
 }: QuestionListItemProps) {
   const { t } = useTranslation();
 
+  const title = useWatch({ control, name: `questions.${index}.title` });
+  const type = useWatch({ control, name: `questions.${index}.type` }) as QuestionType;
+  const difficulty = useWatch({ control, name: `questions.${index}.difficulty` });
+
+  // Composed here, from the parent's *stable* onSelect/onDuplicate/onDelete
+  // references + this row's own index — so QuestionList never has to hand
+  // this component a freshly-allocated closure on every render.
+  const handleSelect = useCallback(() => onSelect(index), [onSelect, index]);
+  const handleDuplicateClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDuplicate(index);
+    },
+    [onDuplicate, index],
+  );
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete(index);
+    },
+    [onDelete, index],
+  );
+
   return (
     <Box
       role="button"
       tabIndex={0}
       aria-selected={isSelected}
-      onClick={onSelect}
+      onClick={handleSelect}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect();
+          handleSelect();
         }
       }}
       sx={{
@@ -98,30 +123,30 @@ export default function QuestionListItem({
             color: isSelected ? 'primary.main' : 'text.primary',
           }}
         >
-          {question.title || t('questionBuilder.questionFallback', { number: index + 1 })}
+          {title || t('questionBuilder.questionFallback', { number: index + 1 })}
         </Typography>
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           <Chip
-            label={getQuestionTypeLabel(question.type, t)}
+            label={getQuestionTypeLabel(type, t)}
             size="small"
             sx={{
               height: 22,
               fontSize: '0.65rem',
               fontWeight: 600,
-              bgcolor: `${TYPE_COLORS[question.type]}15`,
-              color: TYPE_COLORS[question.type],
+              bgcolor: `${TYPE_COLORS[type]}15`,
+              color: TYPE_COLORS[type],
               borderRadius: '4px',
             }}
           />
           <Chip
-            label={getDifficultyLabel(question.difficulty, t)}
+            label={getDifficultyLabel(difficulty, t)}
             size="small"
             sx={{
               height: 22,
               fontSize: '0.65rem',
               fontWeight: 600,
-              bgcolor: `${DIFFICULTY_COLORS[question.difficulty]}15`,
-              color: DIFFICULTY_COLORS[question.difficulty],
+              bgcolor: `${DIFFICULTY_COLORS[difficulty]}15`,
+              color: DIFFICULTY_COLORS[difficulty],
               borderRadius: '4px',
             }}
           />
@@ -131,17 +156,17 @@ export default function QuestionListItem({
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0, opacity: 0.6, '&:hover': { opacity: 1 } }}>
         <Tooltip title={t('common.edit')}>
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+          <IconButton size="small" onClick={handleSelect}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title={t('common.duplicate')}>
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDuplicate(); }}>
+          <IconButton size="small" onClick={handleDuplicateClick}>
             <ContentCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title={t('common.delete')}>
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDelete(); }} color="error">
+          <IconButton size="small" onClick={handleDeleteClick} color="error">
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -149,3 +174,5 @@ export default function QuestionListItem({
     </Box>
   );
 }
+
+export default memo(QuestionListItem);

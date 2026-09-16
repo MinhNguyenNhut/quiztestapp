@@ -37,7 +37,7 @@
    "equalsHelper": "Trường điều kiện phải bằng giá trị này thì trường này mới được hiển thị.",
    "clearRule": "Xóa điều kiện",
    "noEarlierFields": "Không có trường nào đứng trước — thêm một trường phía trên trường này để thiết lập điều kiện hiển thị.",
-   "pageDesc": "Cấu hình các trường mà thí sinh điền trước khi bắt đầu bài thi. Biểu mẫu hiển thị tại /quiz/:id/candidate được tạo từ danh sách này.",
+   "pageDesc": "Cấu hình các trường mà thí sinh cần điền trước khi bắt đầu bài thi. Biểu mẫu hiển thị trên trang thông tin thí sinh sẽ được tạo từ danh sách này.",
    "manageSections": "Quản lý nhóm",
    "manageSectionsDesc": "Các nhóm dùng để gộp các trường trên biểu mẫu thí sinh.",
    "done": "Xong",

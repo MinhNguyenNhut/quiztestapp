@@ -4,6 +4,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,8 +15,9 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../features/store';
+import { useAppDispatch, useAppSelector, type RootState } from '../features/store';
 import { deleteSubmission, fetchSubmissionsByQuiz, getSubmissionHistory } from '../features/submissions/submissionSlice';
+import { fetchQuizById } from '../features/quiz/quizSlice'; // <-- Import fetchQuizById
 import { SubmissionsSummaryHeader } from '../components/submissions/SubmissionsSummaryHeader';
 import { SubmissionsFilterBar } from '../components/submissions/SubmissionsFilterBar';
 import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
@@ -31,15 +33,32 @@ export default function SubmissionsDashboardPage() {
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
 
-  const quizzes = useAppSelector(state => state.quiz.quizzes);
-  const allSubmissions = useAppSelector(getSubmissionHistory);
+  const quizzes = useAppSelector((state: RootState) => state.quiz.quizzes);
+  const allSubmissions = useAppSelector((state: RootState) => getSubmissionHistory(state));
 
   const quiz = useMemo(() => quizzes.find((q) => q.id === id), [quizzes, id]);
+
+  const [notFoundId, setNotFoundId] = useState<string | null>(null);
+  const notFound = !quiz && notFoundId === id;
 
   useEffect(() => {
     if (!id) return;
     dispatch(fetchSubmissionsByQuiz(id));
-  }, [id, dispatch]);
+
+    // If the quiz isn't in the store (e.g., on page reload), fetch it.
+    if (!quiz) {
+      let cancelled = false;
+      dispatch(fetchQuizById(id))
+        .unwrap()
+        .catch(() => {
+          if (!cancelled) setNotFoundId(id);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [id, dispatch, quiz]);
 
   const submissions = useMemo(
     () => (quiz ? allSubmissions.filter((s) => s.quizId === quiz.id) : []),
@@ -59,23 +78,6 @@ export default function SubmissionsDashboardPage() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-
-  if (!quiz) {
-    return (
-      <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
-        <Alert
-          severity="error"
-          action={
-            <Button onClick={() => navigate('/')}>
-              {t('common.home')}
-            </Button>
-          }
-        >
-          {t('errors.quizNotFound')}
-        </Alert>
-      </Box>
-    );
-  }
 
   const filtered = useMemo(() => {
     let result = submissions;
@@ -144,6 +146,27 @@ export default function SubmissionsDashboardPage() {
     const validIds = new Set(sorted.map((s) => s.id));
     return new Set([...selectedIds].filter((sid) => validIds.has(sid)));
   }, [selectedIds, sorted]);
+
+  if (!quiz) {
+    if (!id || notFound) {
+      return (
+        <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
+          <Alert
+            severity="error"
+            action={<Button onClick={() => navigate('/')}>{t('common.home')}</Button>}
+          >
+            {t('errors.quizNotFound')}
+          </Alert>
+        </Box>
+      );
+    }
+
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const handleRowClick = (submission: Submission) => {
     navigate(`/quiz/${quiz.id}/result/${submission.id}`);

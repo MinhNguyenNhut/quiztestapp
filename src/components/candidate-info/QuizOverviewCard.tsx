@@ -114,24 +114,21 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
 
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.difficultyLabel')}:
-              </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t('candidate.difficultyLabel')}:
+            </Typography>
 
-              <Chip
-                label={t(`difficulty.${quiz.difficulty}`)}
-                size="small"
-                sx={{
-                  bgcolor: difficultyColor,
-                  color: '#fff',
-                  fontWeight: 600,
-                  height: 24,
-                }}
-              />
-            </Box>
+            <Chip
+              label={t(`difficulty.${quiz.difficulty}`)}
+              size="small"
+              sx={{
+                bgcolor: difficultyColor,
+                color: '#fff',
+                fontWeight: 600,
+                height: 24,
+              }}
+            />
           </Box>
 
           {quiz.createdBy && (

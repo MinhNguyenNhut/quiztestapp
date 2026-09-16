@@ -54,9 +54,9 @@ export function SubmissionsTable({
    onPageChange,
    onRowsPerPageChange,
 }: SubmissionsTableProps) {
-   const { t } = useTranslation();
+   const { t, i18n } = useTranslation();
    const sortedFields = [...fieldsConfig.fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-   const colCount = sortedFields.length + 6; // checkbox + fields + score + status + time + submitted + actions
+   const colCount = sortedFields.length + 6;
 
    const pageIds = submissions.map((s) => s.id);
    const selectedOnPageCount = pageIds.filter((id) => selectedIds.has(id)).length;
@@ -127,13 +127,13 @@ export function SubmissionsTable({
                               <TableCell>
                                  <Chip
                                     size="small"
-                                    label={s.status}
+                                    label={t(`submissions.submissionStatus.${s.status}`)}
                                     color={STATUS_COLOR[s.status] ?? 'default'}
                                     variant="outlined"
                                  />
                               </TableCell>
                               <TableCell>{formatSeconds(s.timeSpentSeconds)}</TableCell>
-                              <TableCell>{formatDate(s.submittedAt)}</TableCell>
+                              <TableCell>{formatDate(s.submittedAt, i18n.language)}</TableCell>
                               <TableCell align="right">
                                  <Tooltip title={t('common.delete')}>
                                     <IconButton
@@ -191,11 +191,12 @@ function formatSeconds(seconds?: number): string {
    return `${m}m ${sec}s`;
 }
 
-function formatDate(dateStr?: string): string {
+// Accept language as a parameter
+function formatDate(dateStr?: string, language: string = 'en'): string {
    if (!dateStr) return '—';
    const d = new Date(dateStr);
    if (isNaN(d.getTime())) return '—';
-   return d.toLocaleDateString(undefined, {
+   return d.toLocaleDateString(language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

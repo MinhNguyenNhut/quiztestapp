@@ -7,10 +7,11 @@ import { useAppDispatch } from '../../features/store';
 import { updateCandidateFieldsConfig } from '../../features/quiz/quizSlice';
 import { useAlert } from '../../hooks/useAlert';
 import AppAlert from '../common/AppAlert/AppAlert';
-import type {
-  CandidateField,
-  CandidateFieldSection,
-  CandidateFieldsConfig,
+import {
+  FIELD_TYPE_LABEL_KEYS,
+  type CandidateField,
+  type CandidateFieldSection,
+  type CandidateFieldsConfig
 } from '../../types/candidate';
 import CandidateFieldList from './CandidateFieldList';
 import CandidateFieldSectionManager from './CandidateFieldSectionManager';
@@ -139,7 +140,7 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
         </Box>
 
         <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto', p: 3 }}>
-          <Stack spacing={3} sx={{ maxWidth: 720 }}>
+          <Stack spacing={3}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                 {t('candidate.title')}
@@ -192,7 +193,7 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
                         {f.label || t('candidateFieldsBuilder.untitled')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {f.type}
+                        {t(FIELD_TYPE_LABEL_KEYS[f.type])}
                         {f.section ? ` · ${sections.find((s) => s.id === f.section)?.title ?? f.section}` : ''}
                         {f.required ? ` · ${t('candidateFieldsBuilder.requiredSuffix')}` : ''}
                       </Typography>

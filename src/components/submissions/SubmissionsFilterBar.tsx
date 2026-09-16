@@ -70,7 +70,11 @@ export function SubmissionsFilterBar({
         />
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel>{t('common.sortBy')}</InputLabel>
-          <Select value={sortBy} label={t('common.sortBy')} onChange={(e) => onSortByChange(e.target.value as any)}>
+          <Select
+            value={sortBy}
+            label={t('common.sortBy')}
+            onChange={(e) => onSortByChange(e.target.value as 'submitted' | 'score' | 'time')}
+          >
             <MenuItem value="submitted">{t('common.dateSubmitted')}</MenuItem>
             <MenuItem value="score">{t('common.score')}</MenuItem>
             <MenuItem value="time">{t('common.timeSpent')}</MenuItem>

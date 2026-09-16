@@ -10,15 +10,10 @@
    "deleteSingleTitle": "Delete submission?",
    "deleteBulkMessage": "This will permanently remove {{count}} submissions from \"{{title}}\". This action cannot be undone.",
    "deleteSingleMessage": "This will permanently remove the submission from \"{{title}}\". This action cannot be undone.",
-   "columns": {
-      "candidate": "Candidate",
-      "score": "Score",
-      "date": "Date",
-      "status": "Status"
-   },
-   "status": {
-      "completed": "Completed",
-      "inProgress": "In Progress",
-      "abandoned": "Abandoned"
+   "submissionStatus": {
+      "in_progress": "In Progress",
+      "submitted": "Submitted",
+      "expired": "Expired",
+      "graded": "Graded"
    }
 }

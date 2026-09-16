@@ -37,7 +37,7 @@
    "equalsHelper": "This field is shown only when the selected field matches this value.",
    "clearRule": "Clear Rule",
    "noEarlierFields": "There are no previous fields. Add a field above this one to configure conditional visibility.",
-   "pageDesc": "Configure the fields candidates complete before starting the quiz. The form displayed at /quiz/:id/candidate is generated from this list.",
+   "pageDesc": "Configure the fields candidates must complete before starting the quiz. The form displayed on the candidate information page is generated from this list.",
    "manageSections": "Manage Sections",
    "manageSectionsDesc": "Sections are used to group fields on the candidate form.",
    "done": "Done",

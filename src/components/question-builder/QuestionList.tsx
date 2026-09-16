@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -13,14 +13,16 @@ import {
   Badge,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useWatch, type Control } from 'react-hook-form';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 
 import QuestionListItem from './QuestionListItem.tsx';
-import type { QuestionFormValues } from '../../types/index.ts';
+import type { QuizFormValues, QuestionFormValues } from '../../types/index.ts';
 
 interface QuestionListProps {
-  questions: QuestionFormValues[];
+  fieldIds: string[];
+  control: Control<QuizFormValues>;
   selectedIndex: number | null;
   onSelect: (index: number) => void;
   onDuplicate: (index: number) => void;
@@ -36,7 +38,8 @@ interface QuestionListProps {
 }
 
 function QuestionList({
-  questions,
+  fieldIds,
+  control,
   selectedIndex,
   onSelect,
   onDuplicate,
@@ -54,8 +57,6 @@ function QuestionList({
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  // Keep the title local so typing does not update the parent
-  // on every keystroke.
   const [prevQuizTitle, setPrevQuizTitle] = useState(quizTitle);
   const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
 
@@ -66,27 +67,34 @@ function QuestionList({
       : 0
   );
 
-  // Sync local title if the parent changes it externally.
-  // This is the recommended React pattern for adjusting state on prop changes.
   if (quizTitle !== prevQuizTitle) {
     setPrevQuizTitle(quizTitle);
     setLocalQuizTitle(quizTitle);
   }
 
-  // Sync local estimated time if the parent changes it externally.
   if (estimatedTime !== prevEstimatedTime) {
     setPrevEstimatedTime(estimatedTime);
     setLocalEstimatedTime(estimatedTime ?? 0);
   }
 
-  const filtered = questions.filter((q) => {
-    const matchesSearch =
-      q.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
+  const isFiltering = search.trim() !== '' || typeFilter !== 'all';
+  const watchedQuestions = useWatch({
+    control,
+    name: 'questions',
+    disabled: !isFiltering,
+  }) as Pick<QuestionFormValues, 'title' | 'type'>[] | undefined;
 
-    const matchesType = typeFilter === 'all' || q.type === typeFilter;
+  const allIndices = useMemo(() => fieldIds.map((_, i) => i), [fieldIds]);
 
-    return matchesSearch && matchesType;
-  });
+  const filteredIndices = useMemo(() => {
+    if (!isFiltering || !watchedQuestions) return allIndices;
+    return allIndices.filter((index) => {
+      const q = watchedQuestions[index];
+      const matchesSearch = q?.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
+      const matchesType = typeFilter === 'all' || q?.type === typeFilter;
+      return matchesSearch && matchesType;
+    });
+  }, [allIndices, isFiltering, watchedQuestions, search, typeFilter]);
 
   const handleQuizTitleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -109,7 +117,6 @@ function QuestionList({
 
   const handleEstimatedTimeBlur = () => {
     if (localEstimatedTime !== (estimatedTime ?? 0)) {
-      console.log(estimatedTime);
       onEstimatedTimeChange(localEstimatedTime);
     }
   };
@@ -189,7 +196,7 @@ function QuestionList({
           </Typography>
 
           <Badge
-            badgeContent={questions.length}
+            badgeContent={fieldIds.length}
             color="primary"
             sx={{
               '& .MuiBadge-badge': {
@@ -278,7 +285,7 @@ function QuestionList({
           p: 1,
         }}
       >
-        {questions.length === 0 ? (
+        {fieldIds.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -309,7 +316,7 @@ function QuestionList({
               {t('questionBuilder.clickAddQuestion')}
             </Typography>
           </Box>
-        ) : filtered.length === 0 ? (
+        ) : filteredIndices.length === 0 ? (
           <Box
             sx={{
               textAlign: 'center',
@@ -322,21 +329,17 @@ function QuestionList({
             </Typography>
           </Box>
         ) : (
-          filtered.map((question) => {
-            const realIndex = questions.indexOf(question);
-
-            return (
-              <QuestionListItem
-                key={question.id || realIndex}
-                question={question}
-                index={realIndex}
-                isSelected={selectedIndex === realIndex}
-                onSelect={() => onSelect(realIndex)}
-                onDuplicate={() => onDuplicate(realIndex)}
-                onDelete={() => onDelete(realIndex)}
-              />
-            );
-          })
+          filteredIndices.map((index) => (
+            <QuestionListItem
+              key={fieldIds[index]}
+              control={control}
+              index={index}
+              isSelected={selectedIndex === index}
+              onSelect={onSelect}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+            />
+          ))
         )}
       </Box>
 

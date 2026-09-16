@@ -55,7 +55,7 @@ const buildPayload = (question: QuestionFormValues, index: number): CreateQuesti
 
 export default function QuestionBuilder(props: QuestionBuilderProps) {
   const { onSave, onDirtyChange, mode } = props;
-  
+
   const defaultValues = mode === 'edit' ? props.defaultValues : undefined;
   const originalQuiz = mode === 'edit' ? props.originalQuiz : undefined;
 
@@ -99,6 +99,22 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
 
   const { control, setValue, getValues, formState: { isDirty } } = methods;
   const { fields, append, remove, move } = useFieldArray({ control, name: 'questions' });
+
+  // `fields` gets a new array reference on every keystroke anywhere in the
+  // form, because Controller-based nested inputs require RHF to keep fields
+  // in sync with live values. We don't want that churn to reach the sidebar,
+  // which only needs to know the *count and order* of questions (ids), not
+  // their live values (each row watches its own values via useWatch).
+  // This useState-diff pattern gives us a value that only changes when the
+  // ids or their order actually changes — i.e. on add/remove/duplicate/move.
+  const [fieldIds, setFieldIds] = useState<string[]>(() => fields.map((f) => f.id));
+  const latestIds = fields.map((f) => f.id);
+  const idsChanged =
+    latestIds.length !== fieldIds.length ||
+    latestIds.some((id, i) => id !== fieldIds[i]);
+  if (idsChanged) {
+    setFieldIds(latestIds);
+  }
 
   const quizTitle = useWatch({ control, name: 'title' });
   const estimatedTime = useWatch({ control, name: 'estimatedTime' });
@@ -264,7 +280,8 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           <QuestionList
-            questions={fields}
+            fieldIds={fieldIds}
+            control={control}
             selectedIndex={selectedIndex}
             onSelect={handleSelectQuestion}
             onDuplicate={handleDuplicate}

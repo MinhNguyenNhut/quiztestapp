@@ -96,7 +96,7 @@ export default function CandidateFieldListItem({
         >
           {field.label || t('candidateFieldsBuilder.fieldLabelFallback', { index: index + 1 })}
         </Typography>
-        <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
+        <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 1 }}>
           <Chip
             label={t(FIELD_TYPE_LABEL_KEYS[field.type])}
             size="small"

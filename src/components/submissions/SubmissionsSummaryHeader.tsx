@@ -36,15 +36,31 @@ export function SubmissionsSummaryHeader({ quiz, submissions }: SubmissionsSumma
     );
   }, [submissions]);
 
-  const StatBox = ({
-    label,
-    value,
-    unit,
-  }: {
-    label: string;
-    value: string | number;
-    unit?: string;
-  }) => (
+  return (
+    <Box>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+        {quiz.title} — {t('common.submissions')}
+      </Typography>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
+        <StatBox label={t('common.totalAttempts')} value={totalAttempts} />
+        <StatBox label={t('common.averageScore')} value={`${avgPercentage}%`} />
+        <StatBox label={t('common.passRate')} value={`${passRate}%`} />
+        <StatBox label={t('common.averageTime')} value={formatSeconds(avgTime)} />
+      </Stack>
+    </Box>
+  );
+}
+
+function StatBox({
+  label,
+  value,
+  unit,
+}: {
+  label: string;
+  value: string | number;
+  unit?: string;
+}) {
+  return (
     <Card sx={{ flex: '1 1 180px', minWidth: 0 }}>
       <CardContent sx={{ p: 2 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
@@ -62,20 +78,6 @@ export function SubmissionsSummaryHeader({ quiz, submissions }: SubmissionsSumma
         </Box>
       </CardContent>
     </Card>
-  );
-
-  return (
-    <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-        {quiz.title} — {t('common.submissions')}
-      </Typography>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
-        <StatBox label={t('common.totalAttempts')} value={totalAttempts} />
-        <StatBox label={t('common.averageScore')} value={`${avgPercentage}%`} />
-        <StatBox label={t('common.passRate')} value={`${passRate}%`} />
-        <StatBox label={t('common.averageTime')} value={formatSeconds(avgTime)} />
-      </Stack>
-    </Box>
   );
 }
 
