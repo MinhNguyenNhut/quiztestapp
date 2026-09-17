@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
+import QuizSettingsBuilder, { DEFAULT_QUIZ_SETTINGS } from '../components/quiz-settings-builder';
 
 import type { Question, QuizFormValues } from '../types';
 import type { RootState } from '../features/store.ts';
@@ -18,6 +19,7 @@ import {
 } from '../features/quiz/quizSlice.ts';
 
 import { useAppDispatch, useAppSelector } from '../features/store.ts';
+import { getUserProfile } from '../features/user/userSlice';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields.ts';
@@ -93,6 +95,9 @@ export default function QuizEditorPage() {
     (state: RootState) => state.quiz.error
   );
 
+  // Get current user profile for createdBy field
+  const userProfile = useAppSelector(getUserProfile);
+
   useEffect(() => {
     if (id && !quiz) {
       void dispatch(fetchQuizById(id));
@@ -134,7 +139,8 @@ export default function QuizEditorPage() {
         createQuiz({
           title: data.title,
           description: data.description,
-          estimatedTime: data.estimatedTime ?? 0
+          estimatedTime: data.estimatedTime ?? 0,
+          createdBy: userProfile?.id
         })
       );
 
@@ -142,7 +148,7 @@ export default function QuizEditorPage() {
         throw new Error(result.payload ?? 'Failed to create quiz');
       }
     }
-  }, [dispatch, id, quiz]);
+  }, [dispatch, id, quiz, userProfile]);
 
   const defaultCandidateConfig = useMemo(() => getDefaultCandidateFieldsConfig(i18n.language), [i18n.language]);
   const candidateConfig = useMemo(() => {
@@ -200,6 +206,7 @@ export default function QuizEditorPage() {
       >
         <Tab label={t('quizEditor.tabQuestions')} id="tab-0" aria-controls="tabpanel-0" />
         <Tab label={t('quizEditor.tabCandidateFields')} id="tab-1" aria-controls="tabpanel-1" />
+        <Tab label={t('quizEditor.tabSettings')} id="tab-2" aria-controls="tabpanel-2" />
       </Tabs>
 
       <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
@@ -214,6 +221,7 @@ export default function QuizEditorPage() {
           ) : (
             <QuestionBuilder
               mode="create"
+              createdBy={userProfile?.id}
               onSave={handleSave}
             />
           )}
@@ -229,6 +237,20 @@ export default function QuizEditorPage() {
             <CandidateFieldsBuilder
               quizId={quizId}
               defaultConfig={defaultCandidateConfig}
+            />
+          )}
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={2}>
+          {quiz ? (
+            <QuizSettingsBuilder
+              quizId={quiz.id}
+              defaultSettings={quiz.settings ?? DEFAULT_QUIZ_SETTINGS}
+            />
+          ) : (
+            <QuizSettingsBuilder
+              quizId={quizId}
+              defaultSettings={DEFAULT_QUIZ_SETTINGS}
             />
           )}
         </TabPanel>

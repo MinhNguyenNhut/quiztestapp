@@ -26,5 +26,7 @@
    "shareUnsupported": "Sharing is not supported in this browser",
    "shareText": "I scored {{percentage}}% on \"{{title}}\"!",
    "byDifficulty": "By difficulty",
-   "byTopic": "By topic"
+   "byTopic": "By topic",
+   "thankYou": "Thank You!",
+   "quizCompleted": "You have completed the quiz."
 }

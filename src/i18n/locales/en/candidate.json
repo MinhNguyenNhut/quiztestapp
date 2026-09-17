@@ -13,6 +13,7 @@
    "createdLabel": "Created",
    "startQuiz": "Start Quiz",
    "startingQuiz": "Starting Quiz...",
+   "unlimitedTime": "No Time Limit",
    "fields": {
       "fullName": "Full Name",
       "email": "Email",

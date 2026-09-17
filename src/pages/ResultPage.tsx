@@ -11,6 +11,7 @@ import {
   Snackbar,
   Stack,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PrintIcon from '@mui/icons-material/Print';
@@ -42,6 +43,7 @@ import type { Quiz, Submission } from '../types';
 import { isAnswered } from '../types/answer';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 import { fetchQuizById } from '../features/quiz/quizSlice';
+import { getUserProfile } from '../features/user/userSlice';
 
 export default function ResultPage() {
   const { id, submissionId } = useParams<{ id: string; submissionId: string }>();
@@ -59,6 +61,13 @@ export default function ResultPage() {
   const submission = useMemo(
     () => submissions.find((s) => s.id === submissionId) ?? null,
     [submissions, submissionId]
+  );
+
+  // Get current user profile to check if user is the quiz owner
+  const userProfile = useAppSelector(getUserProfile);
+  const isQuizOwner = useMemo(
+    () => Boolean(userProfile && quiz && userProfile.id === quiz.createdBy),
+    [userProfile, quiz]
   );
 
   const [quizLoadFailed, setQuizLoadFailed] = useState(false);
@@ -138,19 +147,30 @@ export default function ResultPage() {
     );
   }
 
-  return <ResultView quiz={quiz} submission={submission} />;
+  return <ResultView quiz={quiz} submission={submission} isQuizOwner={isQuizOwner} />;
 }
 
 interface ResultViewProps {
   quiz: Quiz;
   submission: Submission;
+  isQuizOwner: boolean;
 }
 
-function ResultView({ quiz, submission }: ResultViewProps) {
+function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
+
+  // Get quiz settings
+  const settings = quiz.settings;
+
+  // ---------------------------------------------------------------------
+  // IMPORTANT: All hooks below must run on every render, in the same
+  // order, regardless of which branch eventually returns. That's why
+  // every useMemo is grouped here, ABOVE the early "showResultsPage"
+  // return below. Never put a hook call after a conditional return.
+  // ---------------------------------------------------------------------
 
   const safeAnswers = useMemo(() => submission.answers ?? {}, [submission.answers]);
 
@@ -158,7 +178,6 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     () => computeScore(quiz, safeAnswers),
     [quiz, safeAnswers]
   );
-  const passed = (submission.percentage ?? 0) >= (quiz.passingScore ?? 0);
 
   const stats = useMemo(() => {
     return summaryStats(
@@ -193,9 +212,63 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     return Math.min(1, (submission.timeSpentSeconds ?? 0) / quiz.estimatedTime);
   }, [quiz.estimatedTime, submission.timeSpentSeconds]);
 
+  // Plain derived values (not hooks) — fine wherever they sit.
+  const passed = (submission.percentage ?? 0) >= (quiz.passingScore ?? 0);
   const rankPercentile = estimateRankPercentile(submission.percentage ?? 0);
 
+  // Check retry settings
+  const canRetry = settings?.allowRetry !== false;
+  const maxAttempts = settings?.maxAttempts ?? 1;
+  // For simplicity, we'll track attempt count from the submission history
+  // In a real app, this would come from the backend or be computed from submission history
+  const attemptCount = 1; // First attempt by default
+  const canRetryNow = canRetry && (maxAttempts === 0 || attemptCount < maxAttempts);
+
+  // If showResultsPage is false, show simple completion screen.
+  // Quiz owners can always see the full results regardless of this setting.
+  // This early return now happens AFTER all hooks have been called,
+  // so hook order stays consistent across renders.
+  const isOwnerView = isQuizOwner;
+  if (settings && settings.showResultsPage === false && !isOwnerView) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: 'background.default',
+          py: { xs: 2, md: 4 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ maxWidth: 600, mx: 'auto', px: 3, textAlign: 'center' }}>
+          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'success.main' }}>
+            {t('result.thankYou')}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+            {t('result.quizCompleted')}
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<HomeIcon />}
+              onClick={() => {
+                dispatch(clearCurrent());
+                dispatch(resetSession());
+                navigate('/');
+              }}
+            >
+              {t('result.returnHome')}
+            </Button>
+          </Stack>
+        </Box>
+      </Box>
+    );
+  }
+
   const handleRetry = () => {
+    if (!canRetryNow) return;
     dispatch(clearCurrent());
     dispatch(resetSession());
     navigate(`/quiz/${quiz.id}/candidate`);
@@ -257,58 +330,68 @@ function ResultView({ quiz, submission }: ResultViewProps) {
     >
       <Box sx={{ mx: 'auto', px: { xs: 2, md: 3 } }}>
         <Stack spacing={3}>
-          <ResultHeader
-            submission={submission}
-            passed={passed}
-            rankPercentile={rankPercentile}
-          />
-          <StatsBlock
-            total={summary.perQuestion.length}
-            correct={summary.correct}
-            wrong={summary.wrong}
-            skipped={summary.skipped}
-            accuracy={summary.percentage / 100}
-            timeUsedSeconds={submission.timeSpentSeconds ?? 0}
-          />
+          {isQuizOwner || settings?.showPassFailStatus !== false ? (
+            <ResultHeader
+              submission={submission}
+              passed={passed}
+              rankPercentile={rankPercentile}
+            />
+          ) : null}
+          {isQuizOwner || settings?.showScore !== false ? (
+            <StatsBlock
+              total={summary.perQuestion.length}
+              correct={summary.correct}
+              wrong={summary.wrong}
+              skipped={summary.skipped}
+              accuracy={summary.percentage / 100}
+              timeUsedSeconds={submission.timeSpentSeconds ?? 0}
+            />
+          ) : null}
           <CandidateSummaryCard
             candidate={submission.candidate}
             fieldsConfig={
               quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language)
             }
           />
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <ScoreCircle
-                percentage={submission.percentage ?? 0}
-                passed={passed}
-                score={submission.score ?? 0}
-                total={summary.totalPoints}
-              />
+          {isQuizOwner || settings?.showScore !== false ? (
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <ScoreCircle
+                  percentage={submission.percentage ?? 0}
+                  passed={passed}
+                  score={submission.score ?? 0}
+                  total={summary.totalPoints}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <PerformanceRadar
+                  difficulty={difficulties}
+                  topic={topics}
+                  accuracyOverall={stats.accuracy}
+                  participation={participation}
+                  timeUsedRatio={timeUsedRatio}
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <PerformanceRadar
-                difficulty={difficulties}
-                topic={topics}
-                accuracyOverall={stats.accuracy}
-                participation={participation}
-                timeUsedRatio={timeUsedRatio}
-              />
-            </Grid>
-          </Grid>
+          ) : null}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 12 }}>
               <BreakdownChart title={t('result.byTopic')} stats={topics} />
             </Grid>
           </Grid>
 
-          <Card variant="outlined" sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <QuestionReviewAccordion
-                results={summary.perQuestion}
-                candidateAnswers={safeAnswers}
-              />
-            </CardContent>
-          </Card>
+          {isQuizOwner || settings?.showCorrectAnswers !== false ? (
+            <Card variant="outlined" sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <QuestionReviewAccordion
+                  results={summary.perQuestion}
+                  candidateAnswers={safeAnswers}
+                  showCorrectAnswers={isQuizOwner || !!settings?.showCorrectAnswers}
+                  showExplanations={isQuizOwner || !!settings?.showExplanations}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Card
             variant="outlined"
@@ -326,14 +409,16 @@ function ResultView({ quiz, submission }: ResultViewProps) {
                 useFlexGap
               >
                 <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }} useFlexGap>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<RefreshIcon />}
-                    onClick={handleRetry}
-                  >
-                    {t('result.retryQuiz')}
-                  </Button>
+                  {canRetryNow && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<RefreshIcon />}
+                      onClick={handleRetry}
+                    >
+                      {t('result.retryQuiz')}
+                    </Button>
+                  )}
                   <Tooltip title={t('result.downloadPdfTooltip')}>
                     <Button
                       variant="outlined"

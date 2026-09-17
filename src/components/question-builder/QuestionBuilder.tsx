@@ -19,7 +19,7 @@ import type { CreateQuestionPayload } from '../../api/questionApi.ts';
 import { useAppDispatch } from '../../features/store.ts';
 
 type QuestionBuilderProps =
-  | { mode: 'create'; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void }
+  | { mode: 'create'; createdBy?: string; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void }
   | { mode: 'edit'; defaultValues: QuizFormValues; originalQuiz: Quiz; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void };
 
 function getFirstErrorMessage(errors: unknown): string | undefined {
@@ -58,6 +58,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
 
   const defaultValues = mode === 'edit' ? props.defaultValues : undefined;
   const originalQuiz = mode === 'edit' ? props.originalQuiz : undefined;
+  const createdBy = mode === 'create' ? props.createdBy : undefined;
 
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -70,24 +71,22 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
 
   const quizFormSchema = useMemo(() => createQuestionSchemas(t).createQuizFormSchema, [t]);
 
-  const initialValues: QuizFormValues = useMemo(
-    () =>
-      mode === 'edit' && defaultValues
-        ? {
-          ...defaultValues,
-          questions: (defaultValues.questions ?? []).map((question) => ({
-            ...question,
-            options: (question.options ?? []).map((option, optionIndex) => ({
-              ...option,
-              id: option.id ?? uuidv4(),
-              text: option.text ?? '',
-              isCorrect: Boolean(option.isCorrect),
-              order: option.order ?? optionIndex,
-            })),
+  const [initialValues] = useState<QuizFormValues>(() =>
+    mode === 'edit' && defaultValues
+      ? {
+        ...defaultValues,
+        questions: (defaultValues.questions ?? []).map((question) => ({
+          ...question,
+          options: (question.options ?? []).map((option, optionIndex) => ({
+            ...option,
+            id: option.id ?? uuidv4(),
+            text: option.text ?? '',
+            isCorrect: Boolean(option.isCorrect),
+            order: option.order ?? optionIndex,
           })),
-        }
-        : { title: '', description: '', estimatedTime: 0, questions: [] },
-    [],
+        })),
+      }
+      : { title: '', description: '', estimatedTime: 0, questions: [] },
   );
 
   const methods = useForm<QuizFormValues>({
@@ -140,7 +139,12 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
   const submitToStore = useCallback(
     async (data: QuizFormValues) => {
       const quiz = await dispatch(
-        createQuiz({ title: data.title, description: data.description, estimatedTime: data.estimatedTime ?? 0 }),
+        createQuiz({
+          title: data.title,
+          description: data.description,
+          estimatedTime: data.estimatedTime ?? 0,
+          createdBy,
+        }),
       ).unwrap();
 
       for (const [index, question] of data.questions.entries()) {
@@ -148,7 +152,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
       }
       navigate('/');
     },
-    [dispatch, navigate],
+    [dispatch, navigate, createdBy],
   );
 
   const updateQuestions = useCallback(

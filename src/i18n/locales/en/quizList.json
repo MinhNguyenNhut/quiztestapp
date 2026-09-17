@@ -11,6 +11,7 @@
    "questions_plural": "{{count}} Questions",
    "minutes": "{{count}} min",
    "minutes_plural": "{{count}} mins",
+   "unlimitedTime": "No Time Limit",
    "updated": "Updated {{time}}",
    "start": "Start",
    "submissions": "Submissions",

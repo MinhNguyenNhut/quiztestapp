@@ -1,0 +1,21 @@
+{
+  "title": "Quiz Settings",
+  "pageDesc": "Configure how the quiz behaves, how it's graded, and what candidates see after completing it.",
+  "gradingSection": "Grading",
+  "resultsSection": "Results & Feedback",
+  "navigationSection": "Attempts & Navigation",
+  "passingScore": "Passing Score (%)",
+  "showResultsPage": "Show Results Page",
+  "showScore": "Show Score",
+  "showPassFailStatus": "Show Pass/Fail Status",
+  "showCorrectAnswers": "Show Correct Answers",
+  "showExplanations": "Show Explanations",
+  "allowRetry": "Allow Retry",
+  "maxAttempts": "Max Attempts (0 = unlimited)",
+  "shuffleQuestions": "Shuffle Questions",
+  "shuffleOptions": "Shuffle Options",
+  "allowBackwardNavigation": "Allow Backward Navigation",
+  "unlimitedTime": "Unlimited Time (No Time Limit)",
+  "settingsSaved": "Quiz settings saved successfully",
+  "saveFailed": "Failed to save quiz settings"
+}

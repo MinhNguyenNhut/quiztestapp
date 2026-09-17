@@ -22,6 +22,7 @@ import time from './time.json';
 import login from './login.json';
 import register from './register.json';
 import profile from './profile.json';
+import quizSettings from './quizSettings.json';
 
 export default {
    common,
@@ -47,5 +48,6 @@ export default {
    time,
    login,
    register,
-   profile
+   profile,
+   quizSettings
 };

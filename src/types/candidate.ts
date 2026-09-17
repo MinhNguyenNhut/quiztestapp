@@ -75,6 +75,7 @@ export interface QuizOverview {
   difficulty: 'easy' | 'medium' | 'hard';
   createdBy?: string;
   createdAt?: string;
+  unlimitedTime?: boolean;
 }
 
 /**

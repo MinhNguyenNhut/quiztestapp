@@ -35,7 +35,7 @@ import { useAppDispatch, useAppSelector } from '../features/store.ts';
 import {
   addQuiz,
   deleteQuiz,
-  fetchQuizzes,
+  fetchQuizzesByUser,
 } from '../features/quiz/quizSlice.ts';
 import { quizToFormValues, formValuesToQuiz } from '../utils/quizMappers.ts';
 import {
@@ -62,10 +62,13 @@ export default function QuizListPage() {
   const quizzes = useAppSelector(state => state.quiz.quizzes);
   const isLoading = useAppSelector((s) => s.quiz.isLoading);
   const error = useAppSelector((s) => s.quiz.error);
+  const userId = useAppSelector((s) => s.user.profile?.id);
 
   useEffect(() => {
-    void dispatch(fetchQuizzes());
-  }, [dispatch]);
+    if (!userId) return;
+
+    void dispatch(fetchQuizzesByUser({ userId }));
+  }, [dispatch, userId]);
 
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Quiz | null>(null);
@@ -276,6 +279,7 @@ function QuizCard({
   const difficulty = aggregateDifficulty(questions);
   const minutes = quiz.estimatedTime ?? 0;
   const questionCount = quiz.questionCount ?? questions.length ?? 0;
+  const unlimitedTime = quiz.settings?.unlimitedTime ?? false;
 
   return (
     <Card
@@ -331,8 +335,9 @@ function QuizCard({
           <Chip
             size="small"
             icon={<TimerIcon />}
-            label={t('quizList.minutes', { count: minutes })}
+            label={unlimitedTime ? t('quizList.unlimitedTime') : t('quizList.minutes', { count: minutes })}
             variant="outlined"
+            sx={unlimitedTime ? { bgcolor: 'success.light', color: 'success.dark', '& .MuiChip-icon': { color: 'success.dark' } } : {}}
           />
         </Stack>
 

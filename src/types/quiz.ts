@@ -8,6 +8,44 @@
 import type { TFunction } from 'i18next';
 import type { CandidateFieldsConfig } from './candidate';
 
+/** Quiz-level behavior and grading configuration. */
+export interface QuizSettings {
+  // Result & feedback settings
+  showResultsPage: boolean;
+  showScore: boolean;
+  showPassFailStatus: boolean;
+  showCorrectAnswers: boolean;
+  showExplanations: boolean;
+
+  // Attempt & navigation settings
+  allowRetry: boolean;
+  maxAttempts: number; // 0 = unlimited
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+  allowBackwardNavigation: boolean;
+
+  // Grading settings
+  passingScorePercentage: number;
+
+  // Time settings
+  unlimitedTime: boolean;
+}
+
+export const DEFAULT_QUIZ_SETTINGS: QuizSettings = {
+  showResultsPage: true,
+  showScore: true,
+  showPassFailStatus: true,
+  showCorrectAnswers: true,
+  showExplanations: false,
+  allowRetry: false,
+  maxAttempts: 1,
+  shuffleQuestions: false,
+  shuffleOptions: false,
+  allowBackwardNavigation: true,
+  passingScorePercentage: 70,
+  unlimitedTime: false,
+};
+
 /** Question types supported by the platform. */
 export type QuestionType =
   | 'single_choice'
@@ -99,6 +137,7 @@ export interface Quiz {
   updatedAt: string;
   difficulty?: "easy" | "medium" | "hard";
   candidateFieldsConfig?: CandidateFieldsConfig;
+  settings?: QuizSettings;
   questions: Question[];
 }
 
@@ -158,6 +197,7 @@ export interface QuizFormValues {
   title: string;
   description: string;
   estimatedTime?: number;
+  settings?: QuizSettings;
   questions: QuestionFormValues[];
 }
 

@@ -47,6 +47,20 @@ export const fetchQuizzes = createAsyncThunk<
   }
 });
 
+/** GET /api/quizzes/user/:userId */
+export const fetchQuizzesByUser = createAsyncThunk<
+  Quiz[],
+  { userId: string; page?: number; limit?: number },
+  { rejectValue: string }
+>('quizzes/fetchByUser', async ({ userId, page = 1, limit = 50 }, { rejectWithValue }) => {
+  try {
+    const res = await quizApi.listByUser(userId, page, limit);
+    return res.data;
+  } catch (err) {
+    return rejectWithValue(rejectMessage(err, 'Failed to load quizzes for user'));
+  }
+});
+
 /** GET /api/quizzes/:id — fetches a single quiz (includes nested questions[]). */
 export const fetchQuizById = createAsyncThunk<
   Quiz,
@@ -63,7 +77,7 @@ export const fetchQuizById = createAsyncThunk<
 /** POST /api/quizzes. */
 export const createQuiz = createAsyncThunk<
   Quiz,
-  { title: string; description: string; estimatedTime: number; candidateFieldsConfig?: CandidateFieldsConfig },
+  { title: string; description: string; estimatedTime: number; candidateFieldsConfig?: CandidateFieldsConfig; createdBy?: string },
   { rejectValue: string }
 >('quizzes/create', async (payload, { rejectWithValue }) => {
   try {
@@ -76,7 +90,7 @@ export const createQuiz = createAsyncThunk<
 /** PATCH /api/quizzes/:id. */
 export const updateQuiz = createAsyncThunk<
   Quiz,
-  { id: string; patch: Partial<Pick<Quiz, 'title' | 'description' | 'estimatedTime' | 'candidateFieldsConfig'>> },
+  { id: string; patch: Partial<Pick<Quiz, 'title' | 'description' | 'estimatedTime' | 'candidateFieldsConfig' | 'settings'>> },
   { rejectValue: string }
 >('quizzes/update', async ({ id, patch }, { rejectWithValue }) => {
   try {
@@ -170,6 +184,19 @@ const quizSlice = createSlice({
       .addCase(fetchQuizzes.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload ?? action.error.message ?? 'Failed to load quizzes';
+      })
+
+      .addCase(fetchQuizzesByUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchQuizzesByUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.quizzes = action.payload;
+      })
+      .addCase(fetchQuizzesByUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ?? action.error.message ?? 'Failed to load quizzes for user';
       })
 
       // fetchQuizById

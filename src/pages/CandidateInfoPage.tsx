@@ -85,6 +85,7 @@ export default function CandidateInfoPage() {
     difficulty: quiz.difficulty ?? 'medium',
     createdBy: quiz.createdBy ?? 'Unknown',
     createdAt: quiz.createdAt,
+    unlimitedTime: quiz.settings?.unlimitedTime ?? false,
   };
 
   const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
@@ -154,11 +155,31 @@ function CandidateInfoForm({
         return;
       }
 
+      // Apply quiz settings: shuffle questions and options
+      let questions = [...(fullQuiz.questions ?? [])];
+      const settings = fullQuiz.settings;
+
+      // Shuffle questions if enabled
+      if (settings?.shuffleQuestions) {
+        questions = shuffleArray(questions);
+      }
+
+      // Shuffle options for each question if enabled
+      if (settings?.shuffleOptions) {
+        questions = questions.map((q) => ({
+          ...q,
+          options: shuffleArray([...q.options]),
+        }));
+      }
+
+      // If unlimited time is enabled, pass 0 to disable timer
+      const estimatedMinutes = settings?.unlimitedTime ? 0 : fullQuiz.estimatedTime;
+
       dispatch(
         startSession({
           quizId: fullQuiz.id,
-          questions: fullQuiz.questions,
-          estimatedMinutes: fullQuiz.estimatedTime,
+          questions,
+          estimatedMinutes,
           candidate: data,
         }),
       );
@@ -171,6 +192,16 @@ function CandidateInfoForm({
       setIsSubmitting(false);
     }
   };
+
+// Utility function to shuffle array (Fisher-Yates)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
   return (
     <Box
@@ -202,7 +233,7 @@ function CandidateInfoForm({
               <Grid size={{ xs: 12, md: 5 }}>
                 <Fade in timeout={800}>
                   <Box sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
-                    <QuizOverviewCard quiz={quiz} />
+                    <QuizOverviewCard quiz={quiz} unlimitedTime={quiz.unlimitedTime} />
                   </Box>
                 </Fade>
               </Grid>

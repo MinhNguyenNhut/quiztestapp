@@ -21,13 +21,14 @@ import { DIFFICULTY_COLORS } from '../../types/quiz';
 
 interface QuizOverviewCardProps {
   quiz: QuizOverview;
+  unlimitedTime?: boolean;
 }
 
 /**
  * QuizOverviewCard displays the quiz information in a card format
  * Shows cover image, title, description, and metadata
  */
-export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
+export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOverviewCardProps) {
   const { t, i18n } = useTranslation();
   const difficultyColor = DIFFICULTY_COLORS[quiz.difficulty];
   const dateLocale = i18n.language?.startsWith('vi') ? 'vi-VN' : 'en-US';
@@ -78,7 +79,17 @@ export default function QuizOverviewCard({ quiz }: QuizOverviewCardProps) {
         <Divider sx={{ my: 2 }} />
 
         <Stack spacing={2}>
-          {quiz.estimatedTime && (
+          {unlimitedTime ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
+              <Typography variant="body2" color="text.secondary">
+                {t('candidate.estimatedTime')}:{' '}
+                <Box component="span" sx={{ fontWeight: 600, color: 'success.main' }}>
+                  {t('candidate.unlimitedTime')}
+                </Box>
+              </Typography>
+            </Box>
+          ) : quiz.estimatedTime && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">

@@ -127,7 +127,7 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
             onReorder={handleReorder}
             onDelete={handleDeleteField}
           />
-          <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{ p: 1.5, border: 1, borderColor: 'divider', backgroundColor: '#ffffff' }}>
             <Button
               variant="contained"
               fullWidth

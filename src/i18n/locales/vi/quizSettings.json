@@ -1,0 +1,21 @@
+{
+  "title": "Cài đặt bài kiểm tra",
+  "pageDesc": "Cấu hình cách bài kiểm tra hoạt động, cách chấm điểm và những gì ứng viên nhìn thấy sau khi hoàn thành.",
+  "gradingSection": "Chấm điểm",
+  "resultsSection": "Kết quả & Phản hồi",
+  "navigationSection": "Lượt làm & Điều hướng",
+  "passingScore": "Điểm đạt (%)",
+  "showResultsPage": "Hiển thị trang kết quả",
+  "showScore": "Hiển thị điểm số",
+  "showPassFailStatus": "Hiển thị trạng thái Đạt/Không đạt",
+  "showCorrectAnswers": "Hiển thị đáp án đúng",
+  "showExplanations": "Hiển thị giải thích",
+  "allowRetry": "Cho phép làm lại",
+  "maxAttempts": "Số lần tối đa (0 = không giới hạn)",
+  "shuffleQuestions": "Xáo trộn câu hỏi",
+  "shuffleOptions": "Xáo trộn đáp án",
+  "allowBackwardNavigation": "Cho phép quay lại câu trước",
+  "unlimitedTime": "Không giới hạn thời gian",
+  "settingsSaved": "Đã lưu cài đặt bài kiểm tra thành công",
+  "saveFailed": "Lưu cài đặt bài kiểm tra thất bại"
+}

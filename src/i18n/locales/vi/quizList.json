@@ -11,6 +11,7 @@
    "questions_plural": "{{count}} Câu hỏi",
    "minutes": "{{count}} phút",
    "minutes_plural": "{{count}} phút",
+   "unlimitedTime": "Không giới hạn thời gian",
    "updated": "Cập nhật {{time}}",
    "start": "Bắt đầu",
    "submissions": "Bài nộp",

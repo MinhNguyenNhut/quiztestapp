@@ -143,6 +143,9 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   const fullscreen = useFullscreen();
   const online = useNetworkStatus();
 
+  // Get quiz settings
+  const settings = quiz.settings;
+
   const question = useMemo(
     () => quiz.questions[session.currentIndex] ?? null,
     [quiz.questions, session.currentIndex]
@@ -168,21 +171,28 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
     return total;
   }, [quiz.questions, session.answers, question]);
 
+  // Check if unlimited time is enabled
+  const isUnlimitedTime = settings?.unlimitedTime === true;
+
   useEffect(() => {
+    // If unlimited time is enabled, don't start the timer
+    if (isUnlimitedTime) return;
     if (session.isSubmitted) return;
     if (session.remainingSeconds <= 0) return;
     const id = window.setInterval(() => {
       dispatch(tickTimer(Math.max(0, session.remainingSeconds - 1)));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [dispatch, session.remainingSeconds, session.isSubmitted]);
+  }, [dispatch, session.remainingSeconds, session.isSubmitted, isUnlimitedTime]);
 
   useEffect(() => {
+    // If unlimited time is enabled, don't expire the timer
+    if (isUnlimitedTime) return;
     if (session.isSubmitted) return;
     if (session.remainingSeconds > 0) return;
     dispatch(expireTimer());
     onSubmit('expired');
-  }, [dispatch, session.remainingSeconds, session.isSubmitted, onSubmit]);
+  }, [dispatch, session.remainingSeconds, session.isSubmitted, onSubmit, isUnlimitedTime]);
 
   useAutoSave(AUTOSAVE_KEY_PREFIX + (session.quizId ?? ''), session, {
     onSave: () => {
@@ -204,8 +214,12 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   }, [dispatch]);
 
   const handlePrevious = useCallback(() => {
+    // Check if backward navigation is allowed
+    if (settings?.allowBackwardNavigation === false) {
+      return;
+    }
     dispatch(previousQuestion());
-  }, [dispatch]);
+  }, [dispatch, settings]);
 
   const handleJump = useCallback(
     (index: number) => dispatch(goToQuestion(index)),
@@ -309,13 +323,13 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
         autoSaveStatus={session.autoSaveStatus}
         online={online}
         trailing={
-          isMobile ? undefined : (
+          !isUnlimitedTime && !isMobile ? (
             <HeaderTimer remainingSeconds={session.remainingSeconds} />
-          )
+          ) : undefined
         }
       />
 
-      {isMobile && (
+      {!isUnlimitedTime && isMobile && (
         <Box sx={{ p: 2 }}>
           <TimerCard remainingSeconds={session.remainingSeconds} dense />
         </Box>
@@ -342,9 +356,11 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
                     }
                     score={liveScore}
                     total={quiz.questions.length}
-                    timeLeftSeconds={session.remainingSeconds}
+                    timeLeftSeconds={isUnlimitedTime ? 0 : session.remainingSeconds}
                   />
-                  <TimerCard remainingSeconds={session.remainingSeconds} />
+                  {!isUnlimitedTime && (
+                    <TimerCard remainingSeconds={session.remainingSeconds} />
+                  )}
                   <ProgressCard
                     answered={answeredCount}
                     total={quiz.questions.length}

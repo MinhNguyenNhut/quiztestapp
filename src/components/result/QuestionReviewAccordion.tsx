@@ -22,6 +22,8 @@ import { getQuestionTypeLabel } from '../../types';
 interface QuestionReviewAccordionProps {
   results: PerQuestionResult[];
   candidateAnswers: Record<string, import('../../types/answer').AnyAnswer>;
+  showCorrectAnswers?: boolean;
+  showExplanations?: boolean;
 }
 
 const statusMeta = (
@@ -96,7 +98,12 @@ const formatCorrectAnswer = (question: import('../../types/quiz').Question, t: (
   }
 };
 
-export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionReviewAccordionProps) => {
+export const QuestionReviewAccordion = ({
+  results,
+  candidateAnswers,
+  showCorrectAnswers = true,
+  showExplanations = true
+}: QuestionReviewAccordionProps) => {
   const { t } = useTranslation();
 
   if (results.length === 0) {
@@ -193,49 +200,51 @@ export const QuestionReviewAccordion = ({ results, candidateAnswers }: QuestionR
                     dangerouslySetInnerHTML={{ __html: r.question.content.html }}
                   />
                 )}
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      {t('common.yourAnswer')}
-                    </Typography>
-                    <Box
-                      sx={{
-                        mt: 0.5,
-                        p: 1.5,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        borderRadius: 1.5,
-                        backgroundColor: 'background.default',
-                        whiteSpace: 'pre-wrap',
-                        fontSize: '0.9rem',
-                        minHeight: 40,
-                      }}
-                    >
-                      {candidateText || <em>{t('common.noAnswer')}</em>}
+                {showCorrectAnswers && (
+                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        {t('common.yourAnswer')}
+                      </Typography>
+                      <Box
+                        sx={{
+                          mt: 0.5,
+                          p: 1.5,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 1.5,
+                          backgroundColor: 'background.default',
+                          whiteSpace: 'pre-wrap',
+                          fontSize: '0.9rem',
+                          minHeight: 40,
+                        }}
+                      >
+                        {candidateText || <em>{t('common.noAnswer')}</em>}
+                      </Box>
                     </Box>
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      {t('common.correctAnswer')}
-                    </Typography>
-                    <Box
-                      sx={{
-                        mt: 0.5,
-                        p: 1.5,
-                        border: '1px solid',
-                        borderColor: 'success.light',
-                        borderRadius: 1.5,
-                        backgroundColor: 'rgba(34,197,94,0.06)',
-                        whiteSpace: 'pre-wrap',
-                        fontSize: '0.9rem',
-                        minHeight: 40,
-                      }}
-                    >
-                      {correctText}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        {t('common.correctAnswer')}
+                      </Typography>
+                      <Box
+                        sx={{
+                          mt: 0.5,
+                          p: 1.5,
+                          border: '1px solid',
+                          borderColor: 'success.light',
+                          borderRadius: 1.5,
+                          backgroundColor: 'rgba(34,197,94,0.06)',
+                          whiteSpace: 'pre-wrap',
+                          fontSize: '0.9rem',
+                          minHeight: 40,
+                        }}
+                      >
+                        {correctText}
+                      </Box>
                     </Box>
-                  </Box>
-                </Stack>
-                {r.question.explanation && (
+                  </Stack>
+                )}
+                {showExplanations && r.question.explanation && (
                   <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, backgroundColor: 'rgba(99,102,241,0.06)' }}>
                     <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
                       {t('common.explanation')}

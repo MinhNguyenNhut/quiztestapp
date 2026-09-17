@@ -9,7 +9,7 @@
  * just metadata can ignore that field.
  */
 import type { CandidateFieldsConfig } from '../types/candidate';
-import type { Quiz } from '../types/quiz';
+import type { Quiz, QuizSettings } from '../types/quiz';
 import { apiDelete, apiGet, apiPatch, apiPost } from './httpClient';
 
 export interface PaginatedQuizzes {
@@ -24,6 +24,10 @@ export interface CreateQuizPayload {
   description: string;
   /** Optional owner-defined candidate-info field config. */
   candidateFieldsConfig?: CandidateFieldsConfig;
+  /** Optional quiz behavior and grading settings. */
+  settings?: QuizSettings;
+  /** ID of the user creating the quiz. */
+  createdBy?: string;
 }
 
 export type UpdateQuizPayload = Partial<CreateQuizPayload>;
@@ -31,6 +35,9 @@ export type UpdateQuizPayload = Partial<CreateQuizPayload>;
 export const quizApi = {
   list: (page = 1, limit = 20) =>
     apiGet<PaginatedQuizzes>('/api/quizzes', { params: { page, limit } }),
+
+  listByUser: (userId: string, page = 1, limit = 20) =>
+    apiGet<PaginatedQuizzes>(`/api/quizzes/user/${userId}`, { params: { page, limit } }),
 
   getById: (id: string) => apiGet<Quiz>(`/api/quizzes/${id}`),
 
