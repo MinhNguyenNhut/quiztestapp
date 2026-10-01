@@ -12,14 +12,16 @@ import type { QuizSettings } from '../../types';
 interface QuizSettingsBuilderProps {
   quizId: string;
   defaultSettings: QuizSettings;
+  estimatedTime?: number;
 }
 
-export default function QuizSettingsBuilder({ quizId, defaultSettings }: QuizSettingsBuilderProps) {
+export default function QuizSettingsBuilder({ quizId, defaultSettings, estimatedTime }: QuizSettingsBuilderProps) {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { alert, showAlert, closeAlert } = useAlert();
 
   const [settings, setSettings] = useState<QuizSettings>(defaultSettings ?? DEFAULT_QUIZ_SETTINGS);
+  const unlimitedTime = settings.unlimitedTime || estimatedTime === 0;
 
   const handleChange = useCallback((key: keyof QuizSettings, value: boolean | number) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -27,13 +29,13 @@ export default function QuizSettingsBuilder({ quizId, defaultSettings }: QuizSet
 
   const handleSave = useCallback(async () => {
     try {
-      await dispatch(updateQuiz({ id: quizId, patch: { settings } })).unwrap();
+      await dispatch(updateQuiz({ id: quizId, patch: { settings: { ...settings, unlimitedTime } } })).unwrap();
       showAlert(t('quizSettings.settingsSaved'), 'success');
     } catch (err) {
       console.error(err);
       showAlert(t('quizSettings.saveFailed'), 'error');
     }
-  }, [dispatch, quizId, settings, showAlert, t]);
+  }, [dispatch, quizId, settings, unlimitedTime, showAlert, t]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -60,7 +62,8 @@ export default function QuizSettingsBuilder({ quizId, defaultSettings }: QuizSet
               <FormControlLabel
                 control={
                   <Switch
-                    checked={settings.unlimitedTime}
+                    checked={unlimitedTime}
+                    disabled={estimatedTime === 0}
                     onChange={(e) => handleChange('unlimitedTime', e.target.checked)}
                     color="primary"
                   />

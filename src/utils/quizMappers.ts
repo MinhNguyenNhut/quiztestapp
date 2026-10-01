@@ -47,8 +47,6 @@ function questionToFormValues(
 
     difficulty: question.difficulty ?? 'medium',
 
-    topic: question.topic ?? '',
-
     tags: question.tags ?? [],
 
     options: (question.options ?? []).map(
@@ -127,7 +125,6 @@ function formValuesToQuestion(
     description: question.description ?? '',
     points: question.points ?? 1,
     difficulty: question.difficulty ?? 'medium',
-    topic: question.topic ?? '',
     tags: question.tags ?? [],
     order: index,
     options: (
@@ -175,7 +172,6 @@ export function createQuestionTemplate(
     description: '',
     points: 1,
     difficulty: 'medium',
-    topic: '',
     tags: [],
     options: defaultOptionsFor(type),
   };

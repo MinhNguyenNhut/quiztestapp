@@ -179,9 +179,6 @@ export const QuestionReviewAccordion = ({
                   <Chip label={getQuestionTypeLabel(r.question.type, t)} size="small" variant="outlined" />
                   <DifficultyChip difficulty={r.question.difficulty} />
                   <PointsBadge points={r.pointsPossible} />
-                  {r.question.topic && (
-                    <Chip label={r.question.topic} size="small" variant="outlined" color="info" />
-                  )}
                 </Stack>
                 {r.question.content.html && (
                   <Box

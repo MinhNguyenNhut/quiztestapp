@@ -52,9 +52,6 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
             />
             <DifficultyChip difficulty={question.difficulty} />
             <PointsBadge points={question.points} />
-            {question.topic && (
-              <Chip label={question.topic} size="small" variant="outlined" color="info" />
-            )}
           </Stack>
         </Stack>
         {question.title && (

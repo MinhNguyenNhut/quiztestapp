@@ -22,26 +22,6 @@ const groupBy = <T,>(items: T[], key: (t: T) => string): Record<string, T[]> =>
     return acc;
   }, {});
 
-export const topicBreakdown = (
-  _quiz: Quiz,
-  perQuestion: PerQuestionResult[],
-): BreakdownStat[] => {
-  const groups = groupBy(perQuestion, (p) => p.question.topic ?? 'Uncategorized');
-  return Object.entries(groups)
-    .map(([key, items]) => {
-      const total = items.length;
-      const correct = items.filter((i) => i.result.isCorrect).length;
-      return {
-        key,
-        label: key,
-        total,
-        correct,
-        accuracy: total === 0 ? 0 : correct / total,
-      };
-    })
-    .sort((a, b) => b.total - a.total);
-};
-
 export const difficultyBreakdown = (
   _quiz: Quiz,
   perQuestion: PerQuestionResult[],

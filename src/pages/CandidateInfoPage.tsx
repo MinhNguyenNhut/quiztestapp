@@ -26,6 +26,8 @@ import type {
   CandidateFormValues,
   QuizOverview,
 } from '../types/candidate';
+import { isQuizUnlimitedTime } from '../types/quiz';
+import { aggregateDifficulty } from '../utils/quizDisplay';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 
 export default function CandidateInfoPage() {
@@ -82,10 +84,10 @@ export default function CandidateInfoPage() {
     estimatedTime: quiz.estimatedTime ?? 30,
     questionCount: quiz.questionCount ?? quiz.questions?.length ?? 0,
     passingScore: quiz.passingScore ?? 0,
-    difficulty: quiz.difficulty ?? 'medium',
+    difficulty: aggregateDifficulty(quiz.questions ?? []) ?? 'medium',
     createdBy: quiz.createdBy ?? 'Unknown',
     createdAt: quiz.createdAt,
-    unlimitedTime: quiz.settings?.unlimitedTime ?? false,
+    unlimitedTime: isQuizUnlimitedTime(quiz),
   };
 
   const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
@@ -173,7 +175,7 @@ function CandidateInfoForm({
       }
 
       // If unlimited time is enabled, pass 0 to disable timer
-      const estimatedMinutes = settings?.unlimitedTime ? 0 : fullQuiz.estimatedTime;
+      const estimatedMinutes = isQuizUnlimitedTime(fullQuiz) ? 0 : fullQuiz.estimatedTime;
 
       dispatch(
         startSession({
@@ -233,7 +235,7 @@ function shuffleArray<T>(array: T[]): T[] {
               <Grid size={{ xs: 12, md: 5 }}>
                 <Fade in timeout={800}>
                   <Box sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
-                    <QuizOverviewCard quiz={quiz} unlimitedTime={quiz.unlimitedTime} />
+                    <QuizOverviewCard quiz={quiz} unlimitedTime={isQuizUnlimitedTime(quiz)} />
                   </Box>
                 </Fade>
               </Grid>

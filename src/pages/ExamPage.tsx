@@ -11,6 +11,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../features/store';
+import { isQuizUnlimitedTime } from '../types/quiz';
 import {
   clearAnswer,
   expireTimer,
@@ -172,7 +173,7 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   }, [quiz.questions, session.answers, question]);
 
   // Check if unlimited time is enabled
-  const isUnlimitedTime = settings?.unlimitedTime === true;
+  const isUnlimitedTime = isQuizUnlimitedTime(quiz);
 
   useEffect(() => {
     // If unlimited time is enabled, don't start the timer

@@ -19,7 +19,6 @@ export type CreateQuestionPayload = {
   description?: string;
   points: number;
   difficulty: Difficulty;
-  topic?: string;
   tags?: string[];
   order: number;
   options?: CreateQuestionOptionPayload[];

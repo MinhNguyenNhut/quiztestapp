@@ -37,7 +37,6 @@ import {
   difficultyBreakdown,
   estimateRankPercentile,
   summaryStats,
-  topicBreakdown,
 } from '../shared/utils/resultStats';
 import type { Quiz, Submission } from '../types';
 import { isAnswered } from '../types/answer';
@@ -188,10 +187,6 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
     );
   }, [quiz, summary, safeAnswers, submission.timeSpentSeconds]);
 
-  const topics = useMemo(
-    () => topicBreakdown(quiz, summary.perQuestion),
-    [quiz, summary.perQuestion]
-  );
   const difficulties = useMemo(
     () => difficultyBreakdown(quiz, summary.perQuestion),
     [quiz, summary.perQuestion]
@@ -366,7 +361,6 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
               <Grid size={{ xs: 12, md: 6 }}>
                 <PerformanceRadar
                   difficulty={difficulties}
-                  topic={topics}
                   accuracyOverall={stats.accuracy}
                   participation={participation}
                   timeUsedRatio={timeUsedRatio}
@@ -376,7 +370,7 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
           ) : null}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 12 }}>
-              <BreakdownChart title={t('result.byTopic')} stats={topics} />
+              <BreakdownChart title={t('result.byDifficulty')} stats={difficulties} />
             </Grid>
           </Grid>
 

@@ -127,6 +127,7 @@ export default function QuizEditorPage() {
             title: data.title,
             description: data.description,
             estimatedTime: data.estimatedTime ?? 0,
+            settings: data.settings ?? DEFAULT_QUIZ_SETTINGS,
           },
         })
       );
@@ -140,6 +141,7 @@ export default function QuizEditorPage() {
           title: data.title,
           description: data.description,
           estimatedTime: data.estimatedTime ?? 0,
+          settings: data.settings ?? DEFAULT_QUIZ_SETTINGS,
           createdBy: userProfile?.id
         })
       );
@@ -246,6 +248,7 @@ export default function QuizEditorPage() {
             <QuizSettingsBuilder
               quizId={quiz.id}
               defaultSettings={quiz.settings ?? DEFAULT_QUIZ_SETTINGS}
+              estimatedTime={quiz.estimatedTime}
             />
           ) : (
             <QuizSettingsBuilder

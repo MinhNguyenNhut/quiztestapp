@@ -1,6 +1,6 @@
 /**
  * Score a quiz attempt. Walks each question, runs `checkAnswer`, and
- * aggregates per-question results into totals + topic/difficulty stats.
+ * aggregates per-question results into totals and per-question stats.
  */
 
 import type { AnyAnswer, Question, Quiz } from '../../types';

@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit';
-import type { Quiz } from '../../types/index.ts';
+import type { Quiz, QuizSettings } from '../../types/index.ts';
 import type { CandidateFieldsConfig } from '../../types/candidate.ts';
 import { quizApi } from '../../api/quizApi.ts';
 import {
@@ -77,7 +77,7 @@ export const fetchQuizById = createAsyncThunk<
 /** POST /api/quizzes. */
 export const createQuiz = createAsyncThunk<
   Quiz,
-  { title: string; description: string; estimatedTime: number; candidateFieldsConfig?: CandidateFieldsConfig; createdBy?: string },
+  { title: string; description: string; estimatedTime: number; candidateFieldsConfig?: CandidateFieldsConfig; settings: QuizSettings; createdBy?: string },
   { rejectValue: string }
 >('quizzes/create', async (payload, { rejectWithValue }) => {
   try {

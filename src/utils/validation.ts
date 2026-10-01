@@ -59,8 +59,6 @@ export const createQuestionSchemas = (t: TFunction) => {
 
     difficulty: z.enum(['easy', 'medium', 'hard'] as const).optional().default('medium'),
 
-    topic: z.string().optional(),
-
     tags: z.array(z.string()).optional().default([]),
 
     options: z.array(questionOptionSchema).optional().default([]),

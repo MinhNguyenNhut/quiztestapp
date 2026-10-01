@@ -4,7 +4,6 @@ import type { BreakdownStat } from '../../shared/utils/resultStats';
 
 interface PerformanceRadarProps {
   difficulty: BreakdownStat[];
-  topic: BreakdownStat[];
   accuracyOverall: number; // 0..1
   participation: number; // 0..1
   timeUsedRatio: number; // 0..1
@@ -16,7 +15,7 @@ interface MetricRow {
   color: string;
 }
 
-export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, timeUsedRatio }: PerformanceRadarProps) => {
+export const PerformanceRadar = ({ difficulty, accuracyOverall, timeUsedRatio }: PerformanceRadarProps) => {
   const { t } = useTranslation();
   const byDiff = (label: string) =>
     difficulty.find((d) => d.label.toLowerCase() === label)?.accuracy ?? 0;
@@ -28,8 +27,6 @@ export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, timeUsedR
     { label: t('common.accuracy'), value: accuracyOverall, color: '#6366f1' },
     { label: t('common.timeUsed'), value: timeUsedRatio, color: '#0ea5e9' },
   ];
-
-  const hasTopic = topic.length > 0;
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
@@ -64,11 +61,6 @@ export const PerformanceRadar = ({ difficulty, topic, accuracyOverall, timeUsedR
             </Box>
           ))}
         </Stack>
-        {hasTopic && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-            {topic.length} {t('common.topicsCovered')}
-          </Typography>
-        )}
       </CardContent>
     </Card>
   );

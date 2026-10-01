@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isQuizUnlimitedTime } from '../types/quiz';
 import {
   Box,
   Typography,
@@ -279,7 +280,7 @@ function QuizCard({
   const difficulty = aggregateDifficulty(questions);
   const minutes = quiz.estimatedTime ?? 0;
   const questionCount = quiz.questionCount ?? questions.length ?? 0;
-  const unlimitedTime = quiz.settings?.unlimitedTime ?? false;
+  const unlimitedTime = isQuizUnlimitedTime(quiz);
 
   return (
     <Card

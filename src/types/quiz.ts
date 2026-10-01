@@ -104,7 +104,6 @@ export interface Question {
   description?: string;
   points: number;
   difficulty: Difficulty;
-  topic?: string;
   tags: string[];
   order: number;
   options: QuestionOption[];
@@ -135,10 +134,15 @@ export interface Quiz {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
-  difficulty?: "easy" | "medium" | "hard";
   candidateFieldsConfig?: CandidateFieldsConfig;
   settings?: QuizSettings;
   questions: Question[];
+}
+
+export function isQuizUnlimitedTime(
+  quiz: Pick<Quiz, 'estimatedTime' | 'settings'>,
+): boolean {
+  return quiz.estimatedTime === 0 || quiz.settings?.unlimitedTime === true;
 }
 
 // ---- Human-facing labels & colors ----
@@ -209,7 +213,6 @@ export interface QuestionFormValues {
   description?: string;
   points: number;
   difficulty: Difficulty;
-  topic?: string;
   tags: string[];
   options: { id?: string; text: string; isCorrect: boolean; order?: number }[];
   explanation?: RichTextContent;

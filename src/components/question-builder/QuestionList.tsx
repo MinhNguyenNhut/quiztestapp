@@ -32,10 +32,83 @@ interface QuestionListProps {
   onSaveQuiz: () => void;
   quizTitle: string;
   onQuizTitleChange: (value: string) => void;
+  quizDescription: string;
+  onQuizDescriptionChange: (value: string) => void;
   estimatedTime?: number;
   onEstimatedTimeChange: (value: number) => void;
   isSaving: boolean;
 }
+
+interface QuizInfoFieldsProps {
+  quizTitle: string;
+  quizDescription: string;
+  estimatedTime?: number;
+  onQuizTitleChange: (value: string) => void;
+  onQuizDescriptionChange: (value: string) => void;
+  onEstimatedTimeChange: (value: number) => void;
+}
+
+const QuizInfoFields = memo(function QuizInfoFields({
+  quizTitle,
+  quizDescription,
+  estimatedTime,
+  onQuizTitleChange,
+  onQuizDescriptionChange,
+  onEstimatedTimeChange,
+}: QuizInfoFieldsProps) {
+  const { t } = useTranslation();
+  const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
+  const [localQuizDescription, setLocalQuizDescription] = useState(quizDescription);
+  const [localEstimatedTime, setLocalEstimatedTime] = useState(estimatedTime ?? 0);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+      <TextField
+        fullWidth
+        size="small"
+        label={t('quizEditor.quizTitle')}
+        value={localQuizTitle}
+        onChange={(event) => setLocalQuizTitle(event.target.value)}
+        onBlur={() => {
+          if (localQuizTitle !== quizTitle) onQuizTitleChange(localQuizTitle);
+        }}
+      />
+      <TextField
+        fullWidth
+        size="small"
+        multiline
+        minRows={2}
+        maxRows={4}
+        label={t('quizEditor.quizDescription')}
+        value={localQuizDescription}
+        onChange={(event) => setLocalQuizDescription(event.target.value)}
+        onBlur={() => {
+          if (localQuizDescription !== quizDescription) {
+            onQuizDescriptionChange(localQuizDescription);
+          }
+        }}
+        slotProps={{ htmlInput: { maxLength: 2000 } }}
+      />
+      <TextField
+        fullWidth
+        size="small"
+        type="number"
+        label={t('quizEditor.estimatedTime')}
+        value={localEstimatedTime}
+        onChange={(event) => {
+          const value = event.target.value;
+          setLocalEstimatedTime(value === '' ? 0 : Number(value));
+        }}
+        onBlur={() => {
+          if (localEstimatedTime !== (estimatedTime ?? 0)) {
+            onEstimatedTimeChange(localEstimatedTime);
+          }
+        }}
+        slotProps={{ htmlInput: { min: 0 } }}
+      />
+    </Box>
+  );
+});
 
 function QuestionList({
   fieldIds,
@@ -48,6 +121,8 @@ function QuestionList({
   onSaveQuiz,
   quizTitle,
   onQuizTitleChange,
+  quizDescription,
+  onQuizDescriptionChange,
   estimatedTime,
   onEstimatedTimeChange,
   isSaving,
@@ -56,26 +131,6 @@ function QuestionList({
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-
-  const [prevQuizTitle, setPrevQuizTitle] = useState(quizTitle);
-  const [localQuizTitle, setLocalQuizTitle] = useState(quizTitle);
-
-  const [prevEstimatedTime, setPrevEstimatedTime] = useState(estimatedTime);
-  const [localEstimatedTime, setLocalEstimatedTime] = useState<number>(
-    estimatedTime !== undefined && estimatedTime !== null
-      ? Number(estimatedTime)
-      : 0
-  );
-
-  if (quizTitle !== prevQuizTitle) {
-    setPrevQuizTitle(quizTitle);
-    setLocalQuizTitle(quizTitle);
-  }
-
-  if (estimatedTime !== prevEstimatedTime) {
-    setPrevEstimatedTime(estimatedTime);
-    setLocalEstimatedTime(estimatedTime ?? 0);
-  }
 
   const isFiltering = search.trim() !== '' || typeFilter !== 'all';
   const watchedQuestions = useWatch({
@@ -95,31 +150,6 @@ function QuestionList({
       return matchesSearch && matchesType;
     });
   }, [allIndices, isFiltering, watchedQuestions, search, typeFilter]);
-
-  const handleQuizTitleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setLocalQuizTitle(event.target.value);
-  };
-
-  const handleQuizTitleBlur = () => {
-    if (localQuizTitle !== quizTitle) {
-      onQuizTitleChange(localQuizTitle);
-    }
-  };
-
-  const handleEstimatedTimeChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const value = event.target.value;
-    setLocalEstimatedTime(value === '' ? 0 : Number(value));
-  };
-
-  const handleEstimatedTimeBlur = () => {
-    if (localEstimatedTime !== (estimatedTime ?? 0)) {
-      onEstimatedTimeChange(localEstimatedTime);
-    }
-  };
 
   return (
     <Paper
@@ -155,26 +185,15 @@ function QuestionList({
         </Typography>
 
         {/* Quiz title & Estimated Time */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-          <TextField
-            fullWidth
-            size="small"
-            label={t('quizEditor.quizTitle')}
-            value={localQuizTitle}
-            onChange={handleQuizTitleChange}
-            onBlur={handleQuizTitleBlur}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            type="number"
-            label={t('quizEditor.estimatedTime')}
-            value={localEstimatedTime}
-            onChange={handleEstimatedTimeChange}
-            onBlur={handleEstimatedTimeBlur}
-            slotProps={{ htmlInput: { min: 0 } }}
-          />
-        </Box>
+        <QuizInfoFields
+          key={JSON.stringify([quizTitle, quizDescription, estimatedTime ?? 0])}
+          quizTitle={quizTitle}
+          quizDescription={quizDescription}
+          estimatedTime={estimatedTime}
+          onQuizTitleChange={onQuizTitleChange}
+          onQuizDescriptionChange={onQuizDescriptionChange}
+          onEstimatedTimeChange={onEstimatedTimeChange}
+        />
 
         {/* Questions header */}
         <Box

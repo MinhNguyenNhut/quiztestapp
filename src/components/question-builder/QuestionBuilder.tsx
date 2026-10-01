@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-import type { QuizFormValues, QuestionType, Quiz, QuestionFormValues } from '../../types/index.ts';
+import { DEFAULT_QUIZ_SETTINGS, type QuizFormValues, type QuestionType, type Quiz, type QuestionFormValues } from '../../types/index.ts';
 import { createQuestionTemplate } from '../../utils/quizMappers.ts';
 import { createQuestionSchemas } from '../../utils/validation.ts';
 import AddQuestionModal from './AddQuestionModal.tsx';
@@ -96,8 +96,17 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     reValidateMode: 'onBlur',
   });
 
-  const { control, setValue, getValues, formState: { isDirty } } = methods;
+  const { control, setValue, getValues } = methods;
+  const isDirty = onDirtyChange ? methods.formState.isDirty : undefined;
   const { fields, append, remove, move } = useFieldArray({ control, name: 'questions' });
+
+  const prevDirtyRef = useRef(isDirty ?? false);
+  useEffect(() => {
+    if (isDirty !== undefined && isDirty !== prevDirtyRef.current) {
+      prevDirtyRef.current = isDirty;
+      onDirtyChange?.(isDirty);
+    }
+  }, [isDirty, onDirtyChange]);
 
   // `fields` gets a new array reference on every keystroke anywhere in the
   // form, because Controller-based nested inputs require RHF to keep fields
@@ -116,15 +125,8 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
   }
 
   const quizTitle = useWatch({ control, name: 'title' });
+  const quizDescription = useWatch({ control, name: 'description' });
   const estimatedTime = useWatch({ control, name: 'estimatedTime' });
-
-  const prevDirtyRef = useRef(isDirty);
-  useEffect(() => {
-    if (isDirty !== prevDirtyRef.current) {
-      prevDirtyRef.current = isDirty;
-      onDirtyChange?.(isDirty);
-    }
-  }, [isDirty, onDirtyChange]);
 
   const [prevFieldsLength, setPrevFieldsLength] = useState(fields.length);
   if (fields.length !== prevFieldsLength) {
@@ -143,6 +145,10 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
           title: data.title,
           description: data.description,
           estimatedTime: data.estimatedTime ?? 0,
+          settings: {
+            ...(data.settings ?? DEFAULT_QUIZ_SETTINGS),
+            unlimitedTime: data.estimatedTime === 0 || data.settings?.unlimitedTime === true,
+          },
           createdBy,
         }),
       ).unwrap();
@@ -269,6 +275,11 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     [setValue],
   );
 
+  const handleQuizDescriptionChange = useCallback(
+    (value: string) => setValue('description', value, { shouldDirty: true }),
+    [setValue],
+  );
+
   const handleEstimatedTimeChange = useCallback(
     (value: number | string) => setValue('estimatedTime', value ? Number(value) : 0, { shouldDirty: true }),
     [setValue],
@@ -295,6 +306,8 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
             onSaveQuiz={handleSaveQuiz}
             quizTitle={quizTitle}
             onQuizTitleChange={handleQuizTitleChange}
+            quizDescription={quizDescription ?? ''}
+            onQuizDescriptionChange={handleQuizDescriptionChange}
             estimatedTime={estimatedTime ?? 0}
             onEstimatedTimeChange={handleEstimatedTimeChange}
             isSaving={isSaving}

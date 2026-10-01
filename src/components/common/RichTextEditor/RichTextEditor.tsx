@@ -100,7 +100,7 @@ function RichTextEditor({
       if (html === lastHtmlRef.current) return;
       lastHtmlRef.current = html;
       onChangeRef.current(parseEditorContent(el));
-    }, 120);
+    }, 250);
   }, []);
 
   const handleFormat = useCallback((command: string, cmdValue?: string) => {
@@ -244,6 +244,7 @@ function RichTextEditor({
       <Box sx={wrapperSx}>
         {showToolbar && (
           <EditorToolbar
+            isEditorFocused={isFocused}
             onFormat={handleFormat}
             onInsertImage={handleInsertImage}
             onInsertTable={handleInsertTable}

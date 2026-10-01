@@ -31,6 +31,7 @@ import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ColorPickerPopover from './ColorPickerPopover.tsx';
 
 interface EditorToolbarProps {
+  isEditorFocused: boolean;
   onFormat: (command: string, value?: string) => void;
   onInsertImage: () => void;
   onInsertTable: () => void;
@@ -68,7 +69,14 @@ const EMPTY_ACTIVE: ActiveStates = {
   codeBlock: false,
 };
 
+function areActiveStatesEqual(left: ActiveStates, right: ActiveStates): boolean {
+  return (Object.keys(left) as (keyof ActiveStates)[]).every(
+    (key) => left[key] === right[key],
+  );
+}
+
 export default function EditorToolbar({
+  isEditorFocused,
   onFormat,
   onInsertImage,
   onInsertTable,
@@ -98,7 +106,9 @@ export default function EditorToolbar({
         quote: document.queryCommandState('formatBlock') && document.queryCommandValue('formatBlock') === 'blockquote',
         codeBlock: document.queryCommandValue('formatBlock') === 'pre',
       };
-      setActive(next);
+      setActive((previous) =>
+        areActiveStatesEqual(previous, next) ? previous : next,
+      );
 
       // Read the text color at the current caret position.
       const fore = document.queryCommandValue('foreColor') as string | '' | null;
@@ -114,10 +124,12 @@ export default function EditorToolbar({
   }, []);
 
   useEffect(() => {
+    if (!isEditorFocused) return;
     const handler = () => refreshActiveStates();
+    handler();
     document.addEventListener('selectionchange', handler);
     return () => document.removeEventListener('selectionchange', handler);
-  }, [refreshActiveStates]);
+  }, [isEditorFocused, refreshActiveStates]);
 
   const handleBlockChange = useCallback(
     (e: SelectChangeEvent<string>) => {
