@@ -19,6 +19,13 @@ export interface PaginatedQuizzes {
   limit: number;
 }
 
+export interface PublicQuizListParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  [key: string]: string | number | undefined;
+}
+
 export interface CreateQuizPayload {
   title: string;
   description: string;
@@ -38,6 +45,9 @@ export const quizApi = {
 
   listByUser: (userId: string, page = 1, limit = 20) =>
     apiGet<PaginatedQuizzes>(`/api/quizzes/user/${userId}`, { params: { page, limit } }),
+
+  listPublic: (params: PublicQuizListParams = {}) =>
+    apiGet<PaginatedQuizzes>('/api/quizzes/public', { params }),
 
   getById: (id: string) => apiGet<Quiz>(`/api/quizzes/${id}`),
 

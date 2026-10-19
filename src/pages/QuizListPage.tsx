@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { isQuizUnlimitedTime } from '../types/quiz';
 import {
   Box,
@@ -59,6 +60,7 @@ type ToastState = {
 
 export default function QuizListPage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const quizzes = useAppSelector(state => state.quiz.quizzes);
   const isLoading = useAppSelector((s) => s.quiz.isLoading);
@@ -112,7 +114,7 @@ export default function QuizListPage() {
   };
 
   const handlePreview = (quiz: Quiz) =>
-    showToast(t('quizList.previewComingSoon', { title: quiz.title }), 'info');
+    navigate(`/quiz/${quiz.id}/preview`);
 
   return (
     <Box sx={{ mx: 'auto', p: { xs: 2, sm: 3 } }}>

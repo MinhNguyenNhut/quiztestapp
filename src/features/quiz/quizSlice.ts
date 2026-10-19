@@ -6,6 +6,8 @@ import {
 import type { Quiz, QuizSettings } from '../../types/index.ts';
 import type { CandidateFieldsConfig } from '../../types/candidate.ts';
 import { quizApi } from '../../api/quizApi.ts';
+import type { PublicQuizListParams } from '../../api/quizApi.ts';
+import type { RootState } from '../store.ts';
 import {
   fetchQuestionsForQuiz,
   createQuestion,
@@ -18,6 +20,13 @@ interface QuizState {
   currentQuiz: Quiz | null;
   isLoading: boolean;
   error: string | null;
+
+  // Public quizzes (for landing page)
+  publicQuizzes: Quiz[];
+  publicIsLoading: boolean;
+  publicError: string | null;
+  publicHasMore: boolean;
+  publicPage: number;
 }
 
 const initialState: QuizState = {
@@ -25,6 +34,12 @@ const initialState: QuizState = {
   currentQuiz: null,
   isLoading: false,
   error: null,
+
+  publicQuizzes: [],
+  publicIsLoading: false,
+  publicError: null,
+  publicHasMore: true,
+  publicPage: 1,
 };
 
 const rejectMessage = (err: unknown, fallback: string): string =>
@@ -58,6 +73,21 @@ export const fetchQuizzesByUser = createAsyncThunk<
     return res.data;
   } catch (err) {
     return rejectWithValue(rejectMessage(err, 'Failed to load quizzes for user'));
+  }
+});
+
+/** GET /api/quizzes/public — public quiz listing for landing page. */
+export const fetchPublicQuizzes = createAsyncThunk<
+  { data: Quiz[]; total: number; page: number; limit: number },
+  PublicQuizListParams | void,
+  { rejectValue: string }
+>('quizzes/fetchPublic', async (params, { rejectWithValue }) => {
+  try {
+    const { search, page = 1, limit = 9 } = params ?? {};
+    const res = await quizApi.listPublic({ search, page, limit });
+    return { data: res.data, total: res.total, page: res.page, limit: res.limit };
+  } catch (err) {
+    return rejectWithValue(rejectMessage(err, 'Failed to load public quizzes'));
   }
 });
 
@@ -199,6 +229,22 @@ const quizSlice = createSlice({
         state.error = action.payload ?? action.error.message ?? 'Failed to load quizzes for user';
       })
 
+      // fetchPublicQuizzes
+      .addCase(fetchPublicQuizzes.pending, (state) => {
+        state.publicIsLoading = true;
+        state.publicError = null;
+      })
+      .addCase(fetchPublicQuizzes.fulfilled, (state, action) => {
+        state.publicIsLoading = false;
+        state.publicQuizzes = action.payload.data;
+        state.publicHasMore = action.payload.page * action.payload.limit < action.payload.total;
+        state.publicPage = action.payload.page;
+      })
+      .addCase(fetchPublicQuizzes.rejected, (state, action) => {
+        state.publicIsLoading = false;
+        state.publicError = action.payload ?? action.error.message ?? 'Failed to load public quizzes';
+      })
+
       // fetchQuizById
       .addCase(fetchQuizById.pending, (state) => {
         state.isLoading = true;
@@ -313,5 +359,12 @@ export const {
   addQuiz,
   updateCandidateFieldsConfig,
 } = quizSlice.actions;
+
+// Selectors
+export const getPublicQuizzes = (state: RootState) => state.quiz.publicQuizzes;
+export const getPublicIsLoading = (state: RootState) => state.quiz.publicIsLoading;
+export const getPublicError = (state: RootState) => state.quiz.publicError;
+export const getPublicHasMore = (state: RootState) => state.quiz.publicHasMore;
+export const getPublicPage = (state: RootState) => state.quiz.publicPage;
 
 export default quizSlice.reducer;

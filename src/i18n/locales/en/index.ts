@@ -23,6 +23,8 @@ import login from './login.json';
 import register from './register.json';
 import profile from './profile.json';
 import quizSettings from './quizSettings.json';
+import quizPreview from './quizPreview.json';
+import landing from './landing.json';
 
 export default {
    common,
@@ -49,5 +51,7 @@ export default {
    login,
    register,
    profile,
-   quizSettings
+   quizSettings,
+   quizPreview,
+   landing
 };

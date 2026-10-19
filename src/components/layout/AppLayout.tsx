@@ -98,7 +98,7 @@ export default function AppLayout() {
           <Button
             color="inherit"
             component={RouterLink}
-            to="/"
+            to="/quizzes"
           >
             {t('common.myQuizzes')}
           </Button>

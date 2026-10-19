@@ -41,7 +41,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginCredentials) => {
     const result = await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
-      navigate('/', { replace: true });
+      navigate('/quizzes', { replace: true });
     }
   };
 

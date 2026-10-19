@@ -1,0 +1,11 @@
+{
+  "title": "Xem trước bài kiểm tra",
+  "shuffleQuestions": "Xáo trộn câu hỏi",
+  "shuffleOptions": "Xáo trộn đáp án",
+  "backwardNavigation": "Cho phép quay lại",
+  "noBackwardNavigation": "Không cho phép quay lại",
+  "passingScore": "Điểm đậu: {{score}}%",
+  "startExam": "Bắt đầu thi",
+  "editQuiz": "Chỉnh sửa bài kiểm tra",
+  "goHome": "Về trang chủ"
+}

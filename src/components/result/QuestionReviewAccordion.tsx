@@ -24,6 +24,8 @@ interface QuestionReviewAccordionProps {
   candidateAnswers: Record<string, import('../../types/answer').AnyAnswer>;
   showCorrectAnswers?: boolean;
   showExplanations?: boolean;
+  /** Preview mode: only show correct answers, hide candidate answers */
+  preview?: boolean;
 }
 
 const statusMeta = (
@@ -102,7 +104,8 @@ export const QuestionReviewAccordion = ({
   results,
   candidateAnswers,
   showCorrectAnswers = true,
-  showExplanations = true
+  showExplanations = true,
+  preview = false
 }: QuestionReviewAccordionProps) => {
   const { t } = useTranslation();
 
@@ -139,7 +142,7 @@ export const QuestionReviewAccordion = ({
                 borderRadius: 1.5,
                 '&:before': { display: 'none' },
                 borderLeftWidth: 4,
-                borderLeftColor:
+                borderLeftColor: preview ? 'primary.main' :
                   meta.color === 'success'
                     ? 'success.main'
                     : meta.color === 'error'
@@ -160,17 +163,19 @@ export const QuestionReviewAccordion = ({
                   <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }} noWrap>
                     {r.question.title || t('common.untitledQuestion')}
                   </Typography>
-                  <Stack direction="row" spacing={0.75} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: "center" }}>
-                    <Chip
-                      label={meta.label}
-                      color={meta.color}
-                      size="small"
-                      icon={meta.icon as React.ReactElement}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {r.pointsEarned}/{r.pointsPossible} {t('common.pointsAbbrev')}
-                    </Typography>
-                  </Stack>
+                  {!preview && (
+                    <Stack direction="row" spacing={0.75} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: "center" }}>
+                      <Chip
+                        label={meta.label}
+                        color={meta.color}
+                        size="small"
+                        icon={meta.icon as React.ReactElement}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {r.pointsEarned}/{r.pointsPossible} {t('common.pointsAbbrev')}
+                      </Typography>
+                    </Stack>
+                  )}
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
@@ -199,29 +204,31 @@ export const QuestionReviewAccordion = ({
                 )}
                 {showCorrectAnswers && (
                   <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        {t('common.yourAnswer')}
-                      </Typography>
-                      <Box
-                        sx={{
-                          mt: 0.5,
-                          p: 1.5,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1.5,
-                          backgroundColor: 'background.default',
-                          whiteSpace: 'pre-wrap',
-                          fontSize: '0.9rem',
-                          minHeight: 40,
-                        }}
-                      >
-                        {candidateText || <em>{t('common.noAnswer')}</em>}
+                    {!preview && (
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                          {t('common.yourAnswer')}
+                        </Typography>
+                        <Box
+                          sx={{
+                            mt: 0.5,
+                            p: 1.5,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1.5,
+                            backgroundColor: 'background.default',
+                            whiteSpace: 'pre-wrap',
+                            fontSize: '0.9rem',
+                            minHeight: 40,
+                          }}
+                        >
+                          {candidateText || <em>{t('common.noAnswer')}</em>}
+                        </Box>
                       </Box>
-                    </Box>
+                    )}
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        {t('common.correctAnswer')}
+                        {preview ? t('common.answer') : t('common.correctAnswer')}
                       </Typography>
                       <Box
                         sx={{

@@ -49,7 +49,7 @@ export default function RegisterPage() {
       const { confirmPassword: _confirmPassword, ...payload } = data;
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
-         navigate('/', { replace: true });
+         navigate('/quizzes', { replace: true });
       }
    };
 

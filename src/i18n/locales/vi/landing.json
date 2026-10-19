@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "features": "Tính năng",
+    "howItWorks": "Cách thức hoạt động",
+    "quizzes": "Các bài kiểm tra"
+  },
+  "hero": {
+    "title": "Tạo bài kiểm tra hấp dẫn chỉ trong vài phút",
+    "description": "Xây dựng các bài đánh giá chuyên nghiệp với nhiều loại câu hỏi, tùy chọn thời gian linh hoạt và chấm điểm tức thì. Chia sẻ với thí sinh và nhận phân tích chi tiết.",
+    "ctaLoginToCreate": "Đăng nhập để tạo bài kiểm tra",
+    "ctaCreateQuiz": "Tạo bài kiểm tra",
+    "ctaBrowse": "Duyệt bài kiểm tra",
+    "instantScoring": "Chấm điểm tức thì",
+    "multipleTypes": "Nhiều loại câu hỏi",
+    "flexibleTiming": "Thời gian linh hoạt"
+  },
+  "features": {
+    "label": "Tính năng",
+    "title": "Tất cả những gì bạn cần để đánh giá kiến thức",
+    "subtitle": "Công cụ mạnh mẽ cho giáo viên, huấn luyện viên và các nhóm để tạo các bài đánh giá hiệu quả.",
+    "multipleTypes": {
+      "title": "Nhiều loại câu hỏi",
+      "description": "Hỗ trợ trắc nghiệm một đáp án, trắc nghiệm nhiều đáp án, đúng/sai, điền vào chỗ trống, nối cột, câu hỏi ngắn, luận văn và đọc hiểu."
+    },
+    "flexibleTiming": {
+      "title": "Thời gian linh hoạt",
+      "description": "Đặt giới hạn thời gian cho mỗi bài kiểm tra hoặc cho phép không giới hạn thời gian. Cấu hình cảnh báo thời gian và tự động nộp khi hết giờ."
+    },
+    "instantScoring": {
+      "title": "Chấm điểm & phản hồi tức thì",
+      "description": "Chấm tự động cho câu hỏi khách quan với giải thích chi tiết. Xem xét thủ công cho câu hỏi luận và câu trả lời ngắn."
+    },
+    "submissionsDashboard": {
+      "title": "Bảng điều khiển bài nộp",
+      "description": "Theo dõi mọi lần thử, xem điểm số, phân tích thống kê theo câu hỏi và xuất kết quả ra CSV."
+    }
+  },
+  "howItWorks": {
+    "label": "Cách thức hoạt động",
+    "title": "Ba bước để có bài kiểm tra đầu tiên",
+    "subtitle": "Từ tạo bài đến xem kết quả chỉ trong vài phút.",
+    "step1": {
+      "title": "Tạo bài kiểm tra",
+      "description": "Sử dụng trình xây dựng trực quan để thêm câu hỏi, đặt đáp án, cấu hình chấm điểm và tùy chỉnh cài đặt."
+    },
+    "step2": {
+      "title": "Chia sẻ cho thí sinh",
+      "description": "Gửi liên kết bài kiểm tra hoặc nhúng nó. Thí sinh điền thông tin và bắt đầu làm bài ngay lập tức."
+    },
+    "step3": {
+      "title": "Xem lại kết quả",
+      "description": "Xem các bài nộp theo thời gian thực, phân tích chi tiết điểm số và xuất báo cáo phân tích."
+    },
+    "connector": "→"
+  },
+  "quizzes": {
+    "label": "Bài kiểm tra công khai",
+    "title": "Khám phá các bài kiểm tra có sẵn",
+    "searchPlaceholder": "Tìm kiếm bài kiểm tra...",
+    "emptyTitle": "Chưa có bài kiểm tra công khai",
+    "emptyDescription": "Hãy là người đầu tiên tạo và công khai bài kiểm tra!",
+    "noResults": "Không tìm thấy bài kiểm tra nào khớp với \"{{search}}\".",
+    "clearSearch": "Xóa tìm kiếm",
+    "loadMore": "Tải thêm"
+  },
+  "myQuizzes": "Bài kiểm tra của tôi",
+  "createQuiz": "Tạo bài kiểm tra",
+  "login": "Đăng nhập",
+  "register": "Đăng ký",
+  "footer": {
+    "tagline": "Xây dựng các bài đánh giá tốt hơn. Nhận thông tin chi tiết hơn.",
+    "copyright": "© {{year}} Quiz Builder. Mọi quyền được bảo lưu."
+  },
+  "menuOpen": "Mở menu",
+  "menuClose": "Đóng menu"
+}

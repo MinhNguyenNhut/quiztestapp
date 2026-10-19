@@ -1,0 +1,11 @@
+{
+  "title": "Quiz Preview",
+  "shuffleQuestions": "Shuffle Questions",
+  "shuffleOptions": "Shuffle Options",
+  "backwardNavigation": "Allow Backward Navigation",
+  "noBackwardNavigation": "No Backward Navigation",
+  "passingScore": "Passing Score: {{score}}%",
+  "startExam": "Start Exam",
+  "editQuiz": "Edit Quiz",
+  "goHome": "Go Home"
+}

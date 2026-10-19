@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "quizzes": "Quizzes"
+  },
+  "hero": {
+    "title": "Create engaging quizzes in minutes",
+    "description": "Build professional assessments with multiple question types, flexible timing options, and instant scoring. Share with candidates and get detailed analytics.",
+    "ctaLoginToCreate": "Login to create a quiz",
+    "ctaCreateQuiz": "Create a quiz",
+    "ctaBrowse": "Browse quizzes",
+    "instantScoring": "Instant scoring",
+    "multipleTypes": "Multiple question types",
+    "flexibleTiming": "Flexible timing"
+  },
+  "features": {
+    "label": "Features",
+    "title": "Everything you need to assess knowledge",
+    "subtitle": "Powerful tools for educators, trainers, and teams to create effective assessments.",
+    "multipleTypes": {
+      "title": "Multiple question types",
+      "description": "Support for single choice, multiple choice, true/false, fill-in-the-blank, matching, short answer, essay, and reading comprehension questions."
+    },
+    "flexibleTiming": {
+      "title": "Flexible timing",
+      "description": "Set time limits per quiz or allow unlimited time. Configure time warnings and auto-submit on expiry."
+    },
+    "instantScoring": {
+      "title": "Instant scoring & feedback",
+      "description": "Automatic grading for objective questions with detailed explanations. Manual review for essays and short answers."
+    },
+    "submissionsDashboard": {
+      "title": "Submissions dashboard",
+      "description": "Track all attempts, view scores, analyze question-level statistics, and export results to CSV."
+    }
+  },
+  "howItWorks": {
+    "label": "How it works",
+    "title": "Three steps to your first quiz",
+    "subtitle": "From creation to results in minutes.",
+    "step1": {
+      "title": "Create your quiz",
+      "description": "Use the intuitive builder to add questions, set options, configure scoring, and customize settings."
+    },
+    "step2": {
+      "title": "Share with candidates",
+      "description": "Send the quiz link or embed it. Candidates fill in their info and start the exam instantly."
+    },
+    "step3": {
+      "title": "Review results",
+      "description": "See real-time submissions, detailed score breakdowns, and export analytics for reporting."
+    },
+    "connector": "→"
+  },
+  "quizzes": {
+    "label": "Public Quizzes",
+    "title": "Explore available quizzes",
+    "searchPlaceholder": "Search quizzes...",
+    "emptyTitle": "No public quizzes yet",
+    "emptyDescription": "Be the first to create and publish a quiz!",
+    "noResults": "No quizzes match \"{{search}}\".",
+    "clearSearch": "Clear search",
+    "loadMore": "Load more"
+  },
+  "myQuizzes": "My Quizzes",
+  "createQuiz": "Create Quiz",
+  "login": "Login",
+  "register": "Register",
+  "footer": {
+    "tagline": "Build better assessments. Get better insights.",
+    "copyright": "© {{year}} Quiz Builder. All rights reserved."
+  },
+  "menuOpen": "Open menu",
+  "menuClose": "Close menu"
+}
