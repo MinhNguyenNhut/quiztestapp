@@ -2,7 +2,9 @@
   "nav": {
     "features": "Tính năng",
     "howItWorks": "Cách thức hoạt động",
-    "quizzes": "Các bài kiểm tra"
+    "quizzes": "Các bài kiểm tra",
+    "useCases": "Dành cho ai",
+    "faq": "Câu hỏi thường gặp"
   },
   "hero": {
     "title": "Tạo bài kiểm tra hấp dẫn chỉ trong vài phút",
@@ -12,7 +14,67 @@
     "ctaBrowse": "Duyệt bài kiểm tra",
     "instantScoring": "Chấm điểm tức thì",
     "multipleTypes": "Nhiều loại câu hỏi",
-    "flexibleTiming": "Thời gian linh hoạt"
+    "flexibleTiming": "Thời gian linh hoạt",
+    "preview": {
+      "progress": "Câu {{current}} / {{total}}",
+      "question": "Thủ đô của Úc là thành phố nào?",
+      "option0": "Sydney",
+      "option1": "Canberra",
+      "option2": "Melbourne",
+      "option3": "Perth",
+      "hint": "Thử ngay: chọn một đáp án.",
+      "correct": "Chính xác! +10 điểm",
+      "incorrect": "Chưa đúng. Đáp án là Canberra.",
+      "retry": "Thử lại"
+    }
+  },
+  "useCases": {
+    "title": "Dành cho mọi người cần kiểm tra kiến thức",
+    "subtitle": "Từ bài kiểm tra trên lớp đến vòng sàng lọc ứng viên, một công cụ là đủ.",
+    "teachers": {
+      "title": "Giáo viên",
+      "description": "Tạo bài kiểm tra và đề luyện tập, chia sẻ một đường link và xem điểm của từng học sinh ngay khi các em nộp bài."
+    },
+    "hr": {
+      "title": "Nhà tuyển dụng và HR",
+      "description": "Sàng lọc ứng viên bằng bài test kỹ năng có giới hạn thời gian và so sánh kết quả trên một bảng điều khiển."
+    },
+    "trainers": {
+      "title": "Giảng viên đào tạo",
+      "description": "Kiểm tra mức độ hiểu bài sau buổi workshop hoặc đào tạo nhân viên mới, có kết quả ngay."
+    },
+    "communities": {
+      "title": "Cộng đồng và sự kiện",
+      "description": "Tổ chức đố vui và thử thách mà ai cũng có thể tham gia qua một đường link."
+    }
+  },
+  "faq": {
+    "title": "Câu hỏi thường gặp",
+    "q1": {
+      "question": "Tôi có cần tài khoản để làm bài không?",
+      "answer": "Không. Bất kỳ ai có link đều có thể làm bài công khai. Bạn chỉ cần tài khoản để tạo và quản lý bài kiểm tra."
+    },
+    "q2": {
+      "question": "Hỗ trợ những loại câu hỏi nào?",
+      "answer": "Bạn có thể kết hợp trắc nghiệm, đúng/sai và các dạng câu hỏi khác trong cùng một bài."
+    },
+    "q3": {
+      "question": "Tôi có thể đặt giới hạn thời gian không?",
+      "answer": "Có. Bạn có thể đặt thời gian cho cả bài hoặc để mở, tùy theo mục đích."
+    },
+    "q4": {
+      "question": "Làm sao để xem kết quả của người tham gia?",
+      "answer": "Mở bảng điều khiển bài nộp để xem mọi lượt làm, điểm số và thời gian hoàn thành ở một nơi."
+    },
+    "q5": {
+      "question": "Tôi có thể giữ bài kiểm tra ở chế độ riêng tư không?",
+      "answer": "Có. Chỉ những bài bạn công khai mới xuất hiện trong danh sách chung. Bài riêng tư chỉ truy cập được qua link bạn chia sẻ."
+    }
+  },
+  "cta": {
+    "title": "Tạo bài kiểm tra đầu tiên chỉ trong vài phút",
+    "description": "Soạn bài, chia sẻ link và nhận kết quả chấm điểm tự động.",
+    "button": "Đăng nhập để bắt đầu"
   },
   "features": {
     "label": "Tính năng",

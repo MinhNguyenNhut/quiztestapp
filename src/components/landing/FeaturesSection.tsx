@@ -1,31 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import { Box, Grid, Card, CardContent, Stack, Typography } from '@mui/material';
+import { alpha, Box, Grid, Paper, Typography } from '@mui/material';
 import QuizIcon from '@mui/icons-material/Quiz';
 import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import SectionHeading from './SectionHeading';
 
+// Bento layout: widths alternate 7/5 and 5/7. The first tile is the single bold one.
 const features = [
-  {
-    icon: <QuizIcon />,
-    title: 'landing.features.multipleTypes.title',
-    description: 'landing.features.multipleTypes.description',
-  },
-  {
-    icon: <TimerIcon />,
-    title: 'landing.features.flexibleTiming.title',
-    description: 'landing.features.flexibleTiming.description',
-  },
-  {
-    icon: <AssessmentIcon />,
-    title: 'landing.features.instantScoring.title',
-    description: 'landing.features.instantScoring.description',
-  },
-  {
-    icon: <DashboardIcon />,
-    title: 'landing.features.submissionsDashboard.title',
-    description: 'landing.features.submissionsDashboard.description',
-  },
+  { icon: <QuizIcon />, key: 'multipleTypes', md: 7 },
+  { icon: <TimerIcon />, key: 'flexibleTiming', md: 5 },
+  { icon: <AssessmentIcon />, key: 'instantScoring', md: 5 },
+  { icon: <DashboardIcon />, key: 'submissionsDashboard', md: 7 },
 ];
 
 export default function FeaturesSection() {
@@ -35,83 +21,59 @@ export default function FeaturesSection() {
     <Box
       component="section"
       id="features"
-      sx={{
-        py: { xs: 6, md: 10 },
-        px: { xs: 2, md: 3 },
-        backgroundColor: 'background.paper',
-      }}
+      sx={{ scrollMarginTop: { xs: 56, sm: 64 }, py: { xs: 7, md: 11 }, px: { xs: 2, md: 3 }, bgcolor: 'background.paper' }}
     >
       <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-        {/* Section header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: 2, mb: 1, display: 'block' }}
-          >
-            {t('landing.features.label')}
-          </Typography>
-          <Typography variant="h3" component="h2" sx={{ fontWeight: 700, mb: 2 }}>
-            {t('landing.features.title')}
-          </Typography>
-          <Typography
-            variant="h6"
-            component="p"
-            color="text.secondary"
-            sx={{ maxWidth: 600, mx: 'auto' }}
-          >
-            {t('landing.features.subtitle')}
-          </Typography>
-        </Box>
+        <SectionHeading title={t('landing.features.title')} subtitle={t('landing.features.subtitle')} />
 
-        {/* Features grid */}
-        <Grid container spacing={3}>
-          {features.map((feature) => (
-            <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card
-                variant="outlined"
-                sx={{
-                  height: '100%',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                  <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
-                    <Box
-                      sx={(theme) => ({
-                        width: 64,
-                        height: 64,
-                        borderRadius: 3,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                        color: theme.palette.primary.contrastText,
-                      })}
-                    >
-                      {feature.icon}
-                    </Box>
-                    <Stack spacing={1} sx={{ width: '100%' }}>
-                      <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                        {t(feature.title)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ lineHeight: 1.6 }}
-                      >
-                        {t(feature.description)}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+        <Grid container spacing={2.5}>
+          {features.map((f, i) => {
+            const highlight = i === 0;
+            return (
+              <Grid key={f.key} size={{ xs: 12, md: f.md }}>
+                <Paper
+                  elevation={0}
+                  variant={highlight ? undefined : 'outlined'}
+                  sx={(theme) => ({
+                    height: '100%',
+                    minHeight: 220,
+                    p: { xs: 3, md: 4 },
+                    borderRadius: 3,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    bgcolor: highlight ? 'primary.main' : 'background.default',
+                    color: highlight ? theme.palette.primary.contrastText : 'text.primary',
+                  })}
+                >
+                  <Box
+                    sx={(theme) => ({
+                      width: 48,
+                      height: 48,
+                      mb: 4,
+                      borderRadius: 2,
+                      display: 'grid',
+                      placeItems: 'center',
+                      bgcolor: highlight
+                        ? alpha(theme.palette.primary.contrastText, 0.18)
+                        : alpha(theme.palette.primary.main, 0.1),
+                      color: highlight ? 'inherit' : 'primary.main',
+                    })}
+                  >
+                    {f.icon}
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                      {t(`landing.features.${f.key}.title`)}
+                    </Typography>
+                    <Typography sx={{ lineHeight: 1.7, maxWidth: 460, opacity: highlight ? 0.9 : 1 }} color={highlight ? 'inherit' : 'text.secondary'}>
+                      {t(`landing.features.${f.key}.description`)}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     </Box>

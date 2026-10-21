@@ -2,7 +2,9 @@
   "nav": {
     "features": "Features",
     "howItWorks": "How it works",
-    "quizzes": "Quizzes"
+    "quizzes": "Quizzes",
+    "useCases": "Who it's for",
+    "faq": "FAQ"
   },
   "hero": {
     "title": "Create engaging quizzes in minutes",
@@ -12,7 +14,67 @@
     "ctaBrowse": "Browse quizzes",
     "instantScoring": "Instant scoring",
     "multipleTypes": "Multiple question types",
-    "flexibleTiming": "Flexible timing"
+    "flexibleTiming": "Flexible timing",
+    "preview": {
+      "progress": "Question {{current}} of {{total}}",
+      "question": "What is the capital of Australia?",
+      "option0": "Sydney",
+      "option1": "Canberra",
+      "option2": "Melbourne",
+      "option3": "Perth",
+      "hint": "Try it: pick an answer.",
+      "correct": "Correct! +10 points",
+      "incorrect": "Not quite. The answer is Canberra.",
+      "retry": "Try again"
+    }
+  },
+  "useCases": {
+    "title": "Built for anyone who needs answers",
+    "subtitle": "From a classroom test to a hiring screen, the same quiz builder fits.",
+    "teachers": {
+      "title": "Teachers",
+      "description": "Create tests and practice quizzes, share one link, and see every student's score as they finish."
+    },
+    "hr": {
+      "title": "Recruiters and HR",
+      "description": "Screen candidates with a timed skills test and compare results in one dashboard."
+    },
+    "trainers": {
+      "title": "Trainers",
+      "description": "Check understanding after a workshop or onboarding session, with instant results."
+    },
+    "communities": {
+      "title": "Communities and events",
+      "description": "Run trivia nights and challenges that anyone can join from a link."
+    }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "q1": {
+      "question": "Do I need an account to take a quiz?",
+      "answer": "No. Anyone with the link can take a public quiz. You only need an account to create and manage quizzes."
+    },
+    "q2": {
+      "question": "Which question types are supported?",
+      "answer": "You can mix multiple-choice, true/false and other question types in the same quiz."
+    },
+    "q3": {
+      "question": "Can I set a time limit?",
+      "answer": "Yes. Set a time limit for the whole quiz or leave it open, whatever suits your test."
+    },
+    "q4": {
+      "question": "How do I see my participants' results?",
+      "answer": "Open the submissions dashboard to see every attempt, score and completion time in one place."
+    },
+    "q5": {
+      "question": "Can I keep a quiz private?",
+      "answer": "Yes. Only quizzes you publish appear in the public list. Private quizzes are reachable only by the people you share the link with."
+    }
+  },
+  "cta": {
+    "title": "Create your first quiz in minutes",
+    "description": "Build it, share the link, and get scored results back automatically.",
+    "button": "Log in to start"
   },
   "features": {
     "label": "Features",

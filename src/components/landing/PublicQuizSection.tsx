@@ -68,7 +68,7 @@ export default function PublicQuizSection() {
 
   const handlePageChange = (_: unknown, newPage: number) => {
     setPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('quizzes')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleLoadMore = () => {
@@ -112,9 +112,6 @@ export default function PublicQuizSection() {
               sx={{
                 fontWeight: 800,
                 letterSpacing: -1,
-                background: 'linear-gradient(90deg, #4F46E5 0%, #A855F7 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
               }}
             >
               {t('landing.quizzes.title')}

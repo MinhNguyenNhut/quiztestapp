@@ -18,7 +18,15 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: [
+      'system-ui',
+      '-apple-system',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
     h3: { fontWeight: 700 },
     h4: { fontWeight: 600 },
     h5: { fontWeight: 600 },

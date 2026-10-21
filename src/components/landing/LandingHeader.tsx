@@ -73,6 +73,7 @@ export default function LandingHeader() {
     { id: 'features', label: t('landing.nav.features') },
     { id: 'how-it-works', label: t('landing.nav.howItWorks') },
     { id: 'quizzes', label: t('landing.nav.quizzes') },
+    { id: 'faq', label: t('landing.nav.faq') },
   ];
 
   return (

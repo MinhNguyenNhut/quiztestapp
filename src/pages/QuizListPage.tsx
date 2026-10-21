@@ -340,7 +340,7 @@ function QuizCard({
             icon={<TimerIcon />}
             label={unlimitedTime ? t('quizList.unlimitedTime') : t('quizList.minutes', { count: minutes })}
             variant="outlined"
-            sx={unlimitedTime ? { bgcolor: 'success.light', color: 'success.dark', '& .MuiChip-icon': { color: 'success.dark' } } : {}}
+            sx={unlimitedTime ? { bgcolor: 'success.light', color: 'common.white', '& .MuiChip-icon': { color: 'common.white' } } : {}}
           />
         </Stack>
 

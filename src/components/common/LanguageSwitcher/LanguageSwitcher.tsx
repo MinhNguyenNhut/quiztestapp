@@ -1,18 +1,17 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-} from '@mui/material';
-import LanguageIcon from '@mui/icons-material/Language';
+import { Button, Menu, MenuItem, ListItemIcon, ListItemText, Box } from '@mui/material';
+import { FlagEN, FlagVN } from './Flags';
 
-const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+interface Language {
+  code: string;
+  name: string;
+  flag: ReactNode;
+}
+
+const languages: Language[] = [
+  { code: 'en', name: 'English', flag: <FlagEN /> },
+  { code: 'vi', name: 'Tiếng Việt', flag: <FlagVN /> },
 ];
 
 export default function LanguageSwitcher() {
@@ -20,18 +19,15 @@ export default function LanguageSwitcher() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const currentLang = languages.find((l) => l.code === i18n.language) || languages[0];
+  // 'en-US' / 'vi-VN' should still match 'en' / 'vi'
+  const activeCode = (i18n.resolvedLanguage ?? i18n.language ?? 'en').split('-')[0];
+  const currentLang = languages.find((l) => l.code === activeCode) ?? languages[0];
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
 
   const handleLanguageChange = (langCode: string) => {
-    i18n.changeLanguage(langCode);
+    void i18n.changeLanguage(langCode);
     handleClose();
   };
 
@@ -39,15 +35,12 @@ export default function LanguageSwitcher() {
     <>
       <Button
         onClick={handleClick}
-        startIcon={<LanguageIcon />}
-        sx={{
-          color: 'inherit',
-          textTransform: 'none',
-          fontWeight: 500,
-        }}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        sx={{ color: 'inherit', textTransform: 'none', fontWeight: 500 }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <span>{currentLang.flag}</span>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {currentLang.flag}
           <span>{currentLang.name}</span>
         </Box>
       </Button>
@@ -62,11 +55,9 @@ export default function LanguageSwitcher() {
           <MenuItem
             key={lang.code}
             onClick={() => handleLanguageChange(lang.code)}
-            selected={lang.code === i18n.language}
+            selected={lang.code === currentLang.code}
           >
-            <ListItemIcon>
-              <span style={{ fontSize: '1.25rem' }}>{lang.flag}</span>
-            </ListItemIcon>
+            <ListItemIcon>{lang.flag}</ListItemIcon>
             <ListItemText primary={lang.name} />
           </MenuItem>
         ))}

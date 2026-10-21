@@ -84,7 +84,7 @@ export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOv
               <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
                 {t('candidate.estimatedTime')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'success.main' }}>
+                <Box component="span" sx={{ fontWeight: 600, color: 'white' }}>
                   {t('candidate.unlimitedTime')}
                 </Box>
               </Typography>

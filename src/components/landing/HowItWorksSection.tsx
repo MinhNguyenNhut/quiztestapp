@@ -1,26 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Box, Grid, Typography, Paper } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ShareIcon from '@mui/icons-material/Share';
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import { Box, Stack, Typography } from '@mui/material';
+import SectionHeading from './SectionHeading';
 
-const steps = [
-  {
-    icon: <AddIcon />,
-    title: 'landing.howItWorks.step1.title',
-    description: 'landing.howItWorks.step1.description',
-  },
-  {
-    icon: <ShareIcon />,
-    title: 'landing.howItWorks.step2.title',
-    description: 'landing.howItWorks.step2.description',
-  },
-  {
-    icon: <AssessmentIcon />,
-    title: 'landing.howItWorks.step3.title',
-    description: 'landing.howItWorks.step3.description',
-  },
-];
+const steps = ['step1', 'step2', 'step3'];
 
 export default function HowItWorksSection() {
   const { t } = useTranslation();
@@ -29,91 +11,57 @@ export default function HowItWorksSection() {
     <Box
       component="section"
       id="how-it-works"
-      sx={{
-        py: { xs: 6, md: 10 },
-        px: { xs: 2, md: 3 },
-        backgroundColor: 'background.default',
-      }}
+      sx={{ scrollMarginTop: { xs: 56, sm: 64 }, py: { xs: 7, md: 11 }, px: { xs: 2, md: 3 }, bgcolor: 'background.default' }}
     >
       <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-        {/* Section header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: 2, mb: 1, display: 'block' }}
-          >
-            {t('landing.howItWorks.label')}
-          </Typography>
-          <Typography variant="h3" component="h2" sx={{ fontWeight: 700, mb: 2 }}>
-            {t('landing.howItWorks.title')}
-          </Typography>
-          <Typography
-            variant="h6"
-            component="p"
-            color="text.secondary"
-            sx={{ maxWidth: 600, mx: 'auto' }}
-          >
-            {t('landing.howItWorks.subtitle')}
-          </Typography>
-        </Box>
+        <SectionHeading title={t('landing.howItWorks.title')} subtitle={t('landing.howItWorks.subtitle')} />
 
-        {/* Steps */}
-        <Grid container spacing={4} sx={{ justifyContent: 'center' }}>
+        {/* Numbers are right here: this really is a sequence */}
+        <Stack component="ol" direction={{ xs: 'column', md: 'row' }} spacing={4} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {steps.map((step, index) => (
-            <Grid key={step.title} size={{ xs: 12, md: 4 }}>
-              <Paper
-                elevation={0}
-                variant="outlined"
+            <Box
+              component="li"
+              key={step}
+              sx={{
+                flex: 1,
+                position: 'relative',
+                '&:not(:last-of-type)::after': {
+                  content: '""',
+                  display: { xs: 'none', md: 'block' },
+                  position: 'absolute',
+                  top: 28,
+                  left: 76,
+                  right: 0,
+                  borderTop: '2px dashed',
+                  borderColor: 'divider',
+                },
+              }}
+            >
+              <Box
                 sx={{
-                  p: { xs: 3, md: 4 },
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  textAlign: 'center',
+                  width: 56,
+                  height: 56,
+                  mb: 3,
+                  borderRadius: '50%',
+                  display: 'grid',
+                  placeItems: 'center',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  fontSize: 22,
+                  fontWeight: 800,
                 }}
               >
-                <Box
-                  sx={(theme) => ({
-                    mb: 3,
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                    color: theme.palette.primary.contrastText,
-                    '& svg': { fontSize: 28 },
-                  })}
-                >
-                  {step.icon}
-                </Box>
-
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ fontWeight: 700, lineHeight: 1.5 }}
-                >
-                  {index + 1}
-                </Typography>
-
-                <Typography variant="h6" component="h3" sx={{ fontWeight: 700, mb: 1.5 }}>
-                  {t(step.title)}
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ lineHeight: 1.7, flex: 1 }}
-                >
-                  {t(step.description)}
-                </Typography>
-              </Paper>
-            </Grid>
+                {index + 1}
+              </Box>
+              <Typography variant="h6" component="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                {t(`landing.howItWorks.${step}.title`)}
+              </Typography>
+              <Typography color="text.secondary" sx={{ lineHeight: 1.7, maxWidth: 340 }}>
+                {t(`landing.howItWorks.${step}.description`)}
+              </Typography>
+            </Box>
           ))}
-        </Grid>
+        </Stack>
       </Box>
     </Box>
   );

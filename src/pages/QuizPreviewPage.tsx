@@ -33,11 +33,11 @@ export default function QuizPreviewPage() {
   const { t } = useTranslation();
 
   const quizzes = useAppSelector(state => state.quiz.quizzes);
+  const user = useAppSelector(state => state.user);
   const questions = useAppSelector((state) =>
     id ? state.questions.questionsByQuizId[id] ?? EMPTY_QUESTIONS : EMPTY_QUESTIONS
   );
   const isLoading = useAppSelector((state) => state.quiz.isLoading || state.questions.isLoading);
-
   const quiz: Quiz | null = useMemo(
     () => quizzes.find((q) => q.id === id) ?? null,
     [quizzes, id]
@@ -147,7 +147,7 @@ export default function QuizPreviewPage() {
                     size="small"
                     label={unlimitedTime ? t('quizList.unlimitedTime') : t('quizList.minutes', { count: estimatedMinutes })}
                     variant="outlined"
-                    sx={unlimitedTime ? { bgcolor: 'success.light', color: 'success.dark' } : {}}
+                    sx={unlimitedTime ? { bgcolor: 'success.light', color: 'common.white' } : {}}
                   />
                   <Chip
                     size="small"
@@ -162,13 +162,15 @@ export default function QuizPreviewPage() {
                 </Stack>
               </Box>
               <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
-                <Button
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
-                >
-                  {t('common.edit')}
-                </Button>
+                {quiz.createdBy == user?.profile?.id &&
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
+                  >
+                    {t('common.edit')}
+                  </Button>
+                }
                 <Button
                   variant="outlined"
                   startIcon={<AssessmentIcon />}
@@ -208,14 +210,16 @@ export default function QuizPreviewPage() {
               useFlexGap
             >
               <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }} useFlexGap>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<EditIcon />}
-                  onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
-                >
-                  {t('common.edit')}
-                </Button>
+                {quiz.createdBy == user?.profile?.id &&
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<EditIcon />}
+                    onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
+                  >
+                    {t('common.edit')}
+                  </Button>
+                }
                 <Button
                   variant="outlined"
                   startIcon={<AssessmentIcon />}
