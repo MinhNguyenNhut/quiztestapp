@@ -24,7 +24,10 @@
       "insertImage": "Insert Image",
       "insertTable": "Insert Table",
       "insertFormula": "Insert Formula",
-      "addBlank": "+ Blank"
+      "addBlank": "+ Blank",
+      "fontDefault": "Default font",
+      "fontSizeDefault": "Size",
+      "clearFormatting": "Clear formatting"
    },
    "colorPicker": {
       "modeColorSuffix": "{{mode}} color",

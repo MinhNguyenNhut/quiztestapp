@@ -24,7 +24,10 @@
       "insertImage": "Chèn hình ảnh",
       "insertTable": "Chèn bảng",
       "insertFormula": "Chèn công thức",
-      "addBlank": "+ Chỗ trống"
+      "addBlank": "+ Chỗ trống",
+      "fontDefault": "Font mặc định",
+      "fontSizeDefault": "Cỡ chữ",
+      "clearFormatting": "Xóa định dạng"
    },
    "colorPicker": {
       "modeColorSuffix": "Màu {{mode}}",

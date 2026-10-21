@@ -28,7 +28,14 @@ import SubscriptIcon from '@mui/icons-material/Subscript';
 import SuperscriptIcon from '@mui/icons-material/Superscript';
 import FormatColorTextIcon from '@mui/icons-material/FormatColorText';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
+import FormatClearIcon from '@mui/icons-material/FormatClear';
 import ColorPickerPopover from './ColorPickerPopover.tsx';
+import {
+  queryCommandState,
+  queryCommandValue,
+  readFontFamilyAtCaret,
+  readFontSizeAtCaret,
+} from './utils.ts';
 
 interface EditorToolbarProps {
   isEditorFocused: boolean;
@@ -88,36 +95,40 @@ export default function EditorToolbar({
   const [active, setActive] = useState<ActiveStates>(EMPTY_ACTIVE);
   const [currentTextColor, setCurrentTextColor] = useState<string>('#000000');
   const [currentHighlight, setCurrentHighlight] = useState<string>('transparent');
+  const [currentFontFamily, setCurrentFontFamily] = useState<string>('');
+  const [currentFontSize, setCurrentFontSize] = useState<string>('');
 
   // Poll the document for selection state so toolbar buttons reflect the caret.
   const refreshActiveStates = useCallback(() => {
     try {
       const next: ActiveStates = {
-        bold: document.queryCommandState('bold'),
-        italic: document.queryCommandState('italic'),
-        underline: document.queryCommandState('underline'),
-        subscript: document.queryCommandState('subscript'),
-        superscript: document.queryCommandState('superscript'),
-        orderedList: document.queryCommandState('insertOrderedList'),
-        unorderedList: document.queryCommandState('insertUnorderedList'),
-        alignLeft: document.queryCommandState('justifyLeft'),
-        alignCenter: document.queryCommandState('justifyCenter'),
-        alignRight: document.queryCommandState('justifyRight'),
-        quote: document.queryCommandState('formatBlock') && document.queryCommandValue('formatBlock') === 'blockquote',
-        codeBlock: document.queryCommandValue('formatBlock') === 'pre',
+        bold: queryCommandState('bold'),
+        italic: queryCommandState('italic'),
+        underline: queryCommandState('underline'),
+        subscript: queryCommandState('subscript'),
+        superscript: queryCommandState('superscript'),
+        orderedList: queryCommandState('insertOrderedList'),
+        unorderedList: queryCommandState('insertUnorderedList'),
+        alignLeft: queryCommandState('justifyLeft'),
+        alignCenter: queryCommandState('justifyCenter'),
+        alignRight: queryCommandState('justifyRight'),
+        quote: queryCommandState('formatBlock') && queryCommandValue('formatBlock') === 'blockquote',
+        codeBlock: queryCommandValue('formatBlock') === 'pre',
       };
       setActive((previous) =>
         areActiveStatesEqual(previous, next) ? previous : next,
       );
 
       // Read the text color at the current caret position.
-      const fore = document.queryCommandValue('foreColor') as string | '' | null;
+      const fore = queryCommandValue('foreColor') as string | '' | null;
       if (fore) setCurrentTextColor(normalizeColor(fore) || '#000000');
 
       // hiliteColor is unreliable across browsers (Chrome reports empty/incorrectly),
       // so try queryCommandValue first, then fall back to walking the DOM from the
       // caret to find the actually-applied inline background-color.
       setCurrentHighlight(readHighlightAtCaret());
+      setCurrentFontFamily(readFontFamilyAtCaret());
+      setCurrentFontSize(readFontSizeAtCaret());
     } catch {
       // Ignore — older browsers can throw on unsupported commands.
     }
@@ -143,13 +154,28 @@ export default function EditorToolbar({
     [onFormat, refreshActiveStates],
   );
 
+  const handleFontFamilyChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      onFormat('__fontFamily__', e.target.value);
+      setTimeout(refreshActiveStates, 0);
+    },
+    [onFormat, refreshActiveStates],
+  );
+
+  const handleFontSizeChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      onFormat('__fontSize__', e.target.value);
+      setTimeout(refreshActiveStates, 0);
+    },
+    [onFormat, refreshActiveStates],
+  );
+
   const handleRemoveTextColor = useCallback(() => {
     onFormat('foreColor', '#000000');
   }, [onFormat]);
 
   const handleRemoveHighlight = useCallback(() => {
-    // Setting 'transparent' makes the highlight effectively disappear across engines.
-    onFormat('hiliteColor', 'transparent');
+    onFormat('__clearHighlight__', undefined);
   }, [onFormat]);
 
   const handleLinkInsert = useCallback(() => {
@@ -198,6 +224,58 @@ export default function EditorToolbar({
       </Select>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+      {/* Font Family */}
+      <Select
+        size="small"
+        value={currentFontFamily || '__default__'}
+        onChange={handleFontFamilyChange}
+        sx={{ minWidth: 130, mr: 0.5 }}
+        renderValue={(val) =>
+          val === '__default__'
+            ? t('richTextEditor.toolbar.fontDefault')
+            : val.split(',')[0].replace(/['"]/g, '').trim()
+        }
+        MenuProps={{ disableAutoFocusItem: true }}
+      >
+        <MenuItem value="__default__">
+          {t('richTextEditor.toolbar.fontDefault')}
+        </MenuItem>
+        <MenuItem value="Arial, Helvetica, sans-serif">Arial</MenuItem>
+        <MenuItem value="'Times New Roman', Times, serif">Times New Roman</MenuItem>
+        <MenuItem value="'Courier New', Courier, monospace">Courier New</MenuItem>
+        <MenuItem value="Georgia, serif">Georgia</MenuItem>
+        <MenuItem value="'Trebuchet MS', sans-serif">Trebuchet MS</MenuItem>
+        <MenuItem value="Verdana, Geneva, sans-serif">Verdana</MenuItem>
+        <MenuItem value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro</MenuItem>
+        <MenuItem value="Inter, sans-serif">Inter</MenuItem>
+      </Select>
+
+      {/* Font Size */}
+      <Select
+        size="small"
+        value={currentFontSize || '__default__'}
+        onChange={handleFontSizeChange}
+        sx={{ minWidth: 80, mr: 0.5 }}
+        renderValue={(val) =>
+          val === '__default__'
+            ? t('richTextEditor.toolbar.fontSizeDefault')
+            : val
+        }
+        MenuProps={{ disableAutoFocusItem: true }}
+      >
+        <MenuItem value="__default__">
+          {t('richTextEditor.toolbar.fontSizeDefault')}
+        </MenuItem>
+        <MenuItem value="12px">12</MenuItem>
+        <MenuItem value="14px">14</MenuItem>
+        <MenuItem value="16px">16</MenuItem>
+        <MenuItem value="18px">18</MenuItem>
+        <MenuItem value="20px">20</MenuItem>
+        <MenuItem value="24px">24</MenuItem>
+        <MenuItem value="28px">28</MenuItem>
+        <MenuItem value="32px">32</MenuItem>
+      </Select>
 
       {/* Bold, Italic, Underline */}
       <Tooltip title={t('richTextEditor.toolbar.bold')}>
@@ -405,6 +483,19 @@ export default function EditorToolbar({
         </IconButton>
       </Tooltip>
 
+      <Tooltip title={t('richTextEditor.toolbar.clearFormatting')}>
+        <IconButton
+          size="small"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            onFormat('removeFormat');
+            onFormat('__clearHighlight__');
+          }}
+        >
+          <FormatClearIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
       {onInsertBlank && (
         <>
           <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
@@ -420,10 +511,10 @@ export default function EditorToolbar({
 function activeButtonSx(isActive: boolean) {
   return isActive
     ? {
-        bgcolor: 'primary.main',
-        color: 'primary.contrastText',
-        '&:hover': { bgcolor: 'primary.dark' },
-      }
+      bgcolor: 'primary.main',
+      color: 'primary.contrastText',
+      '&:hover': { bgcolor: 'primary.dark' },
+    }
     : undefined;
 }
 
@@ -451,7 +542,7 @@ function normalizeColor(value: string): string | null {
 // has an inline background-color set.
 function readHighlightAtCaret(): string {
   try {
-    const viaCommand = document.queryCommandValue('hiliteColor') as string | '' | null;
+    const viaCommand = queryCommandValue('hiliteColor') as string | '' | null;
     const normalized = viaCommand ? normalizeColor(viaCommand) : null;
     if (normalized && normalized !== '#ffffff') return normalized;
   } catch {

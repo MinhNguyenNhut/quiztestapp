@@ -13,6 +13,10 @@ import {
   insertTable,
   insertImage,
   insertFormula,
+  clearHighlightInSelection,
+  sanitizePastedHtml,
+  applyFontFamily,
+  applyFontSize,
 } from './utils.ts';
 import type { RichTextContent } from '../../../types/index.ts';
 
@@ -50,6 +54,7 @@ function RichTextEditor({
   const debounceRef = useRef<number | null>(null);
   const lastHtmlRef = useRef<string>('');
   const isFocusedRef = useRef<boolean>(false);
+  const savedSelectionRef = useRef<Range | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [formulaOpen, setFormulaOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
@@ -103,12 +108,40 @@ function RichTextEditor({
     }, 250);
   }, []);
 
-  const handleFormat = useCallback((command: string, cmdValue?: string) => {
-    if (disabled) return;
-    editorRef.current?.focus();
-    execFormat(command, cmdValue);
-    handleInput();
-  }, [disabled, handleInput]);
+  const handleFormat = useCallback(
+    (command: string, cmdValue?: string) => {
+      if (disabled) return;
+
+      editorRef.current?.focus();
+
+      const saved = savedSelectionRef.current;
+      if (saved) {
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(saved);
+        }
+        savedSelectionRef.current = null;
+      }
+
+      if (command === '__clearHighlight__') {
+        clearHighlightInSelection();
+      } else if (command === '__fontFamily__') {
+        if (cmdValue && cmdValue !== '__default__') {
+          applyFontFamily(cmdValue);
+        }
+      } else if (command === '__fontSize__') {
+        if (cmdValue && cmdValue !== '__default__') {
+          const px = parseInt(cmdValue, 10);
+          if (!Number.isNaN(px)) applyFontSize(px);
+        }
+      } else {
+        execFormat(command, cmdValue);
+      }
+      handleInput();
+    },
+    [disabled, handleInput],
+  );
 
   const handleImageInsert = useCallback((url: string, alt: string) => {
     if (disabled) return;
@@ -166,6 +199,10 @@ function RichTextEditor({
   }, []);
 
   const handleBlur = useCallback(() => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+      savedSelectionRef.current = sel.getRangeAt(0).cloneRange();
+    }
     isFocusedRef.current = false;
     setIsFocused(false);
     if (debounceRef.current !== null) {
@@ -174,6 +211,48 @@ function RichTextEditor({
     }
     flushChange();
   }, [flushChange]);
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      if (disabled) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+
+      const html = e.clipboardData.getData('text/html');
+      const text = e.clipboardData.getData('text/plain');
+
+      editorRef.current?.focus();
+
+      if (html) {
+        const cleaned = sanitizePastedHtml(html);
+
+        // Insert the sanitized HTML at the caret via the Range API (cross-browser
+        // safe — execCommand('insertHTML') is missing in Firefox and deprecated
+        // everywhere else anyway).
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          const fragment = range.createContextualFragment(cleaned);
+          const lastNode = fragment.lastChild;
+          range.insertNode(fragment);
+          if (lastNode) {
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      } else if (text) {
+        execFormat('insertText', text);
+      }
+
+      handleInput();
+    },
+    [disabled, handleInput],
+  );
 
   const editorSx = useMemo(
     () => ({
@@ -257,6 +336,7 @@ function RichTextEditor({
           contentEditable={!disabled}
           suppressContentEditableWarning
           onInput={handleInput}
+          onPaste={handlePaste}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
