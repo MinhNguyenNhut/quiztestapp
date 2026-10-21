@@ -1,8 +1,7 @@
 {
    "backToQuizzes": "Back to Quizzes",
    "profileInformation": "Profile Information",
-   "firstName": "First Name",
-   "lastName": "Last Name",
+   "name": "Name",
    "email": "Email",
    "userId": "User ID",
    "loadFailed": "Failed to load profile"

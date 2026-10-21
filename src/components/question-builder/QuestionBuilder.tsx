@@ -156,7 +156,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
       for (const [index, question] of data.questions.entries()) {
         await dispatch(createQuestion({ quizId: quiz.id, payload: buildPayload(question, index) })).unwrap();
       }
-      navigate('/');
+      navigate('/quizzes', { replace: true });
     },
     [dispatch, navigate, createdBy],
   );

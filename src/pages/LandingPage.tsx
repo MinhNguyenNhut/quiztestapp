@@ -13,7 +13,15 @@ export default function LandingPage() {
   const quizListKey = quizzes.length; // Change key when quiz list changes to reset page
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', color: 'text.primary' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        color: 'text.primary',
+        bgcolor: 'background.default',
+      }}
+    >
       <LandingHeader />
       <Box component="main" sx={{ flex: 1 }}>
         <HeroSection />
