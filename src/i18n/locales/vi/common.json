@@ -106,5 +106,6 @@
   "locale": "vi-VN",
   "account": "Tài khoản",
   "profile": "Hồ sơ",
-  "logout": "Đăng xuất"
+  "logout": "Đăng xuất",
+  "backToHome": "Về trang chủ"
 }

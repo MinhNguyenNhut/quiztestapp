@@ -2,30 +2,23 @@ import { useState, useEffect } from 'react';
 import { Box, Button, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { PlayArrow } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import type { UseFormHandleSubmit } from 'react-hook-form';
-import type { CandidateFormValues } from '../../types/candidate';
 
 interface StartExamButtonProps {
-  handleSubmit: UseFormHandleSubmit<CandidateFormValues>;
-  onSubmit: (data: CandidateFormValues) => void;
   isSubmitting?: boolean;
 }
 
 /**
- * StartExamButton provides a sticky button on mobile for form submission
- * Includes smooth animations and loading state
+ * Submit button for the candidate form. Must be rendered inside the <form>:
+ * `type="submit"` triggers the form's own onSubmit (react-hook-form validation
+ * included), so no extra onClick handler is needed.
+ * On mobile it sticks to the bottom and hides while scrolling down.
  */
-export default function StartExamButton({
-  handleSubmit,
-  onSubmit,
-  isSubmitting = false,
-}: StartExamButtonProps) {
+export default function StartExamButton({ isSubmitting = false }: StartExamButtonProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isVisible, setIsVisible] = useState(true);
 
-  // Handle scroll visibility on mobile
   useEffect(() => {
     if (!isMobile) return;
 
@@ -51,12 +44,12 @@ export default function StartExamButton({
         backgroundColor: isMobile ? 'background.paper' : 'transparent',
         borderTop: isMobile ? '1px solid' : 'none',
         borderColor: 'divider',
+        mx: isMobile ? -2.5 : 0,
+        mb: isMobile ? -2.5 : 0,
         p: isMobile ? 2 : 0,
         transform: isMobile && !isVisible ? 'translateY(100%)' : 'translateY(0)',
         transition: 'transform 0.3s ease-in-out',
-        boxShadow: isMobile
-          ? '0 -4px 20px -4px rgb(0 0 0 / 0.1)'
-          : 'none',
+        boxShadow: isMobile ? '0 -4px 20px -4px rgb(0 0 0 / 0.1)' : 'none',
       }}
     >
       <Box
@@ -71,13 +64,8 @@ export default function StartExamButton({
           fullWidth
           size="large"
           disabled={isSubmitting}
-          onClick={handleSubmit(onSubmit)}
           startIcon={
-            isSubmitting ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              <PlayArrow />
-            )
+            isSubmitting ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />
           }
           sx={{
             py: 1.5,

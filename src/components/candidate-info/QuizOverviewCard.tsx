@@ -14,8 +14,10 @@ import {
   Person,
   Speed,
   CalendarToday,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import type { QuizOverview } from '../../types/candidate';
 import { DIFFICULTY_COLORS } from '../../types/quiz';
 
@@ -24,9 +26,32 @@ interface QuizOverviewCardProps {
   unlimitedTime?: boolean;
 }
 
+function InfoRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ color: 'text.secondary', display: 'flex', '& svg': { fontSize: 20 } }}>
+        {icon}
+      </Box>
+      <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        {label}:
+        <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
+          {children}
+        </Box>
+      </Typography>
+    </Box>
+  );
+}
+
 /**
- * QuizOverviewCard displays the quiz information in a card format
- * Shows cover image, title, description, and metadata
+ * Displays quiz information: cover image, title, description and metadata.
  */
 export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOverviewCardProps) {
   const { t, i18n } = useTranslation();
@@ -35,16 +60,15 @@ export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOv
 
   return (
     <Card
+      elevation={0}
       sx={{
-        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 24px -4px rgb(0 0 0 / 0.12)',
-        },
+        borderRadius: 4,
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: '0 8px 32px -8px rgb(15 23 42 / 0.10)',
       }}
     >
       {quiz.coverImage && (
@@ -56,22 +80,14 @@ export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOv
           sx={{ objectFit: 'cover' }}
         />
       )}
-      <CardContent sx={{ flexGrow: 1, p: 3 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          sx={{ fontWeight: 700 }}
-        >
+
+      <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
           {quiz.title}
         </Typography>
 
         {quiz.description && (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3, lineHeight: 1.7 }}
-          >
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
             {quiz.description}
           </Typography>
         )}
@@ -80,56 +96,32 @@ export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOv
 
         <Stack spacing={2}>
           {unlimitedTime ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.estimatedTime')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'white' }}>
-                  {t('candidate.unlimitedTime')}
-                </Box>
-              </Typography>
-            </Box>
-          ) : quiz.estimatedTime && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <AccessTime sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.estimatedTime')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {t('candidate.minutesUnit', { count: quiz.estimatedTime })}
-                </Box>
-              </Typography>
-            </Box>
+            <InfoRow icon={<AccessTime />} label={t('candidate.estimatedTime')}>
+              {t('candidate.unlimitedTime')}
+            </InfoRow>
+          ) : (
+            quiz.estimatedTime && (
+              <InfoRow icon={<AccessTime />} label={t('candidate.estimatedTime')}>
+                {t('candidate.minutesUnit', { count: quiz.estimatedTime })}
+              </InfoRow>
+            )
           )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <HelpOutlined sx={{ color: 'text.secondary', fontSize: 20 }} />
-            <Typography variant="body2" color="text.secondary">
-              {t('candidate.questionsLabel')}:{' '}
-              <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                {quiz.questionCount}
-              </Box>
-            </Typography>
-          </Box>
+          <InfoRow icon={<HelpOutlined />} label={t('candidate.questionsLabel')}>
+            {quiz.questionCount}
+          </InfoRow>
 
           {quiz.passingScore !== undefined && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.passingScore')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {quiz.passingScore}%
-                </Box>
-              </Typography>
-            </Box>
+            <InfoRow icon={<EmojiEvents />} label={t('candidate.passingScore')}>
+              {quiz.passingScore}%
+            </InfoRow>
           )}
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Speed sx={{ color: 'text.secondary', fontSize: 20 }} />
-
             <Typography variant="body2" color="text.secondary">
               {t('candidate.difficultyLabel')}:
             </Typography>
-
             <Chip
               label={t(`difficulty.${quiz.difficulty}`)}
               size="small"
@@ -142,28 +134,16 @@ export default function QuizOverviewCard({ quiz, unlimitedTime = false }: QuizOv
             />
           </Box>
 
-          {quiz.createdBy && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.createdBy')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {quiz.createdBy}
-                </Box>
-              </Typography>
-            </Box>
+          {quiz.userCreated && (
+            <InfoRow icon={<Person />} label={t('candidate.createdBy')}>
+              {quiz.userCreated}
+            </InfoRow>
           )}
 
           {quiz.createdAt && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <CalendarToday sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('candidate.createdLabel')}:{' '}
-                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {new Date(quiz.createdAt).toLocaleDateString(dateLocale)}
-                </Box>
-              </Typography>
-            </Box>
+            <InfoRow icon={<CalendarToday />} label={t('candidate.createdLabel')}>
+              {new Date(quiz.createdAt).toLocaleDateString(dateLocale)}
+            </InfoRow>
           )}
         </Stack>
       </CardContent>

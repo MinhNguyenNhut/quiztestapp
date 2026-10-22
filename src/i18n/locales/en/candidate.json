@@ -25,5 +25,7 @@
    "quizOverview": "Quiz Overview",
    "questions": "Questions",
    "timeLimit": "Time Limit",
-   "difficulty": "Difficulty"
+   "difficulty": "Difficulty",
+   "stepLabel": "Step 1 of 2",
+   "subtitle": "Please complete the form below to start the exam."
 }

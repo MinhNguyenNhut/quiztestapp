@@ -27,7 +27,11 @@
       "addBlank": "+ Blank",
       "fontDefault": "Default font",
       "fontSizeDefault": "Size",
-      "clearFormatting": "Clear formatting"
+      "clearFormatting": "Clear formatting",
+      "fontSizeInput": "Font size",
+      "fontSizeDecrease": "Decrease font size",
+      "fontSizeIncrease": "Increase font size",
+      "fontSizePresets": "Choose font size"
    },
    "colorPicker": {
       "modeColorSuffix": "{{mode}} color",
@@ -37,7 +41,8 @@
       "apply": "Apply",
       "removeColor": "Remove {{mode}} color",
       "textMode": "Text",
-      "highlightMode": "Highlight"
+      "highlightMode": "Highlight",
+      "noColor": "No color"
    },
    "formulaModal": {
       "title": "Insert Math Formula",

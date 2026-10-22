@@ -67,6 +67,7 @@ export interface CandidateFieldsConfig {
 export interface QuizOverview {
   id: string;
   title: string;
+  userCreated?: string;
   description: string;
   coverImage?: string;
   estimatedTime?: number;

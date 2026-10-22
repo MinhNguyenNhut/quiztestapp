@@ -126,6 +126,7 @@ export interface Question {
 export interface Quiz {
   id: string;
   title: string;
+  userCreated?: string;
   description: string;
   questionCount?: number;
   coverImage?: string;

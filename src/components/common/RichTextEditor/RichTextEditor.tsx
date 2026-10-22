@@ -84,6 +84,54 @@ function RichTextEditor({
     };
   }, []);
 
+  // Remember the last selection that was inside the editor. Saving it on blur is
+  // too late: when focus moves to the font-size <input>, the browser has already
+  // moved the document selection into the input.
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const el = editorRef.current;
+      const sel = window.getSelection();
+      if (!el || !sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (!el.contains(range.commonAncestorContainer)) return;
+
+      // When focus leaves the editor (e.g. the user clicked into the font-size
+      // input), browsers such as Safari/Firefox report the old selection as a
+      // collapsed "ghost" caret that still appears to live inside the editor.
+      // Never let that ghost caret overwrite a real text selection that was
+      // saved while the editor had focus — otherwise pressing Enter in the
+      // font-size input would format a collapsed caret instead of the text.
+      const editorHasFocus = el.contains(document.activeElement);
+      const saved = savedSelectionRef.current;
+      if (
+        !editorHasFocus &&
+        range.collapsed &&
+        saved &&
+        !saved.collapsed &&
+        el.contains(saved.commonAncestorContainer)
+      ) {
+        return;
+      }
+      savedSelectionRef.current = range.cloneRange();
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
+
+  // Snapshot the selection synchronously right before a toolbar control (the
+  // font-size text field) is about to steal focus. mousedown fires BEFORE the
+  // browser moves the document selection into the control, so this is the most
+  // reliable capture point — it does not depend on selectionchange ordering.
+  const captureSelection = useCallback(() => {
+    const el = editorRef.current;
+    const sel = window.getSelection();
+    if (!el || !sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (el.contains(range.commonAncestorContainer)) {
+      savedSelectionRef.current = range.cloneRange();
+    }
+  }, []);
+
   const flushChange = useCallback(() => {
     const el = editorRef.current;
     if (!el) return;
@@ -112,16 +160,22 @@ function RichTextEditor({
     (command: string, cmdValue?: string) => {
       if (disabled) return;
 
-      editorRef.current?.focus();
-
+      const el = editorRef.current;
+      // Read the saved selection BEFORE focus(): refocusing the contentEditable
+      // can make the browser re-report (and possibly collapse) the selection,
+      // and the selectionchange listener may then rewrite the ref before we
+      // get a chance to use it.
       const saved = savedSelectionRef.current;
-      if (saved) {
+      el?.focus();
+
+      // Focusing a contentEditable can reset the caret, so restore the last
+      // selection that was inside the editor.
+      if (saved && el?.contains(saved.commonAncestorContainer)) {
         const sel = window.getSelection();
         if (sel) {
           sel.removeAllRanges();
-          sel.addRange(saved);
+          sel.addRange(saved.cloneRange());
         }
-        savedSelectionRef.current = null;
       }
 
       if (command === '__clearHighlight__') {
@@ -199,10 +253,6 @@ function RichTextEditor({
   }, []);
 
   const handleBlur = useCallback(() => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
-      savedSelectionRef.current = sel.getRangeAt(0).cloneRange();
-    }
     isFocusedRef.current = false;
     setIsFocused(false);
     if (debounceRef.current !== null) {
@@ -325,6 +375,7 @@ function RichTextEditor({
           <EditorToolbar
             isEditorFocused={isFocused}
             onFormat={handleFormat}
+            onCaptureSelection={captureSelection}
             onInsertImage={handleInsertImage}
             onInsertTable={handleInsertTable}
             onInsertFormula={handleInsertFormula}

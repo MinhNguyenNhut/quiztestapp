@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,14 +9,7 @@ import {
   Divider,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
-// 40 preset swatches covering the common text / highlight cases.
-export const PRESET_COLORS: ReadonlyArray<string> = [
-  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
-  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
-  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
-  '#cc4125', '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7',
-];
+import { PRESET_COLORS } from './colorPresets.ts';
 
 interface ColorPickerPopoverProps {
   /** Icon element rendered on the toolbar button (e.g. <FormatColorTextIcon />). */
@@ -29,9 +22,10 @@ interface ColorPickerPopoverProps {
   onRemove: () => void;
   /** Short label shown inside the popover header (e.g. "Text" or "Highlight"). */
   modeLabel: string;
-  /** Color currently at the caret, in `#rrggbb` form. Used to mark the active swatch
-   *  and seed the custom-color picker. */
+  /** Color currently at the caret, in `#rrggbb` form (or 'transparent' when none). */
   currentColor?: string;
+  /** Hex used to seed the custom picker when there is no current color. */
+  fallbackColor?: string;
 }
 
 export default function ColorPickerPopover({
@@ -41,34 +35,44 @@ export default function ColorPickerPopover({
   onRemove,
   modeLabel,
   currentColor = '#000000',
+  fallbackColor = '#000000',
 }: ColorPickerPopoverProps) {
   const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [custom, setCustom] = useState<string>(currentColor);
 
-  // Whenever the caret color changes, sync the custom-picker seed so it matches.
-  // This is what makes the picker show "current color selected" out of the box.
-  useEffect(() => {
-    setCustom(currentColor);
-  }, [currentColor]);
+  const normalizedCurrent = (currentColor || '').toLowerCase();
+  const isTransparent = normalizedCurrent === 'transparent' || normalizedCurrent === '';
+  const modeLower = modeLabel.toLowerCase();
+
+  // Color picked in the custom picker while the popover is open. When null the
+  // picker follows the caret color (derived — no effect needed).
+  const [customOverride, setCustomOverride] = useState<string | null>(null);
+  // Always a valid #rrggbb: 'transparent' / rgb() fall back to fallbackColor.
+  const seedColor = isValidHex(currentColor) ? currentColor : fallbackColor;
+  const custom = customOverride ?? seedColor;
+  // True while there is no color and the user hasn't picked a custom one yet.
+  const showNoColor = customOverride === null && isTransparent;
 
   const open = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
   }, []);
-  const close = useCallback(() => setAnchorEl(null), []);
+
+  const close = useCallback(() => {
+    setAnchorEl(null);
+    setCustomOverride(null);
+  }, []);
 
   const apply = useCallback(
     (color: string) => {
       onApply(color);
-      setCustom(color);
-      setAnchorEl(null);
+      close();
     },
-    [onApply],
+    [onApply, close],
   );
 
   const handleCustomChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setCustom(e.target.value);
+      setCustomOverride(e.target.value);
     },
     [],
   );
@@ -79,12 +83,8 @@ export default function ColorPickerPopover({
 
   const handleRemove = useCallback(() => {
     onRemove();
-    setAnchorEl(null);
-  }, [onRemove]);
-
-  const normalizedCurrent = (currentColor || '').toLowerCase();
-  const isTransparent = normalizedCurrent === 'transparent' || normalizedCurrent === '';
-  const modeLower = modeLabel.toLowerCase();
+    close();
+  }, [onRemove, close]);
 
   return (
     <>
@@ -193,13 +193,13 @@ export default function ColorPickerPopover({
               width: 28,
               height: 28,
               borderRadius: '4px',
-              border: '1px solid #d1d5db',
+              border: showNoColor ? '1px dashed #9ca3af' : '1px solid #d1d5db',
               overflow: 'hidden',
               cursor: 'pointer',
               flexShrink: 0,
             }}
           >
-            <Box sx={{ position: 'absolute', inset: 0, bgcolor: custom }} />
+            <Box sx={{ position: 'absolute', inset: 0, bgcolor: showNoColor ? 'transparent' : custom }} />
             <input
               type="color"
               value={isValidHex(custom) ? custom : '#000000'}
@@ -216,10 +216,18 @@ export default function ColorPickerPopover({
               }}
             />
           </Box>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', flex: 1 }}>
-            {custom.toUpperCase()}
+          <Typography
+            variant="body2"
+            sx={{ fontFamily: showNoColor ? 'inherit' : 'monospace', flex: 1 }}
+          >
+            {showNoColor ? t('richTextEditor.colorPicker.noColor') : custom.toUpperCase()}
           </Typography>
-          <Button size="small" onMouseDown={e => e.preventDefault()} variant="outlined" onClick={handleCustomApply}>
+          <Button
+            size="small"
+            onMouseDown={e => e.preventDefault()}
+            variant="outlined"
+            onClick={handleCustomApply}
+          >
             {t('richTextEditor.colorPicker.apply')}
           </Button>
         </Box>

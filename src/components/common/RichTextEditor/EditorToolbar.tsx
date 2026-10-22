@@ -36,10 +36,15 @@ import {
   readFontFamilyAtCaret,
   readFontSizeAtCaret,
 } from './utils.ts';
+import FontSizeInput from './FontSizeInput.tsx';
+import { FONT_FAMILIES, matchFontFamily } from './fontOptions.ts';
 
 interface EditorToolbarProps {
   isEditorFocused: boolean;
   onFormat: (command: string, value?: string) => void;
+  /** Called right before a toolbar control steals focus from the editor, so
+   * the editor can snapshot its current selection (see RichTextEditor). */
+  onCaptureSelection?: () => void;
   onInsertImage: () => void;
   onInsertTable: () => void;
   onInsertFormula: () => void;
@@ -85,6 +90,7 @@ function areActiveStatesEqual(left: ActiveStates, right: ActiveStates): boolean 
 export default function EditorToolbar({
   isEditorFocused,
   onFormat,
+  onCaptureSelection,
   onInsertImage,
   onInsertTable,
   onInsertFormula,
@@ -162,9 +168,9 @@ export default function EditorToolbar({
     [onFormat, refreshActiveStates],
   );
 
-  const handleFontSizeChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onFormat('__fontSize__', e.target.value);
+  const handleFontSizeApply = useCallback(
+    (px: number) => {
+      onFormat('__fontSize__', `${px}px`);
       setTimeout(refreshActiveStates, 0);
     },
     [onFormat, refreshActiveStates],
@@ -226,56 +232,36 @@ export default function EditorToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Font Family */}
+      {/* Font Family */}
       <Select
         size="small"
-        value={currentFontFamily || '__default__'}
+        value={matchFontFamily(currentFontFamily) || '__default__'}
         onChange={handleFontFamilyChange}
-        sx={{ minWidth: 130, mr: 0.5 }}
+        sx={{ minWidth: 150, mr: 0.5 }}
         renderValue={(val) =>
           val === '__default__'
             ? t('richTextEditor.toolbar.fontDefault')
-            : val.split(',')[0].replace(/['"]/g, '').trim()
+            : (FONT_FAMILIES.find((f) => f.value === val)?.label ?? val)
         }
-        MenuProps={{ disableAutoFocusItem: true }}
+        MenuProps={{
+          disableAutoFocusItem: true,
+          slotProps: { paper: { sx: { maxHeight: 360 } } },
+        }}
       >
-        <MenuItem value="__default__">
-          {t('richTextEditor.toolbar.fontDefault')}
-        </MenuItem>
-        <MenuItem value="Arial, Helvetica, sans-serif">Arial</MenuItem>
-        <MenuItem value="'Times New Roman', Times, serif">Times New Roman</MenuItem>
-        <MenuItem value="'Courier New', Courier, monospace">Courier New</MenuItem>
-        <MenuItem value="Georgia, serif">Georgia</MenuItem>
-        <MenuItem value="'Trebuchet MS', sans-serif">Trebuchet MS</MenuItem>
-        <MenuItem value="Verdana, Geneva, sans-serif">Verdana</MenuItem>
-        <MenuItem value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro</MenuItem>
-        <MenuItem value="Inter, sans-serif">Inter</MenuItem>
+        <MenuItem value="__default__">{t('richTextEditor.toolbar.fontDefault')}</MenuItem>
+        {FONT_FAMILIES.map((f) => (
+          <MenuItem key={f.value} value={f.value} sx={{ fontFamily: f.value }}>
+            {f.label}
+          </MenuItem>
+        ))}
       </Select>
 
-      {/* Font Size */}
-      <Select
-        size="small"
-        value={currentFontSize || '__default__'}
-        onChange={handleFontSizeChange}
-        sx={{ minWidth: 80, mr: 0.5 }}
-        renderValue={(val) =>
-          val === '__default__'
-            ? t('richTextEditor.toolbar.fontSizeDefault')
-            : val
-        }
-        MenuProps={{ disableAutoFocusItem: true }}
-      >
-        <MenuItem value="__default__">
-          {t('richTextEditor.toolbar.fontSizeDefault')}
-        </MenuItem>
-        <MenuItem value="12px">12</MenuItem>
-        <MenuItem value="14px">14</MenuItem>
-        <MenuItem value="16px">16</MenuItem>
-        <MenuItem value="18px">18</MenuItem>
-        <MenuItem value="20px">20</MenuItem>
-        <MenuItem value="24px">24</MenuItem>
-        <MenuItem value="28px">28</MenuItem>
-        <MenuItem value="32px">32</MenuItem>
-      </Select>
+      {/* Font Size: type a number, ± buttons, or pick a preset */}
+      <FontSizeInput
+        value={currentFontSize}
+        onChange={handleFontSizeApply}
+        onFieldMouseDown={onCaptureSelection}
+      />
 
       {/* Bold, Italic, Underline */}
       <Tooltip title={t('richTextEditor.toolbar.bold')}>

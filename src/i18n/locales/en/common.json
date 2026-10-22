@@ -106,5 +106,6 @@
   "locale": "en-US",
   "account": "Account",
   "profile": "Profile",
-  "logout": "Logout"
+  "logout": "Logout",
+  "backToHome": "Back to home"
 }

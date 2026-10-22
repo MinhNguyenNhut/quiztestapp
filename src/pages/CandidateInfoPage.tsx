@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -9,11 +9,12 @@ import {
   Fade,
   Grid,
   Paper,
+  Skeleton,
   Snackbar,
   Typography,
 } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
-import type { UseFormRegister } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../features/store';
 import { startSession } from '../features/exam/examSlice';
@@ -30,14 +31,29 @@ import { isQuizUnlimitedTime } from '../types/quiz';
 import { aggregateDifficulty } from '../utils/quizDisplay';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
 
+const HOME_PATH = '/';
+
+// Fisher-Yates shuffle
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Page (data loading)                                                       */
+/* -------------------------------------------------------------------------- */
+
 export default function CandidateInfoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
-  const quizzes = useAppSelector(state => state.quiz.quizzes);
+  const quizzes = useAppSelector((state) => state.quiz.quizzes);
   const quiz = quizzes.find((q) => q.id === id);
-
   const [notFoundId, setNotFoundId] = useState<string | null>(null);
   const notFound = !quiz && notFoundId === id;
 
@@ -62,7 +78,7 @@ export default function CandidateInfoPage() {
         <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
           <Alert
             severity="error"
-            action={<Button onClick={() => navigate('/')}>{t('common.home')}</Button>}
+            action={<Button onClick={() => navigate(HOME_PATH)}>{t('common.home')}</Button>}
           >
             {t('errors.quizNotFound')}
           </Alert>
@@ -79,6 +95,7 @@ export default function CandidateInfoPage() {
   const quizOverview: QuizOverview = {
     id: quiz.id,
     title: quiz.title,
+    userCreated: quiz.userCreated,
     description: quiz.description,
     coverImage: quiz.coverImage,
     estimatedTime: quiz.estimatedTime ?? 30,
@@ -90,39 +107,40 @@ export default function CandidateInfoPage() {
     unlimitedTime: isQuizUnlimitedTime(quiz),
   };
 
-  const fieldsConfig = quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
-
-  const handleStartQuiz = () => {
-    navigate(`/quiz/${quiz.id}/exam`);
-  };
+  const fieldsConfig =
+    quiz.candidateFieldsConfig ?? getDefaultCandidateFieldsConfig(i18n.language);
 
   return (
     <CandidateInfoForm
       quiz={quizOverview}
       fieldsConfig={fieldsConfig}
-      onStartQuiz={handleStartQuiz}
+      onBack={() => navigate(HOME_PATH)}
     />
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Layout + submit logic                                                     */
+/* -------------------------------------------------------------------------- */
+
 interface CandidateInfoFormProps {
   quiz: QuizOverview;
   fieldsConfig: CandidateFieldsConfig;
-  onStartQuiz?: (candidateData: CandidateFormValues) => void;
+  onBack: () => void;
   isLoading?: boolean;
 }
 
 function CandidateInfoForm({
   quiz,
   fieldsConfig,
-  onStartQuiz,
+  onBack,
   isLoading = false,
 }: CandidateInfoFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const storedQuizzes = useAppSelector(state => state.quiz.quizzes);
+  const storedQuizzes = useAppSelector((state) => state.quiz.quizzes);
   const { t } = useTranslation();
 
   const methods = useForm<CandidateFormValues>({
@@ -136,7 +154,7 @@ function CandidateInfoForm({
     }, {} as CandidateFormValues),
   });
 
-  const { handleSubmit } = methods; // Removed watch() to prevent parent re-renders
+  const { handleSubmit } = methods;
 
   const handleFormSubmit = async (data: CandidateFormValues) => {
     setIsSubmitting(true);
@@ -157,24 +175,15 @@ function CandidateInfoForm({
         return;
       }
 
-      // Apply quiz settings: shuffle questions and options
-      let questions = [...(fullQuiz.questions ?? [])];
+      let questions = [...fullQuiz.questions];
       const settings = fullQuiz.settings;
 
-      // Shuffle questions if enabled
-      if (settings?.shuffleQuestions) {
-        questions = shuffleArray(questions);
-      }
-
-      // Shuffle options for each question if enabled
+      if (settings?.shuffleQuestions) questions = shuffleArray(questions);
       if (settings?.shuffleOptions) {
-        questions = questions.map((q) => ({
-          ...q,
-          options: shuffleArray([...q.options]),
-        }));
+        questions = questions.map((q) => ({ ...q, options: shuffleArray([...q.options]) }));
       }
 
-      // If unlimited time is enabled, pass 0 to disable timer
+      // 0 disables the timer when the quiz has unlimited time
       const estimatedMinutes = isQuizUnlimitedTime(fullQuiz) ? 0 : fullQuiz.estimatedTime;
 
       dispatch(
@@ -186,96 +195,110 @@ function CandidateInfoForm({
         }),
       );
 
-      if (onStartQuiz) {
-        await onStartQuiz(data);
-      }
       navigate(`/quiz/${fullQuiz.id}/exam`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-// Utility function to shuffle array (Fisher-Yates)
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-        py: { xs: 2, md: 4 },
-        px: { xs: 2, md: 3 },
+        background:
+          'linear-gradient(180deg, #eef2ff 0%, #f8fafc 320px, #f1f5f9 100%)',
       }}
     >
-      <Container maxWidth="xl">
-        <Fade in timeout={600}>
-          <Box>
-            <Typography
-              variant="h4"
-              component="h1"
-              align="center"
-              sx={{
-                mb: 4,
-                fontWeight: 700,
-                color: 'primary.main',
-                display: { xs: 'none', md: 'block' },
-              }}
-            >
-              {t('candidate.title')}
-            </Typography>
+      {/* ---------- Top bar with back button ---------- */}
+      <Box
+        component="header"
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          bgcolor: 'rgba(255,255,255,0.85)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Container
+          maxWidth="xl"
+          sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1 }}
+        >
+          <Button
+            onClick={onBack}
+            startIcon={<ArrowBack />}
+            color="inherit"
+            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+          >
+            {t('common.backToHome', 'Back to home')}
+          </Button>
 
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Fade in timeout={800}>
-                  <Box sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
-                    <QuizOverviewCard quiz={quiz} unlimitedTime={isQuizUnlimitedTime(quiz)} />
-                  </Box>
-                </Fade>
+          <Typography
+            noWrap
+            variant="body2"
+            color="text.secondary"
+            sx={{ ml: 'auto', maxWidth: 360, display: { xs: 'none', sm: 'block' } }}
+          >
+            {quiz.title}
+          </Typography>
+        </Container>
+      </Box>
+
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, md: 3 } }}>
+        <Fade in timeout={500}>
+          <Box>
+            {/* ---------- Hero ---------- */}
+            <Box sx={{ mb: { xs: 3, md: 5 }, textAlign: { xs: 'left', md: 'center' } }}>
+              <Typography
+                variant="overline"
+                color="primary"
+                sx={{ fontWeight: 700, letterSpacing: 1.2 }}
+              >
+                {t('candidate.stepLabel', 'Step 1 of 2')}
+              </Typography>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
+                {t('candidate.title')}
+              </Typography>
+              <Typography color="text.secondary" sx={{ maxWidth: 560, mx: { md: 'auto' } }}>
+                {t(
+                  'candidate.subtitle',
+                  'Please complete the form below to start the exam.',
+                )}
+              </Typography>
+            </Box>
+
+            <Grid container spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'flex-start' }}>
+              {/* ---------- Quiz overview ---------- */}
+              <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+                <Box sx={{ position: { md: 'sticky' }, top: { md: 88 } }}>
+                  <QuizOverviewCard quiz={quiz} unlimitedTime={isQuizUnlimitedTime(quiz)} />
+                </Box>
               </Grid>
 
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Fade in timeout={1000}>
-                  <Paper
-                    sx={{
-                      p: { xs: 2, sm: 3 },
-                      borderRadius: 3,
-                      boxShadow: '0 4px 24px -4px rgb(0 0 0 / 0.08)',
-                    }}
-                  >
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        mb: 3,
-                        fontWeight: 600,
-                        display: { xs: 'block', md: 'none' },
-                      }}
-                    >
-                      {t('candidate.title')}
-                    </Typography>
-
-                    <FormProvider {...methods}>
-                      <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-                        <CandidateFormFields
-                          fieldsConfig={fieldsConfig}
-                          isLoading={isLoading}
-                        />
-
-                        <StartExamButton
-                          handleSubmit={handleSubmit}
-                          onSubmit={handleFormSubmit}
-                          isSubmitting={isSubmitting}
-                        />
-                      </form>
-                    </FormProvider>
-                  </Paper>
-                </Fade>
+              {/* ---------- Form ---------- */}
+              <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: { xs: 2.5, sm: 4 },
+                    borderRadius: 4,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    boxShadow: '0 8px 32px -8px rgb(15 23 42 / 0.10)',
+                  }}
+                >
+                  <FormProvider {...methods}>
+                    <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+                      <CandidateFormFields
+                        fieldsConfig={fieldsConfig}
+                        isLoading={isLoading}
+                      />
+                      <StartExamButton isSubmitting={isSubmitting} />
+                    </form>
+                  </FormProvider>
+                </Paper>
               </Grid>
             </Grid>
           </Box>
@@ -296,116 +319,106 @@ function shuffleArray<T>(array: T[]): T[] {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Form fields                                                               */
+/* -------------------------------------------------------------------------- */
+
 interface CandidateFormFieldsProps {
   fieldsConfig: CandidateFieldsConfig;
   isLoading?: boolean;
 }
 
-function CandidateFormFields({
-  fieldsConfig,
-  isLoading,
-}: CandidateFormFieldsProps) {
+function CandidateFormFields({ fieldsConfig, isLoading }: CandidateFormFieldsProps) {
   const { fields, sections } = fieldsConfig;
-  const { t } = useTranslation();
   const {
     register,
     control,
+    watch,
     setValue,
     formState: { errors },
   } = useFormContext<CandidateFormValues>();
 
-  // Subscribe to form values locally so only this component re-renders
+  // Subscribe locally so only this component re-renders on input
   const formValues = useWatch({ control });
 
-  const isFieldVisible = (field: CandidateField): boolean => {
-    if (!field.visibleIf) return true;
-    const value = formValues[field.visibleIf.fieldId];
-    return value === field.visibleIf.equals;
-  };
+  const groupedFields = useMemo(() => {
+    const isVisible = (field: CandidateField): boolean => {
+      if (!field.visibleIf) return true;
+      return formValues[field.visibleIf.fieldId] === field.visibleIf.equals;
+    };
+    const byOrder = (a: CandidateField, b: CandidateField) =>
+      (a.order || 0) - (b.order || 0);
 
-  const groupedFields = sections?.length
-    ? sections.map((section) => ({
-      ...section,
-      fields: fields
-        .filter((f) => f.section === section.id)
-        .filter(isFieldVisible)
-        .sort((a, b) => (a.order || 0) - (b.order || 0)),
-    }))
-    : [
-      {
-        id: 'default',
-        title: t('candidate.title'),
-        fields: fields.filter(isFieldVisible),
-      },
-    ];
+    if (sections?.length) {
+      return sections.map((section) => ({
+        id: section.id,
+        title: section.title as string | undefined,
+        fields: fields.filter((f) => f.section === section.id).filter(isVisible).sort(byOrder),
+      }));
+    }
+    return [{ id: 'default', title: undefined as string | undefined, fields: fields.filter(isVisible) }];
+  }, [fields, sections, formValues]);
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
         {[1, 2, 3, 4].map((i) => (
-          <Box key={i} sx={{ height: 60, borderRadius: 1, bgcolor: 'grey.200' }} />
+          <Skeleton key={i} variant="rounded" height={56} />
         ))}
       </Box>
     );
   }
 
-  return (
-    <Box sx={{ mb: 4 }}>
-      {groupedFields.map((section) => (
-        <Box key={section.id} sx={{ mb: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              fontWeight: 600,
-              color: 'primary.main',
-              pb: 1,
-              borderBottom: '2px solid',
-              borderColor: 'primary.light',
-              display: 'inline-block',
-            }}
-          >
-            {section.title}
-          </Typography>
+  const showNumbers = groupedFields.length > 1;
 
-          <Grid container spacing={2}>
-            {section.fields.map((field) => (
-              <Grid
-                size={{ xs: 12, sm: field.type === 'textarea' ? 12 : 6 }}
-                key={field.id}
-              >
-                <FieldRenderer
-                  field={field}
-                  register={register}
-                  watch={useWatch}
-                  setValue={setValue}
-                  error={errors[field.id]}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      ))}
+  return (
+    <Box sx={{ mb: 2 }}>
+      {groupedFields
+        .filter((section) => section.fields.length > 0)
+        .map((section, index) => (
+          <Box key={section.id} sx={{ mb: 4 }}>
+            {section.title && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                {showNumbers && (
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {index + 1}
+                  </Box>
+                )}
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {section.title}
+                </Typography>
+              </Box>
+            )}
+
+            <Grid container spacing={2}>
+              {section.fields.map((field) => (
+                <Grid size={{ xs: 12, sm: field.type === 'textarea' ? 12 : 6 }} key={field.id}>
+                  <DynamicFieldRenderer
+                    field={field}
+                    register={register}
+                    watch={watch}
+                    setValue={setValue}
+                    error={errors[field.id]}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        ))}
     </Box>
-  );
-}
-
-interface FieldRendererProps {
-  field: CandidateField;
-  register: UseFormRegister<CandidateFormValues>;
-  watch: ReturnType<typeof useForm<CandidateFormValues>>['watch'];
-  setValue: ReturnType<typeof useForm<CandidateFormValues>>['setValue'];
-  error?: import('react-hook-form').FieldError;
-}
-
-function FieldRenderer({ field, register, watch, setValue, error }: FieldRendererProps) {
-  return (
-    <DynamicFieldRenderer
-      field={field}
-      register={register}
-      watch={watch}
-      setValue={setValue}
-      error={error}
-    />
   );
 }

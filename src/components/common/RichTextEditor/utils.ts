@@ -128,7 +128,7 @@ export function parseEditorContent(
 ): RichTextContent {
   if (!container) return { html: '', text: '' };
   const html = container.innerHTML;
-  const text = container.textContent || '';
+  const text = (container.textContent || '').replace(/\u200B/g, '');
   const blanks = extractBlanksFromHtml(html);
   return { html, text, blanks: blanks.length > 0 ? blanks : undefined };
 }
@@ -340,102 +340,135 @@ export function sanitizePastedHtml(html: string): string {
   return doc.body.innerHTML;
 }
 
+/**
+ * With a collapsed caret there is nothing to wrap, so insert an empty styled span
+ * (holding a zero-width space) and put the caret inside it. Text typed next
+ * inherits the style. Returns false when there is a real selection.
+ */
+function applyCollapsedStyle(styles: Partial<CSSStyleDeclaration>): boolean {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return false;
+  const range = sel.getRangeAt(0);
+  const span = document.createElement('span');
+  Object.assign(span.style, styles);
+  span.textContent = '\u200B';
+  range.insertNode(span);
+  const caret = document.createRange();
+  caret.setStart(span.firstChild as Text, 1);
+  caret.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(caret);
+  return true;
+}
+
 
 // ---------------------------------------------------------------------------
 // Font family / font size application + reading
 // ---------------------------------------------------------------------------
 
-/**
- * Apply a font family to the current selection. execCommand('fontName') wraps
- * the content in a legacy <font face="..."> tag, so we follow up by walking
- * those <font> elements and converting them to <span style="font-family: ...">
- * to match the sanitized model used everywhere else.
- */
-export function applyFontFamily(family: string): void {
-  if (!family) return;
-  execCommand('fontName', family);
+type StyleSetter = (style: CSSStyleDeclaration) => void;
 
+/**
+ * Turns a legacy <font> element into a styled <span>. When the <font> is the only
+ * child of an existing plain <span>, that span is reused, so repeated size
+ * changes (e.g. clicking "+" several times) don't nest spans deeper each time.
+ */
+function fontElementToSpan(font: HTMLElement, setStyle: StyleSetter): HTMLElement {
+  const parent = font.parentElement;
+  if (
+    parent &&
+    parent.tagName === 'SPAN' &&
+    parent.childNodes.length === 1 &&
+    parent.classList.length === 0
+  ) {
+    setStyle(parent.style);
+    while (font.firstChild) parent.insertBefore(font.firstChild, font);
+    font.remove();
+    return parent;
+  }
+  const span = document.createElement('span');
+  setStyle(span.style);
+  while (font.firstChild) span.appendChild(font.firstChild);
+  font.replaceWith(span);
+  return span;
+}
+
+/** Re-selects the contents of the given elements (moving nodes collapses the selection). */
+function selectContentsOf(elements: HTMLElement[]): void {
+  if (elements.length === 0) return;
+  const sel = window.getSelection();
+  if (!sel) return;
+  const first = elements[0];
+  const last = elements[elements.length - 1];
+  const range = document.createRange();
+  range.setStart(first, 0);
+  range.setEnd(last, last.childNodes.length);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+/**
+ * After an execCommand that produced <font> elements: convert the matching ones
+ * (inside the current selection) to <span>s and restore the selection on them.
+ */
+function convertFontElements(
+  matches: (font: HTMLElement) => boolean,
+  setStyle: StyleSetter,
+): void {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) return;
   const range = sel.getRangeAt(0);
 
-  // After execCommand, the selection's commonAncestorContainer is typically
-  // INSIDE the newly-created <font> element. getElementsByTagName only returns
-  // descendants, so if rootEl IS the <font>, the lookup returns nothing — we
-  // need to handle that case explicitly.
   const rootEl: HTMLElement | null =
     range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
       ? (range.commonAncestorContainer as HTMLElement)
       : range.commonAncestorContainer.parentElement;
   if (!rootEl) return;
 
-  // Case 1: rootEl itself is the <font face="..."> we just created.
-  if (rootEl.tagName === 'FONT' && rootEl.hasAttribute('face')) {
-    const face = rootEl.getAttribute('face') || family;
-    const span = document.createElement('span');
-    span.style.fontFamily = face;
-    while (rootEl.firstChild) span.appendChild(rootEl.firstChild);
-    rootEl.replaceWith(span);
-    return;
-  }
+  const fonts: HTMLElement[] = [];
+  // The selection usually sits INSIDE the <font> that was just created...
+  if (rootEl.tagName === 'FONT' && matches(rootEl)) fonts.push(rootEl);
+  // ...or the <font> elements are descendants (selection spanned several blocks).
+  rootEl.querySelectorAll<HTMLElement>('font').forEach((font) => {
+    if (matches(font) && range.intersectsNode(font)) fonts.push(font);
+  });
 
-  // Case 2: <font> elements are descendants of rootEl (selection spanned
-  // multiple blocks).
-  const fonts = Array.from(
-    rootEl.getElementsByTagName('font') as HTMLCollectionOf<HTMLElement>,
+  const spans = fonts.map((font) => fontElementToSpan(font, setStyle));
+  selectContentsOf(spans);
+}
+
+/**
+ * Apply a font family to the current selection. execCommand('fontName') wraps
+ * the content in a legacy <font face="..."> tag, which we convert to a
+ * <span style="font-family: ..."> and then re-select.
+ */
+export function applyFontFamily(family: string): void {
+  if (!family) return;
+  if (applyCollapsedStyle({ fontFamily: family })) return;
+  execCommand('fontName', family);
+  convertFontElements(
+    (font) => font.hasAttribute('face'),
+    (style) => {
+      style.fontFamily = family;
+    },
   );
-  for (const font of fonts) {
-    if (!font.hasAttribute('face')) continue;
-    if (!range.intersectsNode(font)) continue;
-    const face = font.getAttribute('face') || family;
-    const span = document.createElement('span');
-    span.style.fontFamily = face;
-    while (font.firstChild) span.appendChild(font.firstChild);
-    font.replaceWith(span);
-  }
 }
 
 /**
  * Apply a pixel-based font size to the current selection. execCommand('fontSize')
- * only accepts legacy HTML sizes 1-7, so we use the standard workaround:
- * wrap the selection in <font size="7">, then walk those <font> elements and
- * replace them with <span style="font-size: Npx">.
+ * only accepts legacy sizes 1-7, so wrap in <font size="7"> and convert it to
+ * <span style="font-size: Npx">, then re-select.
  */
 export function applyFontSize(px: number): void {
   if (!px) return;
+  if (applyCollapsedStyle({ fontSize: `${px}px` })) return;
   execCommand('fontSize', '7');
-
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) return;
-  const range = sel.getRangeAt(0);
-
-  const rootEl: HTMLElement | null =
-    range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-      ? (range.commonAncestorContainer as HTMLElement)
-      : range.commonAncestorContainer.parentElement;
-  if (!rootEl) return;
-
-  // Case 1: rootEl itself is the <font size="7"> we just created.
-  if (rootEl.tagName === 'FONT' && rootEl.getAttribute('size') === '7') {
-    const span = document.createElement('span');
-    span.style.fontSize = `${px}px`;
-    while (rootEl.firstChild) span.appendChild(rootEl.firstChild);
-    rootEl.replaceWith(span);
-    return;
-  }
-
-  // Case 2: <font size="7"> elements are descendants of rootEl.
-  const fonts = Array.from(
-    rootEl.getElementsByTagName('font') as HTMLCollectionOf<HTMLElement>,
+  convertFontElements(
+    (font) => font.getAttribute('size') === '7',
+    (style) => {
+      style.fontSize = `${px}px`;
+    },
   );
-  for (const font of fonts) {
-    if (font.getAttribute('size') !== '7') continue;
-    if (!range.intersectsNode(font)) continue;
-    const span = document.createElement('span');
-    span.style.fontSize = `${px}px`;
-    while (font.firstChild) span.appendChild(font.firstChild);
-    font.replaceWith(span);
-  }
 }
 
 /**
@@ -466,18 +499,9 @@ export function readFontFamilyAtCaret(): string {
  */
 export function readFontSizeAtCaret(): string {
   const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) return '';
-
-  let node: Node | null = sel.anchorNode;
-  if (node && node.nodeType === Node.TEXT_NODE) {
-    node = node.parentElement;
-  }
-
-  while (node && node instanceof HTMLElement) {
-    const size = node.style.fontSize;
-    if (size) return size;
-    node = node.parentElement;
-  }
-
-  return '';
+  if (!sel || sel.rangeCount === 0 || !sel.anchorNode) return '';
+  const node = sel.anchorNode;
+  const el =
+    node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+  return el ? window.getComputedStyle(el).fontSize : '';
 }

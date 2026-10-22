@@ -27,7 +27,11 @@
       "addBlank": "+ Chỗ trống",
       "fontDefault": "Font mặc định",
       "fontSizeDefault": "Cỡ chữ",
-      "clearFormatting": "Xóa định dạng"
+      "clearFormatting": "Xóa định dạng",
+      "fontSizeInput": "Cỡ chữ",
+      "fontSizeDecrease": "Giảm cỡ chữ",
+      "fontSizeIncrease": "Tăng cỡ chữ",
+      "fontSizePresets": "Chọn cỡ chữ"
    },
    "colorPicker": {
       "modeColorSuffix": "Màu {{mode}}",
@@ -37,7 +41,8 @@
       "apply": "Áp dụng",
       "removeColor": "Xóa màu {{mode}}",
       "textMode": "chữ",
-      "highlightMode": "tô sáng"
+      "highlightMode": "tô sáng",
+      "noColor": "Không có màu"
    },
    "formulaModal": {
       "title": "Chèn công thức toán học",

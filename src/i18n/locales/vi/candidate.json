@@ -24,5 +24,7 @@
    "quizOverview": "Tổng quan bài kiểm tra",
    "questions": "Số câu hỏi",
    "timeLimit": "Giới hạn thời gian",
-   "difficulty": "Độ khó"
+   "difficulty": "Độ khó",
+   "stepLabel": "Bước 1/2",
+   "subtitle": "Vui lòng điền thông tin bên dưới để bắt đầu làm bài."
 }
