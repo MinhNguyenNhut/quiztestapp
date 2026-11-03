@@ -13,6 +13,8 @@ import NotFoundPage from './pages/NotFoundPage.tsx';
 import RegisterPage from './pages/RegisterPage.tsx';
 import ProfilePage from './pages/ProfilePage';
 import QuizPreviewPage from './pages/QuizPreviewPage.tsx';
+import MeetingLobbyPage from './pages/MeetingLobbyPage.tsx';
+import MeetingRoomPage from './pages/MeetingRoomPage.tsx';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -30,8 +32,10 @@ export const router = createBrowserRouter([
       { path: 'quiz/new', element: <QuizEditorPage /> },
       { path: 'quiz/:id/edit', element: <QuizEditorPage /> },
       { path: 'quiz/:id/submissions', element: <SubmissionsDashboardPage /> },
+      { path: 'meeting', element: <MeetingLobbyPage /> },
     ],
   },
+  { path: 'meeting/:roomId', element: (<ProtectedRoute>   <MeetingRoomPage />   </ProtectedRoute>), },
   { path: 'quiz/:id/candidate', element: <CandidateInfoPage /> },
   { path: 'quiz/:id/exam', element: <ExamPage /> },
   { path: 'quiz/:id/result/:submissionId', element: <ResultPage /> },
