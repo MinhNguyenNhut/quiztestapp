@@ -1,0 +1,17 @@
+{
+  "title": "Giao diện",
+  "mode": "Chế độ màu",
+  "light": "Sáng",
+  "dark": "Tối",
+  "enableDark": "Chuyển sang chế độ tối",
+  "enableLight": "Chuyển sang chế độ sáng",
+  "accent": "Màu nhấn",
+  "colors": {
+    "indigo": "Chàm",
+    "blue": "Xanh đại dương",
+    "teal": "Xanh cổ vịt",
+    "violet": "Tím",
+    "rose": "Hồng",
+    "amber": "Hổ phách"
+  }
+}

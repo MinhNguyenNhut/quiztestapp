@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
 import PersonIcon from '@mui/icons-material/Person';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../features/store.ts';
 import { getAuthToken } from '../features/auth/authSlice.ts';
 import { fetchMe } from '../api/authApi.ts';
+import ThemePicker from '../components/common/ThemePicker/ThemePicker';
 
 type User = {
   id?: string;
@@ -33,8 +35,6 @@ type User = {
   lastName?: string;
   name?: string;
 };
-
-const BRAND_GRADIENT = 'linear-gradient(150deg, #4F46E5 0%, #7C3AED 55%, #A855F7 100%)';
 
 interface InfoTileProps {
   icon: ReactNode;
@@ -60,7 +60,7 @@ function InfoTile({ icon, label, value, mono }: InfoTileProps) {
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
             borderColor: 'primary.main',
-            boxShadow: '0 8px 24px rgba(99, 102, 241, 0.12)',
+            boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.16)}`,
           },
         }}
       >
@@ -70,7 +70,7 @@ function InfoTile({ icon, label, value, mono }: InfoTileProps) {
             height: 44,
             flexShrink: 0,
             borderRadius: 2,
-            bgcolor: 'rgba(99, 102, 241, 0.10)',
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
             color: 'primary.main',
             display: 'grid',
             placeItems: 'center',
@@ -192,7 +192,8 @@ export default function ProfilePage() {
         sx={{
           position: 'relative',
           height: { xs: 150, sm: 190 },
-          background: BRAND_GRADIENT,
+          background: (theme) =>
+            `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`,
           overflow: 'hidden',
         }}
       >
@@ -202,7 +203,7 @@ export default function ProfilePage() {
             width: 320,
             height: 320,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.08)',
+            background: (theme) => alpha(theme.palette.common.white, 0.08),
             top: -160,
             right: -80,
           }}
@@ -213,7 +214,7 @@ export default function ProfilePage() {
             width: 220,
             height: 220,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: (theme) => alpha(theme.palette.common.white, 0.06),
             bottom: -120,
             left: -60,
           }}
@@ -228,18 +229,30 @@ export default function ProfilePage() {
             top: 16,
             left: 16,
             color: '#fff',
-            borderColor: 'rgba(255, 255, 255, 0.4)',
+            borderColor: (theme) => alpha(theme.palette.common.white, 0.5),
             borderRadius: 999,
             textTransform: 'none',
             fontWeight: 600,
             '&:hover': {
               borderColor: '#fff',
-              bgcolor: 'rgba(255, 255, 255, 0.12)',
+              bgcolor: (theme) => alpha(theme.palette.common.white, 0.14),
             },
           }}
         >
           {t('profile.backToQuizzes')}
         </Button>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 16,
+            borderRadius: '50%',
+            bgcolor: (theme) => alpha(theme.palette.common.white, 0.16),
+            color: '#fff',
+          }}
+        >
+          <ThemePicker />
+        </Box>
       </Box>
 
       {/* ── Profile card overlapping the cover ──────────────────────── */}
@@ -249,7 +262,10 @@ export default function ProfilePage() {
           sx={{
             mt: -10,
             borderRadius: 4,
-            boxShadow: '0 20px 50px rgba(15, 23, 42, 0.08)',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 20px 50px rgba(0, 0, 0, 0.3)'
+                : '0 20px 50px rgba(15, 23, 42, 0.08)',
           }}
         >
           <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
@@ -270,8 +286,10 @@ export default function ProfilePage() {
                   fontSize: 36,
                   border: '6px solid',
                   borderColor: 'background.paper',
-                  background: BRAND_GRADIENT,
-                  boxShadow: '0 12px 28px rgba(99, 102, 241, 0.4)',
+                  background: (theme) =>
+                    `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`,
+                  boxShadow: (theme) =>
+                    `0 12px 28px ${alpha(theme.palette.primary.main, 0.4)}`,
                 }}
               >
                 {initials || <PersonIcon sx={{ fontSize: 48 }} />}
@@ -292,7 +310,8 @@ export default function ProfilePage() {
                   width: 4,
                   height: 22,
                   borderRadius: 999,
-                  background: BRAND_GRADIENT,
+                  background: (theme) =>
+                    `linear-gradient(180deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 }}
               />
               <Typography variant="h6" sx={{ fontWeight: 700 }}>

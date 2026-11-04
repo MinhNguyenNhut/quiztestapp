@@ -19,6 +19,39 @@ export interface PaginatedQuizzes {
   limit: number;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readPageNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? value
+    : fallback;
+}
+
+function normalizePaginatedQuizzes(
+  value: unknown,
+  fallbackPage: number,
+  fallbackLimit: number,
+): PaginatedQuizzes {
+  if (!isRecord(value) || !Array.isArray(value.data)) {
+    throw new Error('The quizzes endpoint returned an invalid paginated response.');
+  }
+
+  const metadata = isRecord(value.meta) ? value.meta : {};
+  const total = readPageNumber(value.total ?? metadata.total, Number.NaN);
+  if (!Number.isInteger(total)) {
+    throw new Error('The quizzes endpoint did not return a valid total count.');
+  }
+
+  return {
+    data: value.data as Quiz[],
+    total,
+    page: readPageNumber(value.page ?? metadata.page, fallbackPage),
+    limit: readPageNumber(value.limit ?? metadata.limit, fallbackLimit),
+  };
+}
+
 export interface PublicQuizListParams {
   search?: string;
   page?: number;
@@ -40,14 +73,26 @@ export interface CreateQuizPayload {
 export type UpdateQuizPayload = Partial<CreateQuizPayload>;
 
 export const quizApi = {
-  list: (page = 1, limit = 20) =>
-    apiGet<PaginatedQuizzes>('/api/quizzes', { params: { page, limit } }),
+  list: async (page = 1, limit = 20) =>
+    normalizePaginatedQuizzes(
+      await apiGet<unknown>('/api/quizzes', { params: { page, limit } }),
+      page,
+      limit,
+    ),
 
-  listByUser: (userId: string, page = 1, limit = 20) =>
-    apiGet<PaginatedQuizzes>(`/api/quizzes/user/${userId}`, { params: { page, limit } }),
+  listByUser: async (userId: string, page = 1, limit = 20) =>
+    normalizePaginatedQuizzes(
+      await apiGet<unknown>(`/api/quizzes/user/${userId}`, { params: { page, limit } }),
+      page,
+      limit,
+    ),
 
-  listPublic: (params: PublicQuizListParams = {}) =>
-    apiGet<PaginatedQuizzes>('/api/quizzes/public', { params }),
+  listPublic: async (params: PublicQuizListParams = {}) =>
+    normalizePaginatedQuizzes(
+      await apiGet<unknown>('/api/quizzes/public', { params }),
+      params.page ?? 1,
+      params.limit ?? 9,
+    ),
 
   getById: (id: string) => apiGet<Quiz>(`/api/quizzes/${id}`),
 

@@ -61,9 +61,10 @@ export default function FormulaModal({ open, onClose, onInsert }: FormulaModalPr
             sx={{
               mt: 2,
               p: 2,
-              bgcolor: '#f8fafc',
+              bgcolor: 'action.hover',
               borderRadius: 2,
-              border: '1px solid #e2e8f0',
+              border: '1px solid',
+              borderColor: 'divider',
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
@@ -74,9 +75,10 @@ export default function FormulaModal({ open, onClose, onInsert }: FormulaModalPr
                 fontFamily: 'monospace',
                 fontSize: '1.1rem',
                 p: 1.5,
-                bgcolor: 'white',
+                bgcolor: 'background.paper',
                 borderRadius: 1,
-                border: '1px solid #e2e8f0',
+                border: '1px solid',
+                borderColor: 'divider',
                 overflowX: 'auto',
               }}
             >

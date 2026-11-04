@@ -28,6 +28,7 @@ import landing from './landing.json';
 import layout from './layout.json';
 import meeting from './meeting.json';
 import admin from './admin.json';
+import appearance from './appearance.json';
 
 export default {
    common,
@@ -59,5 +60,6 @@ export default {
    landing,
    layout,
    meeting,
-   admin
+   admin,
+   appearance
 };

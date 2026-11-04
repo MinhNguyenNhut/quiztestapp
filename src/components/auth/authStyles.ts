@@ -1,8 +1,6 @@
 
 import type { SxProps, Theme } from '@mui/material';
-
-const BRAND_GRADIENT =
-  'linear-gradient(150deg, #4F46E5 0%, #7C3AED 55%, #A855F7 100%)';
+import { alpha } from '@mui/material/styles';
 
 export const authFieldSx: SxProps<Theme> = {
   '& .MuiOutlinedInput-root': {
@@ -12,7 +10,7 @@ export const authFieldSx: SxProps<Theme> = {
     '& fieldset': { borderColor: 'divider' },
     '&:hover fieldset': { borderColor: 'primary.main' },
     '&.Mui-focused': {
-      boxShadow: '0 0 0 4px rgba(99, 102, 241, 0.14)',
+      boxShadow: (theme) => `0 0 0 4px ${alpha(theme.palette.primary.main, 0.14)}`,
     },
   },
 };
@@ -23,7 +21,10 @@ export const authPanelSx: SxProps<Theme> = {
   borderColor: 'divider',
   borderRadius: 4,
   p: { xs: 3, sm: 4.5 },
-  boxShadow: '0 20px 50px rgba(15, 23, 42, 0.06)',
+  boxShadow: (theme) =>
+    theme.palette.mode === 'dark'
+      ? '0 20px 50px rgba(0, 0, 0, 0.28)'
+      : '0 20px 50px rgba(15, 23, 42, 0.06)',
 };
 
 export const gradientButtonSx: SxProps<Theme> = {
@@ -32,13 +33,15 @@ export const gradientButtonSx: SxProps<Theme> = {
   fontWeight: 700,
   fontSize: '1rem',
   textTransform: 'none',
-  background: BRAND_GRADIENT,
-  boxShadow: '0 10px 24px rgba(99, 102, 241, 0.35)',
+  background: (theme) =>
+    `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+  color: 'primary.contrastText',
+  boxShadow: (theme) => `0 10px 24px ${theme.palette.primary.main}55`,
   transition: 'all 0.25s ease',
   '&:hover': {
-    background:
-      'linear-gradient(150deg, #4338CA 0%, #6D28D9 55%, #9333EA 100%)',
-    boxShadow: '0 14px 30px rgba(99, 102, 241, 0.45)',
+    background: (theme) =>
+      `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+    boxShadow: (theme) => `0 14px 30px ${theme.palette.primary.main}66`,
     transform: 'translateY(-2px)',
   },
   '&:active': {

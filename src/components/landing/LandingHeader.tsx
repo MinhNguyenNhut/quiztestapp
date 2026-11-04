@@ -25,6 +25,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LanguageSwitcher from '../common/LanguageSwitcher/LanguageSwitcher';
+import ThemePicker from '../common/ThemePicker/ThemePicker';
 import { useAppDispatch, useAppSelector } from '../../features/store.ts';
 import { logout, getIsAuthenticated } from '../../features/auth/authSlice.ts';
 
@@ -128,6 +129,7 @@ export default function LandingHeader() {
                     {link.label}
                   </Button>
                 ))}
+                <ThemePicker />
                 <LanguageSwitcher />
               </Box>
 
@@ -192,7 +194,10 @@ export default function LandingHeader() {
         sx={{ display: { xs: 'block', md: 'none' } }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <LanguageSwitcher />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ThemePicker />
+            <LanguageSwitcher />
+          </Box>
           <IconButton
             onClick={handleMobileMenuClose}
             edge="end"

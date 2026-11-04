@@ -160,9 +160,10 @@ export default memo(function SingleChoiceAnswers({ control, setValue, index }: P
               gap: 1,
               mb: 1.5,
               p: 1,
-              bgcolor: '#fafafa',
+              bgcolor: 'action.hover',
               borderRadius: 1,
-              border: '1px solid #f0f0f0',
+              border: '1px solid',
+              borderColor: 'divider',
             }}
           >
             <Typography

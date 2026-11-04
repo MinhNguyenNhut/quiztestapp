@@ -15,6 +15,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store';
+import ThemePicker from '../../components/common/ThemePicker/ThemePicker';
 import { copyToClipboard } from './clipboard';
 import ChatPanel from './ChatPanel';
 import ControlBar from './ControlBar';
@@ -79,10 +80,13 @@ export default function MeetingRoom({ meeting, token, initial }: Props) {
           display: 'grid',
           placeItems: 'center',
           p: 2,
-          bgcolor: '#202124',
-          color: '#fff',
+          bgcolor: 'background.default',
+          color: 'text.primary',
         }}
       >
+        <Box sx={{ position: 'absolute', top: 12, right: 16 }}>
+          <ThemePicker />
+        </Box>
         <Box sx={{ maxWidth: 420, display: 'grid', gap: 2 }}>
           <Alert severity={m.status === 'ended' ? 'info' : 'error'}>
             {m.error ?? t('meeting.meetingEnded')}
@@ -108,22 +112,23 @@ export default function MeetingRoom({ meeting, token, initial }: Props) {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: '#202124',
-        color: '#fff',
+        bgcolor: 'background.default',
+        color: 'text.primary',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 1.5 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }} noWrap>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1, minWidth: 0 }} noWrap>
           {meeting.title || t('meeting.newMeeting')}
           <Typography component="span" variant="body2" sx={{ ml: 1.5, opacity: 0.7 }}>
             {meeting.roomId} · {t('meeting.inCall', { count: total })}
           </Typography>
         </Typography>
         <Tooltip title={t('meeting.copyLinkTooltip')}>
-          <IconButton onClick={() => void copyLink()} aria-label={t('meeting.copyLinkTooltip')} sx={{ color: '#fff' }}>
+          <IconButton onClick={() => void copyLink()} aria-label={t('meeting.copyLinkTooltip')}>
             <ContentCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
+        <ThemePicker />
         {isHost && (
           <>
             <Tooltip title={t('meeting.endMeetingForAll')}>
@@ -131,7 +136,6 @@ export default function MeetingRoom({ meeting, token, initial }: Props) {
                 aria-label={t('meeting.endMeetingForAll')}
                 onClick={(event) => setMenuAnchor(event.currentTarget)}
                 disabled={ending}
-                sx={{ color: '#fff' }}
               >
                 <MoreVertIcon />
               </IconButton>

@@ -51,7 +51,7 @@ function MatchingAnswers({ control, index }: Props) {
         <Typography variant="subtitle2" sx={{ mb: 2 }}>{t('answerEditors.matching.title')}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t('answerEditors.matching.description')}</Typography>
         {fields.map((pair, pairIdx) => (
-          <Box key={pair.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, p: 1.5, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #f0f0f0' }}>
+          <Box key={pair.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, p: 1.5, bgcolor: 'action.hover', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 24, color: 'text.secondary' }}>{pairIdx + 1}</Typography>
             <PairSideField control={control} index={index} pairIdx={pairIdx} side="left" placeholder={t('answerEditors.matching.leftPlaceholder')} />
             <Typography variant="body2" color="text.secondary">↔</Typography>

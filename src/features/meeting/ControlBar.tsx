@@ -27,9 +27,10 @@ interface Props {
 const circle = (active: boolean) => ({
   width: 52,
   height: 52,
-  color: '#fff',
-  bgcolor: active ? 'rgba(255,255,255,0.12)' : 'error.main',
-  '&:hover': { bgcolor: active ? 'rgba(255,255,255,0.22)' : 'error.dark' },
+  color: active ? 'primary.contrastText' : 'common.white',
+  bgcolor: active ? 'primary.main' : 'error.main',
+  '&:hover': { bgcolor: active ? 'primary.dark' : 'error.dark' },
+  '&.Mui-disabled': { color: 'text.disabled', bgcolor: 'action.disabledBackground' },
 });
 
 export default function ControlBar(p: Props) {
@@ -66,8 +67,11 @@ export default function ControlBar(p: Props) {
             onClick={p.onToggleShare}
             sx={{
               ...circle(true),
-              bgcolor: p.sharing ? 'primary.main' : 'rgba(255,255,255,0.12)',
-              '&:hover': { bgcolor: p.sharing ? 'primary.dark' : 'rgba(255,255,255,0.22)' },
+              bgcolor: p.sharing ? 'secondary.main' : 'action.selected',
+              color: p.sharing ? 'secondary.contrastText' : 'text.primary',
+              '&:hover': {
+                bgcolor: p.sharing ? 'secondary.dark' : 'action.hover',
+              },
             }}
           >
             {p.sharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}

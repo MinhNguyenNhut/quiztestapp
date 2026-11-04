@@ -1,0 +1,17 @@
+{
+  "title": "Appearance",
+  "mode": "Color mode",
+  "light": "Light",
+  "dark": "Dark",
+  "enableDark": "Switch to dark mode",
+  "enableLight": "Switch to light mode",
+  "accent": "Accent color",
+  "colors": {
+    "indigo": "Indigo",
+    "blue": "Ocean blue",
+    "teal": "Teal",
+    "violet": "Violet",
+    "rose": "Rose",
+    "amber": "Amber"
+  }
+}

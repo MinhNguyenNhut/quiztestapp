@@ -205,8 +205,8 @@ function CandidateInfoForm({
     <Box
       sx={{
         minHeight: '100vh',
-        background:
-          'linear-gradient(180deg, #eef2ff 0%, #f8fafc 320px, #f1f5f9 100%)',
+        background: (theme) =>
+          `linear-gradient(180deg, ${theme.palette.primary.light}${theme.palette.mode === 'light' ? '18' : '22'} 0%, ${theme.palette.background.default} 320px)`,
       }}
     >
       {/* ---------- Top bar with back button ---------- */}
@@ -216,7 +216,7 @@ function CandidateInfoForm({
           position: 'sticky',
           top: 0,
           zIndex: 1000,
-          bgcolor: 'rgba(255,255,255,0.85)',
+          bgcolor: 'background.paper',
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -286,7 +286,10 @@ function CandidateInfoForm({
                     borderRadius: 4,
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 8px 32px -8px rgb(15 23 42 / 0.10)',
+                    boxShadow: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? '0 8px 32px -8px rgb(0 0 0 / 0.32)'
+                        : '0 8px 32px -8px rgb(15 23 42 / 0.10)',
                   }}
                 >
                   <FormProvider {...methods}>

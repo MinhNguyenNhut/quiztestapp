@@ -60,7 +60,7 @@ function MultipleChoiceAnswers({ control, index }: Props) {
           {t('answerEditors.multipleChoice.hint')}
         </Typography>
         {fields.map((field, optIdx) => (
-          <Box key={field.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, p: 1, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #f0f0f0' }}>
+          <Box key={field.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, p: 1, bgcolor: 'action.hover', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 24, color: 'text.secondary' }}>
               {LABELS[optIdx] || optIdx}
             </Typography>

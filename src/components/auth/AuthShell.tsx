@@ -9,8 +9,9 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { ArrowBack } from '@mui/icons-material';
+import { alpha } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-const BRAND_GRADIENT = 'linear-gradient(150deg, #4F46E5 0%, #7C3AED 55%, #A855F7 100%)';
+import ThemePicker from '../common/ThemePicker/ThemePicker';
 
 interface AuthShellProps {
   /** Icon rendered inside the gradient chip above the form heading. */
@@ -39,7 +40,8 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
           flexDirection: 'column',
           justifyContent: 'space-between',
           p: 6,
-          background: BRAND_GRADIENT,
+          background: (theme) =>
+            `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`,
         }}
       >
         {/* Decorative blurred circles */}
@@ -49,7 +51,7 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
             width: 420,
             height: 420,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.08)',
+            background: (theme) => alpha(theme.palette.common.white, 0.08),
             top: -120,
             right: -120,
           }}
@@ -60,7 +62,7 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
             width: 300,
             height: 300,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: (theme) => alpha(theme.palette.common.white, 0.06),
             bottom: -80,
             left: -60,
           }}
@@ -71,7 +73,7 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
             width: 110,
             height: 110,
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.10)',
+            background: (theme) => alpha(theme.palette.common.white, 0.1),
             top: 140,
             right: 100,
           }}
@@ -95,8 +97,9 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
               width: 44,
               height: 44,
               borderRadius: 2.5,
-              bgcolor: 'rgba(255, 255, 255, 0.18)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              bgcolor: (theme) => alpha(theme.palette.common.white, 0.18),
+              border: '1px solid',
+              borderColor: (theme) => alpha(theme.palette.common.white, 0.25),
               backdropFilter: 'blur(6px)',
               display: 'grid',
               placeItems: 'center',
@@ -124,7 +127,8 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
               width: 190,
               height: 190,
               borderRadius: '50%',
-              border: '2px dashed rgba(255, 255, 255, 0.35)',
+              border: '2px dashed',
+              borderColor: (theme) => alpha(theme.palette.common.white, 0.35),
               display: 'grid',
               placeItems: 'center',
               '@keyframes auth-spin': {
@@ -139,8 +143,9 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
                 width: 132,
                 height: 132,
                 borderRadius: '50%',
-                bgcolor: 'rgba(255, 255, 255, 0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                bgcolor: (theme) => alpha(theme.palette.common.white, 0.15),
+                border: '1px solid',
+                borderColor: (theme) => alpha(theme.palette.common.white, 0.3),
                 backdropFilter: 'blur(8px)',
                 display: 'grid',
                 placeItems: 'center',
@@ -160,8 +165,9 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
                 width: 52,
                 height: 52,
                 borderRadius: 3,
-                bgcolor: 'rgba(255, 255, 255, 0.14)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
+                bgcolor: (theme) => alpha(theme.palette.common.white, 0.14),
+                border: '1px solid',
+                borderColor: (theme) => alpha(theme.palette.common.white, 0.25),
                 backdropFilter: 'blur(6px)',
                 display: 'grid',
                 placeItems: 'center',
@@ -184,6 +190,9 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
         }}
       >
         <Box sx={{ width: '100%', maxWidth: 460 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <ThemePicker />
+          </Box>
           {/* Mobile logo (brand panel is hidden on small screens) */}
           <Stack
             direction="row"
@@ -195,10 +204,12 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
                 width: 40,
                 height: 40,
                 borderRadius: 2.5,
-                background: BRAND_GRADIENT,
+                background: (theme) =>
+                  `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`,
                 display: 'grid',
                 placeItems: 'center',
-                boxShadow: '0 8px 20px rgba(99, 102, 241, 0.35)',
+                boxShadow: (theme) =>
+                  `0 8px 20px ${alpha(theme.palette.primary.main, 0.35)}`,
               }}
             >
               <QuizOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
@@ -215,10 +226,12 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
                 width: 56,
                 height: 56,
                 borderRadius: 3,
-                background: BRAND_GRADIENT,
+                background: (theme) =>
+                  `linear-gradient(150deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, ${theme.palette.secondary.main} 100%)`,
                 display: 'grid',
                 placeItems: 'center',
-                boxShadow: '0 10px 24px rgba(99, 102, 241, 0.35)',
+                boxShadow: (theme) =>
+                  `0 10px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
                 mb: 1,
               }}
             >
@@ -238,4 +251,3 @@ export default function AuthShell({ icon, title, subtitle, children }: AuthShell
     </Box>
   );
 }
-

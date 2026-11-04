@@ -106,13 +106,18 @@ export default function AddQuestionModal({ open, onClose, onSelect }: AddQuestio
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     borderColor: isSelected ? 'primary.main' : 'divider',
-                    boxShadow: isSelected
-                      ? '0 0 0 2px #4f46e5, 0 4px 12px rgba(79,70,229,0.15)'
-                      : '0 1px 3px rgba(0,0,0,0.06)',
+                    boxShadow: isSelected ? 2 : 0,
+                    outline: isSelected ? '2px solid' : 'none',
+                    outlineColor: 'primary.main',
                     '&:hover': {
                       borderColor: 'primary.light',
-                      transform: 'scale(1.02)',
-                      boxShadow: '0 4px 12px rgba(79,70,229,0.1)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: 2,
+                    },
+                    '&:focus-visible': {
+                      outline: '3px solid',
+                      outlineColor: 'primary.main',
+                      outlineOffset: 2,
                     },
                   }}
                 >

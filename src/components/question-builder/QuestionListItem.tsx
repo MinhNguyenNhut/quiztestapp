@@ -82,11 +82,16 @@ function QuestionListItem({
         borderRadius: 2,
         cursor: 'pointer',
         transition: 'all 0.15s ease',
-        bgcolor: isSelected ? '#eef2ff' : 'transparent',
+        bgcolor: isSelected ? 'action.selected' : 'transparent',
         borderLeft: 3,
         borderColor: isSelected ? 'primary.main' : 'transparent',
         '&:hover': {
-          bgcolor: isSelected ? '#eef2ff' : '#f9fafb',
+          bgcolor: isSelected ? 'action.selected' : 'action.hover',
+        },
+        '&:focus-visible': {
+          outline: '2px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: 2,
         },
       }}
     >
@@ -96,7 +101,7 @@ function QuestionListItem({
           minWidth: 28,
           height: 28,
           borderRadius: '50%',
-          bgcolor: isSelected ? 'primary.main' : '#f3f4f6',
+          bgcolor: isSelected ? 'primary.main' : 'action.selected',
           color: isSelected ? 'white' : 'text.secondary',
           display: 'flex',
           alignItems: 'center',

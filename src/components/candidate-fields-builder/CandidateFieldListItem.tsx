@@ -1,4 +1,5 @@
 import { Box, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -16,10 +17,6 @@ interface CandidateFieldListItemProps {
   onReorder: (from: number, to: number) => void;
   onDelete: () => void;
 }
-
-const REQUIRED_COLOR = '#ef4444';
-const SECTION_COLOR = '#6366f1';
-const TYPE_COLOR = '#0ea5e9';
 
 /**
  * One row in the candidate-fields list. Mirrors `QuestionListItem` —
@@ -61,7 +58,7 @@ export default function CandidateFieldListItem({
         bgcolor: 'transparent',
         borderLeft: 3,
         borderColor: 'transparent',
-        '&:hover': { bgcolor: '#f9fafb' },
+        '&:hover': { bgcolor: 'action.hover' },
       }}
     >
       <Box
@@ -69,7 +66,7 @@ export default function CandidateFieldListItem({
           minWidth: 28,
           height: 28,
           borderRadius: '50%',
-          bgcolor: '#f3f4f6',
+          bgcolor: 'action.selected',
           color: 'text.secondary',
           display: 'flex',
           alignItems: 'center',
@@ -104,8 +101,8 @@ export default function CandidateFieldListItem({
               height: 22,
               fontSize: '0.65rem',
               fontWeight: 600,
-              bgcolor: `${TYPE_COLOR}15`,
-              color: TYPE_COLOR,
+              bgcolor: (theme) => alpha(theme.palette.info.main, 0.12),
+              color: 'info.main',
               borderRadius: '4px',
             }}
           />
@@ -117,8 +114,8 @@ export default function CandidateFieldListItem({
                 height: 22,
                 fontSize: '0.65rem',
                 fontWeight: 600,
-                bgcolor: `${SECTION_COLOR}15`,
-                color: SECTION_COLOR,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                color: 'primary.main',
                 borderRadius: '4px',
               }}
             />
@@ -131,8 +128,8 @@ export default function CandidateFieldListItem({
                 height: 22,
                 fontSize: '0.65rem',
                 fontWeight: 600,
-                bgcolor: `${REQUIRED_COLOR}15`,
-                color: REQUIRED_COLOR,
+                bgcolor: (theme) => alpha(theme.palette.error.main, 0.12),
+                color: 'error.main',
                 borderRadius: '4px',
               }}
             />

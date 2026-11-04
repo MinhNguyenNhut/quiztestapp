@@ -314,7 +314,7 @@ function RichTextEditor({
       lineHeight: 1.6,
       fontSize: '0.95rem',
       color: disabled ? 'text.disabled' : 'text.primary',
-      bgcolor: disabled ? '#f9fafb' : 'white',
+      bgcolor: disabled ? 'action.hover' : 'background.paper',
       cursor: disabled ? 'not-allowed' : 'text',
       overflowY: 'auto' as const,
       '&:empty:before': {
@@ -324,17 +324,18 @@ function RichTextEditor({
       },
       '& img': { maxWidth: '100%', borderRadius: 1, my: 1 },
       '& table': { borderCollapse: 'collapse', width: '100%', my: 1 },
-      '& td, & th': { border: '1px solid #d1d5db', p: 1 },
-      '& th': { bgcolor: '#f9fafb', fontWeight: 600 },
+      '& td, & th': { border: '1px solid', borderColor: 'divider', p: 1 },
+      '& th': { bgcolor: 'action.hover', fontWeight: 600 },
       '& blockquote': {
-        borderLeft: '3px solid #4f46e5',
+        borderLeft: '3px solid',
+        borderColor: 'primary.main',
         ml: 0,
         pl: 2,
-        color: '#6b7280',
+        color: 'text.secondary',
         fontStyle: 'italic',
       },
       '& pre': {
-        bgcolor: '#f3f4f6',
+        bgcolor: 'action.hover',
         p: 2,
         borderRadius: 1,
         fontFamily: 'monospace',
@@ -348,7 +349,7 @@ function RichTextEditor({
   const wrapperSx = useMemo(
     () => ({
       border: 1,
-      borderColor: error ? 'error.main' : isFocused ? 'primary.main' : '#d1d5db',
+      borderColor: error ? 'error.main' : isFocused ? 'primary.main' : 'divider',
       borderRadius: 2,
       overflow: 'hidden',
       transition: 'border-color 0.2s',

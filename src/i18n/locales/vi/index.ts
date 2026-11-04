@@ -28,6 +28,7 @@ import landing from './landing.json';
 import layout from './layout.json';
 import meeting from './meeting.json';
 import admin from './admin.json';
+import appearance from './appearance.json';
 
 // Reassembled into the same shape the old single vi.json had, so every
 // existing t('quizList.title') / t('examUi.progress') call keeps working
@@ -62,5 +63,6 @@ export default {
    landing,
    layout,
    meeting,
-   admin
+   admin,
+   appearance
 };

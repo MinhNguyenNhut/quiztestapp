@@ -6,6 +6,7 @@ import MeetingRoom from '../features/meeting/MeetingRoom';
 import { getMeeting, MeetingApiError, type Meeting } from '../features/meeting/meetingApi';
 import PreJoin from '../features/meeting/PreJoin';
 import { useAuthToken } from '../features/meeting/useAuthToken';
+import ThemePicker from '../components/common/ThemePicker/ThemePicker';
 
 function Centered({ children }: { children: ReactNode }) {
   return (
@@ -15,10 +16,13 @@ function Centered({ children }: { children: ReactNode }) {
         display: 'grid',
         placeItems: 'center',
         p: 2,
-        bgcolor: '#202124',
-        color: '#fff',
+        bgcolor: 'background.default',
+        color: 'text.primary',
       }}
     >
+      <Box sx={{ position: 'absolute', top: 12, right: 16 }}>
+        <ThemePicker />
+      </Box>
       <Box sx={{ display: 'grid', gap: 2, justifyItems: 'center', maxWidth: 420, width: '100%' }}>
         {children}
       </Box>

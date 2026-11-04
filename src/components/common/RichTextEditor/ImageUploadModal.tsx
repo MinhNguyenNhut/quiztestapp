@@ -80,13 +80,14 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
         />
         <Box
           sx={{
-            border: '2px dashed #d1d5db',
+            border: '2px dashed',
+            borderColor: 'divider',
             borderRadius: 2,
             p: 3,
             textAlign: 'center',
             cursor: 'pointer',
-            bgcolor: '#f9fafb',
-            '&:hover': { borderColor: 'primary.main', bgcolor: '#eef2ff' },
+            bgcolor: 'action.hover',
+            '&:hover': { borderColor: 'primary.main', bgcolor: 'action.selected' },
             mb: 2,
           }}
           onClick={() => fileInputRef.current?.click()}
@@ -121,7 +122,7 @@ export default function ImageUploadModal({ open, onClose, onInsert }: ImageUploa
           size="small"
         />
         {previewUrl && (
-          <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+          <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
             <img
               src={previewUrl}
               alt={t('richTextEditor.imageModal.previewAlt')}

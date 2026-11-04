@@ -24,7 +24,9 @@ export default function VideoTile({ stream, label, muted, mirror, showAvatar, co
     <Box
       sx={{
         position: 'relative',
-        bgcolor: '#3c4043',
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
         borderRadius: 3,
         overflow: 'hidden',
         aspectRatio: '16 / 9',

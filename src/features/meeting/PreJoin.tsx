@@ -7,6 +7,7 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAppSelector } from '../store';
+import ThemePicker from '../../components/common/ThemePicker/ThemePicker';
 import type { Meeting } from './meetingApi';
 import VideoTile from './VideoTile';
 
@@ -102,8 +103,8 @@ export default function PreJoin({ meeting, onJoin }: Props) {
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        bgcolor: '#202124',
-        color: '#fff',
+        bgcolor: 'background.default',
+        color: 'text.primary',
         p: 2,
       }}
     >
@@ -117,8 +118,8 @@ export default function PreJoin({ meeting, onJoin }: Props) {
           gap: 4,
           gridTemplateColumns: { xs: '1fr', md: '1.4fr 1fr' },
           alignItems: 'center',
-          bgcolor: '#303134',
-          color: '#fff',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
         }}
       >
         <Box>
@@ -134,7 +135,11 @@ export default function PreJoin({ meeting, onJoin }: Props) {
               aria-label={micOn ? t('meeting.mute') : t('meeting.unmute')}
               onClick={() => setMicOn((value) => !value)}
               disabled={!stream?.getAudioTracks().length}
-              sx={{ bgcolor: micOn ? 'action.hover' : 'error.main', color: '#fff' }}
+              sx={{
+                bgcolor: micOn ? 'primary.main' : 'error.main',
+                color: micOn ? 'primary.contrastText' : 'common.white',
+                '&:hover': { bgcolor: micOn ? 'primary.dark' : 'error.dark' },
+              }}
             >
               {micOn ? <MicIcon /> : <MicOffIcon />}
             </IconButton>
@@ -142,7 +147,11 @@ export default function PreJoin({ meeting, onJoin }: Props) {
               aria-label={camOn ? t('meeting.turnCameraOff') : t('meeting.turnCameraOn')}
               onClick={() => setCamOn((value) => !value)}
               disabled={!camAvailable}
-              sx={{ bgcolor: camOn ? 'action.hover' : 'error.main', color: '#fff' }}
+              sx={{
+                bgcolor: camOn ? 'primary.main' : 'error.main',
+                color: camOn ? 'primary.contrastText' : 'common.white',
+                '&:hover': { bgcolor: camOn ? 'primary.dark' : 'error.dark' },
+              }}
             >
               {camOn ? <VideocamIcon /> : <VideocamOffIcon />}
             </IconButton>
@@ -150,9 +159,12 @@ export default function PreJoin({ meeting, onJoin }: Props) {
         </Box>
 
         <Stack spacing={2}>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            {meeting.title || t('meeting.newMeeting')}
-          </Typography>
+          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              {meeting.title || t('meeting.newMeeting')}
+            </Typography>
+            <ThemePicker />
+          </Stack>
           <Typography color="text.secondary">
             {t('meeting.readyToJoin')}
           </Typography>

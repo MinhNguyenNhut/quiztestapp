@@ -208,7 +208,7 @@ export default function EditorToolbar({
         flexWrap: 'wrap',
         alignItems: 'center',
         gap: 0.25,
-        bgcolor: '#fafafa',
+        bgcolor: 'background.paper',
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
         position: 'sticky',

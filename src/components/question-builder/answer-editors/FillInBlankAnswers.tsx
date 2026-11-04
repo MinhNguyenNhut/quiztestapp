@@ -57,7 +57,7 @@ function FillInBlankAnswers({ control, index }: Props) {
         <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('answerEditors.fillBlank.title')}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t('answerEditors.fillBlank.description')}</Typography>
         {fields.map((blank, blankIdx) => (
-          <Box key={blank.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, p: 1.5, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #f0f0f0' }}>
+          <Box key={blank.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, p: 1.5, bgcolor: 'action.hover', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
             <BlankAnswerField control={control} index={index} blankIdx={blankIdx} label={blank.label} />
             <IconButton size="small" onClick={() => remove(blankIdx)} color="error">
               <DeleteIcon fontSize="small" />

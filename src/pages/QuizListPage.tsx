@@ -117,7 +117,7 @@ export default function QuizListPage() {
     navigate(`/quiz/${quiz.id}/preview`);
 
   return (
-    <Box sx={{ mx: 'auto', p: { xs: 2, sm: 3 } }}>
+    <Box sx={{ mx: 'auto', maxWidth: 1440 }}>
       <PageHeader search={search} onSearchChange={setSearch} />
 
       {error && (
@@ -352,14 +352,25 @@ function QuizCard({
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ px: 2, pb: 2, pt: 0, justifyContent: 'space-between' }}>
-        <Stack direction="row" spacing={1}>
+      <CardActions
+        sx={{
+          px: 2,
+          pb: 2,
+          pt: 0,
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1,
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ flex: 1 }}>
           <Button
             size="small"
             variant="contained"
             component={RouterLink}
             to={'/quiz/' + quiz.id + '/edit'}
             startIcon={<EditIcon />}
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
           >
             {t('common.edit')}
           </Button>
@@ -368,11 +379,12 @@ function QuizCard({
             variant="contained"
             component={RouterLink}
             to={`/quiz/${quiz.id}/candidate`}
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
           >
             {t('quizList.start')}
           </Button>
         </Stack>
-        <Stack direction="row" spacing={0.5}>
+        <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
           <Tooltip title={t('quizList.submissions')}>
             <IconButton
               size="small"

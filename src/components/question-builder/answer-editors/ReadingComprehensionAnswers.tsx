@@ -174,7 +174,7 @@ function ReadingComprehensionAnswers({ control, index }: Props) {
         )}
 
         {childFields.map((child, childIdx) => (
-          <Box key={child.id} sx={{ p: 1.5, mb: 1.5, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #f0f0f0' }}>
+          <Box key={child.id} sx={{ p: 1.5, mb: 1.5, bgcolor: 'action.hover', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 20 }}>{childIdx + 1}.</Typography>
               <ChildTypeSelect control={control} index={index} childIdx={childIdx} />

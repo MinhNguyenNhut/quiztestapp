@@ -28,6 +28,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import LanguageSwitcher from '../common/LanguageSwitcher/LanguageSwitcher';
+import ThemePicker from '../common/ThemePicker/ThemePicker';
 import { useAppDispatch, useAppSelector } from '../../features/store.ts';
 import { logout } from '../../features/auth/authSlice.ts';
 
@@ -133,9 +134,14 @@ export default function AppLayout() {
     <Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
       <AppBar
         position="fixed"
+        color="inherit"
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          borderBottom: 1,
+          borderColor: 'divider',
         }}
       >
         <Toolbar>
@@ -150,6 +156,7 @@ export default function AppLayout() {
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
           <LanguageSwitcher />
+          <ThemePicker />
           <Tooltip title={t('common.account')}>
             <IconButton
               color="inherit"
