@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import QuizPreviewPage from './pages/QuizPreviewPage.tsx';
 import MeetingLobbyPage from './pages/MeetingLobbyPage.tsx';
 import MeetingRoomPage from './pages/MeetingRoomPage.tsx';
+import AdminPage from './pages/AdminPage.tsx';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'quiz/:id/edit', element: <QuizEditorPage /> },
       { path: 'quiz/:id/submissions', element: <SubmissionsDashboardPage /> },
       { path: 'meeting', element: <MeetingLobbyPage /> },
+      { path: 'admin', element: <AdminPage /> },
     ],
   },
   { path: 'meeting/:roomId', element: (<ProtectedRoute>   <MeetingRoomPage />   </ProtectedRoute>), },

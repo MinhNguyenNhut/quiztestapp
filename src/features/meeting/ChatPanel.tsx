@@ -1,18 +1,21 @@
 // src/features/meeting/ChatPanel.tsx
 import { useEffect, useRef, useState } from 'react';
-import { Box, Drawer, IconButton, TextField, Typography } from '@mui/material';
+import { Alert, Box, Drawer, IconButton, TextField, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
+import { useTranslation } from 'react-i18next';
 import type { ChatMessage } from './useMeeting';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   messages: ChatMessage[];
+  chatError: boolean;
   onSend: (message: string) => void;
 }
 
-export default function ChatPanel({ open, onClose, messages, onSend }: Props) {
+export default function ChatPanel({ open, onClose, messages, chatError, onSend }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -38,23 +41,29 @@ export default function ChatPanel({ open, onClose, messages, onSend }: Props) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.5 }}>
         <Typography variant="h6" sx={{ flex: 1 }}>
-          In-call messages
+          {t('meeting.inCallMessages')}
         </Typography>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
 
+      {chatError && (
+        <Alert severity="error" sx={{ mx: 2, mb: 1 }}>
+          {t('meeting.chatPersistFailed')}
+        </Alert>
+      )}
+
       <Box sx={{ flex: 1, overflowY: 'auto', px: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {messages.length === 0 && (
           <Typography color="text.secondary" variant="body2" sx={{ mt: 2 }}>
-            No messages yet. Messages are only visible to people in the call.
+            {t('meeting.noMessages')}
           </Typography>
         )}
-        {messages.map((m, i) => (
-          <Box key={i} sx={{ alignSelf: m.mine ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+        {messages.map((m) => (
+          <Box key={m.id} sx={{ alignSelf: m.mine ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
             <Typography variant="caption" color="text.secondary">
-              {m.mine ? 'You' : (m.name ?? 'Participant')} ·{' '}
+              {m.mine ? t('meeting.you') : (m.name ?? t('meeting.unknownParticipant'))} ·{' '}
               {new Date(m.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Typography>
             <Box
@@ -78,7 +87,7 @@ export default function ChatPanel({ open, onClose, messages, onSend }: Props) {
         <TextField
           fullWidth
           size="small"
-          placeholder="Send a message"
+          placeholder={t('meeting.sendMessage')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}

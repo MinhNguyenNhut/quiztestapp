@@ -25,6 +25,9 @@ import profile from './profile.json';
 import quizSettings from './quizSettings.json';
 import quizPreview from './quizPreview.json';
 import landing from './landing.json';
+import layout from './layout.json';
+import meeting from './meeting.json';
+import admin from './admin.json';
 
 // Reassembled into the same shape the old single vi.json had, so every
 // existing t('quizList.title') / t('examUi.progress') call keeps working
@@ -56,5 +59,8 @@ export default {
    profile,
    quizSettings,
    quizPreview,
-   landing
+   landing,
+   layout,
+   meeting,
+   admin
 };

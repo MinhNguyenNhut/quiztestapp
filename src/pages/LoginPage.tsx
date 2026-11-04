@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -26,6 +26,7 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const status = useAppSelector(getAuthStatus);
   const error = useAppSelector(getAuthError);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +42,14 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginCredentials) => {
     const result = await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
-      navigate('/quizzes', { replace: true });
+      const state = location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null;
+      const from = state?.from;
+      const destination = from?.pathname
+        ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+        : result.payload.user.role === 'admin'
+          ? '/admin'
+          : '/quizzes';
+      navigate(destination, { replace: true });
     }
   };
 

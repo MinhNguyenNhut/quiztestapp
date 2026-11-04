@@ -1,199 +1,242 @@
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Container,
   AppBar,
-  Toolbar,
-  Typography,
-  Button,
+  Box,
+  Divider,
+  Drawer,
   IconButton,
-  Menu,
-  MenuItem,
+  List,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
+  ListSubheader,
+  Menu,
+  MenuItem,
+  Toolbar,
   Tooltip,
+  Typography,
 } from '@mui/material';
-
-import { useTranslation } from 'react-i18next';
-import { Link as RouterLink } from 'react-router-dom';
-
+import MenuIcon from '@mui/icons-material/Menu';
 import QuizIcon from '@mui/icons-material/Quiz';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import AddIcon from '@mui/icons-material/Add';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
-
+import { useTranslation } from 'react-i18next';
+import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import LanguageSwitcher from '../common/LanguageSwitcher/LanguageSwitcher';
-import { useAppDispatch } from '../../features/store.ts';
+import { useAppDispatch, useAppSelector } from '../../features/store.ts';
 import { logout } from '../../features/auth/authSlice.ts';
+
+const drawerWidth = 240;
 
 export default function AppLayout() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const userRole = useAppSelector((state) => state.user.profile?.role);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountMenuAnchor, setAccountMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const [accountMenuAnchor, setAccountMenuAnchor] =
-    useState<null | HTMLElement>(null);
+  const isQuizRoute =
+    location.pathname === '/quizzes' || location.pathname.startsWith('/quiz/');
+  const isCreateRoute = location.pathname === '/quiz/new';
+  const isQuizEditorRoute =
+    location.pathname === '/quiz/new' || /^\/quiz\/[^/]+\/edit$/.test(location.pathname);
 
-  const accountMenuOpen = Boolean(accountMenuAnchor);
-
-  const handleAccountClick = (
-    event: React.MouseEvent<HTMLElement>,
-  ) => {
-    setAccountMenuAnchor(event.currentTarget);
-  };
-
-  const handleAccountClose = () => {
+  const closeMenus = () => {
+    setMobileOpen(false);
     setAccountMenuAnchor(null);
   };
 
-  const handleProfile = () => {
-    handleAccountClose();
-    navigate('/profile');
-  };
-
   const handleLogout = () => {
-    handleAccountClose();
+    closeMenus();
     dispatch(logout());
     navigate('/login', { replace: true });
   };
 
+  const drawer = (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Toolbar>
+        <QuizIcon sx={{ mr: 1 }} color="primary" />
+        <Typography
+          component={RouterLink}
+          to="/quizzes"
+          variant="h6"
+          sx={{ color: 'text.primary', textDecoration: 'none', fontWeight: 700 }}
+          onClick={closeMenus}
+        >
+          {t('common.quizBuilder')}
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List
+        subheader={
+          <ListSubheader component="div">{t('layout.sidebar.quizzes')}</ListSubheader>
+        }
+      >
+        <ListItemButton
+          component={RouterLink}
+          to="/quizzes"
+          selected={isQuizRoute}
+          onClick={closeMenus}
+        >
+          <ListItemIcon><LibraryBooksIcon /></ListItemIcon>
+          <ListItemText primary={t('layout.sidebar.myQuizzes')} />
+        </ListItemButton>
+        <ListItemButton
+          component={RouterLink}
+          to="/quiz/new"
+          selected={isCreateRoute}
+          onClick={closeMenus}
+        >
+          <ListItemIcon><AddIcon /></ListItemIcon>
+          <ListItemText primary={t('layout.sidebar.createQuiz')} />
+        </ListItemButton>
+      </List>
+      {userRole === 'admin' && (
+        <List>
+          <ListItemButton
+            component={RouterLink}
+            to="/admin"
+            selected={location.pathname.startsWith('/admin')}
+            onClick={closeMenus}
+          >
+            <ListItemIcon><AdminPanelSettingsIcon /></ListItemIcon>
+            <ListItemText primary={t('admin.title')} />
+          </ListItemButton>
+        </List>
+      )}
+      <List
+        subheader={
+          <ListSubheader component="div">{t('layout.sidebar.meetingSection')}</ListSubheader>
+        }
+      >
+        <ListItemButton
+          component={RouterLink}
+          to="/meeting"
+          selected={location.pathname === '/meeting'}
+          onClick={closeMenus}
+        >
+          <ListItemIcon><VideoCallIcon /></ListItemIcon>
+          <ListItemText primary={t('layout.sidebar.meetings')} />
+        </ListItemButton>
+      </List>
+    </Box>
+  );
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        overflow: 'hidden',
-      }}
-    >
-      <AppBar position="static" elevation={0}>
+    <Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
+        }}
+      >
         <Toolbar>
-          {/* Logo */}
-          <QuizIcon sx={{ mr: 1 }} />
-
-          <Typography
-            variant="h6"
-            sx={{
-              flexGrow: 1,
-              fontWeight: 700,
-            }}
+          <IconButton
+            color="inherit"
+            edge="start"
+            aria-label={t('layout.sidebar.openMenu')}
+            onClick={() => setMobileOpen(true)}
+            sx={{ mr: 2, display: { md: 'none' } }}
           >
-            <RouterLink
-              to="/"
-              style={{
-                color: 'inherit',
-                textDecoration: 'none',
-              }}
-            >
-              {t('common.quizBuilder')}
-            </RouterLink>
-          </Typography>
-
-          {/* Language */}
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }} />
           <LanguageSwitcher />
-
-          {/* My Quizzes */}
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/quizzes"
-          >
-            {t('common.myQuizzes')}
-          </Button>
-
-          {/* Create Quiz */}
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/quiz/new"
-          >
-            {t('common.createQuiz')}
-          </Button>
-
-          {/* Account */}
           <Tooltip title={t('common.account')}>
             <IconButton
               color="inherit"
-              onClick={handleAccountClick}
-              aria-controls={
-                accountMenuOpen ? 'account-menu' : undefined
-              }
+              onClick={(event) => setAccountMenuAnchor(event.currentTarget)}
+              aria-label={t('common.account')}
               aria-haspopup="true"
-              aria-expanded={
-                accountMenuOpen ? 'true' : undefined
-              }
             >
               <AccountCircleIcon fontSize="large" />
             </IconButton>
           </Tooltip>
-
-          {/* Account dropdown */}
           <Menu
-            id="account-menu"
             anchorEl={accountMenuAnchor}
-            open={accountMenuOpen}
-            onClose={handleAccountClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
+            open={Boolean(accountMenuAnchor)}
+            onClose={() => setAccountMenuAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
-            {/* Profile */}
-            <MenuItem onClick={handleProfile}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-
-              <ListItemText>
-                {t('common.profile')}
-              </ListItemText>
+            <MenuItem
+              onClick={() => {
+                closeMenus();
+                navigate('/profile');
+              }}
+            >
+              <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary={t('common.profile')} />
             </MenuItem>
-
             <Divider />
-
-            {/* Logout */}
             <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon
-                  fontSize="small"
-                  color="error"
-                />
-              </ListItemIcon>
-
+              <ListItemIcon><LogoutIcon fontSize="small" color="error" /></ListItemIcon>
               <ListItemText
                 primary={t('common.logout')}
-                slotProps={{
-                  primary: {
-                    sx: {
-                      color: 'error.main',
-                    },
-                  },
-                }}
+                slotProps={{ primary: { sx: { color: 'error.main' } } }}
               />
             </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
 
-      <Container
-        maxWidth={false}
-        disableGutters
+      <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          open
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box
+        component="main"
         sx={{
-          mt: 0,
-          mb: 0,
-          px: 0,
-          flex: 1,
-          overflow: 'auto',
+          flexGrow: 1,
+          minWidth: 0,
+          minHeight: 0,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <Outlet />
-      </Container>
+        <Toolbar />
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflow: isQuizEditorRoute ? 'hidden' : 'auto',
+            p: isQuizEditorRoute ? 0 : { xs: 2, sm: 3 },
+          }}
+        >
+          <Outlet />
+        </Box>
+      </Box>
     </Box>
   );
 }

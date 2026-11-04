@@ -1,17 +1,29 @@
 // src/features/meeting/useMeeting.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '../store';
 
-const API_URL = import.meta.env.VITE_API_URL as string;
+const API_URL = (
+  (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3000'
+).replace(/\/+$/, '');
 
+const turnUrl = import.meta.env.VITE_TURN_URL as string | undefined;
+const turnUser = import.meta.env.VITE_TURN_USER as string | undefined;
+const turnPass = import.meta.env.VITE_TURN_PASS as string | undefined;
+
+// A TURN server is required for users behind strict NATs/firewalls; STUN alone will fail for some.
 const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    // { urls: 'turn:your-server:3478', username: '...', credential: '...' },
+    ...(turnUrl && turnUser && turnPass
+      ? [{ urls: turnUrl, username: turnUser, credential: turnPass }]
+      : []),
   ],
 };
 
 export interface ChatMessage {
+  id: string;
   from: string;
   name?: string;
   message: string;
@@ -19,17 +31,46 @@ export interface ChatMessage {
   mine: boolean;
 }
 
-export type MeetingStatus = 'connecting' | 'joined' | 'error';
+type ChatMessagePayload = Omit<ChatMessage, 'mine'>;
+
+function mergeMessages(
+  current: ChatMessage[],
+  incoming: ChatMessage[],
+): ChatMessage[] {
+  const messages = new Map(current.map((message) => [message.id, message]));
+  incoming.forEach((message) => messages.set(message.id, message));
+  return [...messages.values()].sort(
+    (left, right) => left.at - right.at || left.id.localeCompare(right.id),
+  );
+}
+
+export type MeetingStatus = 'connecting' | 'joined' | 'error' | 'ended';
+
+interface MeetingPeer {
+  id: string;
+  name: string;
+}
+
+interface SignalData {
+  sdp?: RTCSessionDescriptionInit;
+  candidate?: RTCIceCandidateInit;
+}
 
 export function useMeeting(
   roomId: string,
   token: string,
   initial: { audio: boolean; video: boolean } = { audio: true, video: true },
 ) {
+  const { t } = useTranslation();
+  const translationRef = useRef(t);
+  const userId = useAppSelector((state) => state.user.profile?.id);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [remotes, setRemotes] = useState<Record<string, MediaStream>>({});
+  const [peerIds, setPeerIds] = useState<string[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatError, setChatError] = useState(false);
   const [status, setStatus] = useState<MeetingStatus>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [micOn, setMicOn] = useState(initial.audio);
@@ -41,6 +82,10 @@ export function useMeeting(
   const pcs = useRef(new Map<string, RTCPeerConnection>());
   const queues = useRef(new Map<string, Promise<void>>());
   const initialRef = useRef(initial);
+
+  useEffect(() => {
+    translationRef.current = t;
+  }, [t]);
 
   const replaceVideoTrack = useCallback((track: MediaStreamTrack | null) => {
     pcs.current.forEach((pc) => {
@@ -89,18 +134,35 @@ export function useMeeting(
     };
 
     // I'm the newcomer: offer to everyone already in the room
-    socket.on('peers', (ids: string[]) => {
+    socket.on('peers', (peers: Array<string | MeetingPeer>) => {
       setStatus('joined');
-      ids.forEach((id) =>
+      const peerNames: Record<string, string> = {};
+      const ids = peers.map((peer) => {
+        const id = typeof peer === 'string' ? peer : peer.id;
+        if (typeof peer !== 'string' && peer.name) peerNames[id] = peer.name;
+        return id;
+      });
+      setPeerIds([...new Set(ids)]);
+      setNames(peerNames);
+      peers.forEach((peer) => {
+        const id = typeof peer === 'string' ? peer : peer.id;
         enqueue(id, async () => {
           const pc = createPc(id);
           await pc.setLocalDescription(await pc.createOffer());
           socket.emit('signal', { to: id, data: { sdp: pc.localDescription } });
-        }),
-      );
+        });
+      });
     });
 
-    socket.on('signal', ({ from, data }: { from: string; data: any }) =>
+    socket.on('peer-joined', (peer: MeetingPeer) => {
+      setPeerIds((current) =>
+        current.includes(peer.id) ? current : [...current, peer.id],
+      );
+      setNames((current) => ({ ...current, [peer.id]: peer.name }));
+    });
+
+    socket.on('signal', ({ from, data }: { from: string; data: SignalData }) => {
+      setPeerIds((current) => current.includes(from) ? current : [...current, from]);
       enqueue(from, async () => {
         const pc = pcs.current.get(from) ?? createPc(from);
         if (data.sdp) {
@@ -112,23 +174,49 @@ export function useMeeting(
         } else if (data.candidate) {
           await pc.addIceCandidate(data.candidate);
         }
-      }),
-    );
+      });
+    });
 
     socket.on('peer-left', (id: string) => {
       pcs.current.get(id)?.close();
       pcs.current.delete(id);
       queues.current.delete(id);
-      setRemotes(({ [id]: _removed, ...rest }) => rest);
+      setPeerIds((current) => current.filter((peerId) => peerId !== id));
+      setRemotes((current) => {
+        const remaining = { ...current };
+        delete remaining[id];
+        return remaining;
+      });
+      setNames((current) => {
+        const remaining = { ...current };
+        delete remaining[id];
+        return remaining;
+      });
     });
 
-    socket.on('chat', (msg: Omit<ChatMessage, 'mine'>) =>
-      setMessages((m) => [...m, { ...msg, mine: msg.from === socket.id }]),
-    );
+    socket.on('chat-history', (history: ChatMessagePayload[]) => {
+      setMessages((current) =>
+        mergeMessages(
+          current,
+          history.map((message) => ({ ...message, mine: message.from === userId })),
+        ),
+      );
+      setChatError(false);
+    });
+    socket.on('chat', (message: ChatMessagePayload) => {
+      setMessages((current) =>
+        mergeMessages(current, [{ ...message, mine: message.from === userId }]),
+      );
+    });
+    socket.on('chat-error', () => setChatError(true));
 
-    socket.on('room-full', () => fail('This meeting is full.'));
+    socket.on('room-full', () => fail(translationRef.current('meeting.roomFull')));
     socket.on('error-message', (msg: string) => fail(msg));
-    socket.on('connect_error', () => fail('Cannot connect to the meeting server.'));
+    socket.on('meeting-ended', () => {
+      setError(translationRef.current('meeting.meetingEndedMessage'));
+      setStatus('ended');
+    });
+    socket.on('connect_error', () => fail(translationRef.current('meeting.connectionFailed')));
 
     (async () => {
       let stream: MediaStream;
@@ -138,7 +226,7 @@ export function useMeeting(
         try {
           stream = await navigator.mediaDevices.getUserMedia({ audio: true }); // no camera
         } catch {
-          return fail('Cannot access camera or microphone. Check your browser permissions.');
+          stream = new MediaStream();
         }
       }
       if (cancelled) {
@@ -168,7 +256,7 @@ export function useMeeting(
       socket.emit('leave');
       socket.disconnect();
     };
-  }, [roomId, token]);
+  }, [roomId, token, userId]);
 
   const toggleMic = useCallback(() => {
     const tracks = streamRef.current?.getAudioTracks() ?? [];
@@ -207,6 +295,7 @@ export function useMeeting(
   }, [replaceVideoTrack, stopScreenShare]);
 
   const sendChat = useCallback((message: string) => {
+    setChatError(false);
     socketRef.current?.emit('chat', { message });
   }, []);
 
@@ -214,11 +303,15 @@ export function useMeeting(
     localStream,
     screenStream,
     remotes,
+    peerIds,
+    names,
     messages,
+    chatError,
     status,
     error,
     micOn,
     camOn,
+    camAvailable: Boolean(localStream?.getVideoTracks().length),
     toggleMic,
     toggleCam,
     startScreenShare,

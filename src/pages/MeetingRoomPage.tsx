@@ -1,55 +1,128 @@
-// src/pages/MeetingRoomPage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Box, Button, CircularProgress } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import MeetingRoom from '../features/meeting/MeetingRoom';
-import { getMeeting, type Meeting } from '../features/meeting/meetingApi';
+import { getMeeting, MeetingApiError, type Meeting } from '../features/meeting/meetingApi';
 import PreJoin from '../features/meeting/PreJoin';
 import { useAuthToken } from '../features/meeting/useAuthToken';
 
-function Centered({ children }: { children: React.ReactNode }) {
+function Centered({ children }: { children: ReactNode }) {
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
-      <Box sx={{ display: 'grid', gap: 2, justifyItems: 'center', maxWidth: 420 }}>{children}</Box>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        p: 2,
+        bgcolor: '#202124',
+        color: '#fff',
+      }}
+    >
+      <Box sx={{ display: 'grid', gap: 2, justifyItems: 'center', maxWidth: 420, width: '100%' }}>
+        {children}
+      </Box>
     </Box>
   );
 }
 
+type MeetingLoadState =
+  | { roomId: string; status: 'loading' }
+  | { roomId: string; status: 'loaded'; meeting: Meeting }
+  | { roomId: string; status: 'error'; message: string; notFound: boolean };
+
 export default function MeetingRoomPage() {
+  const { t } = useTranslation();
   const { roomId = '' } = useParams();
   const token = useAuthToken();
-  const [meeting, setMeeting] = useState<Meeting | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [joinOpts, setJoinOpts] = useState<{ audio: boolean; video: boolean } | null>(null);
+  const [loadState, setLoadState] = useState<MeetingLoadState>({
+    roomId: '',
+    status: 'loading',
+  });
+  const [joinOptions, setJoinOptions] = useState<{
+    roomId: string;
+    options: { audio: boolean; video: boolean };
+  } | null>(null);
 
   useEffect(() => {
-    setMeeting(null);
-    setLoadError(null);
+    let active = true;
     getMeeting(roomId, token)
-      .then(setMeeting)
-      .catch((e: Error) => setLoadError(e.message));
-  }, [roomId, token]);
+      .then((result) => {
+        if (active) setLoadState({ roomId, status: 'loaded', meeting: result });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setLoadState({
+          roomId,
+          status: 'error',
+          message: error instanceof Error ? error.message : t('common.error'),
+          notFound: error instanceof MeetingApiError && error.status === 404,
+        });
+      });
+    return () => {
+      active = false;
+    };
+  }, [roomId, token, t]);
 
-  if (loadError || (meeting && !meeting.isActive)) {
+  const currentLoad = loadState.roomId === roomId ? loadState : null;
+  if (!currentLoad || currentLoad.status === 'loading') {
     return (
       <Centered>
-        <Alert severity="error">{loadError ?? 'This meeting has ended.'}</Alert>
+        <CircularProgress />
+        <Alert severity="info">{t('meeting.loading')}</Alert>
+      </Centered>
+    );
+  }
+
+  if (currentLoad.status === 'error' && currentLoad.notFound) {
+    return (
+      <Centered>
+        <Alert severity="error">{t('meeting.notFound')}</Alert>
         <Button component={RouterLink} to="/meeting" variant="contained">
-          Back to meetings
+          {t('meeting.backToMeetings')}
         </Button>
       </Centered>
     );
   }
 
-  if (!meeting) {
+  if (currentLoad.status === 'error') {
     return (
       <Centered>
-        <CircularProgress />
+        <Alert severity="error">{currentLoad.message}</Alert>
+        <Button component={RouterLink} to="/meeting" variant="contained">
+          {t('meeting.backToMeetings')}
+        </Button>
       </Centered>
     );
   }
 
-  if (!joinOpts) return <PreJoin meeting={meeting} onJoin={setJoinOpts} />;
+  const meeting = currentLoad.meeting;
+  if (!meeting.isActive) {
+    return (
+      <Centered>
+        <Alert severity="info">{t('meeting.meetingEnded')}</Alert>
+        <Button component={RouterLink} to="/meeting" variant="contained">
+          {t('meeting.backToMeetings')}
+        </Button>
+      </Centered>
+    );
+  }
 
-  return <MeetingRoom meeting={meeting} token={token} initial={joinOpts} />;
+  if (joinOptions?.roomId !== roomId) {
+    return (
+      <PreJoin
+        meeting={meeting}
+        onJoin={(options) => setJoinOptions({ roomId, options })}
+      />
+    );
+  }
+
+  return (
+    <MeetingRoom
+      key={`${roomId}:${token}`}
+      meeting={meeting}
+      token={token}
+      initial={joinOptions.options}
+    />
+  );
 }

@@ -63,6 +63,10 @@ const EMPTY_QUESTIONS: Question[] = [];
 
 export default function QuizEditorPage() {
   const { id } = useParams();
+  return <QuizEditorContent key={id ?? 'new-quiz'} id={id} />;
+}
+
+function QuizEditorContent({ id }: { id: string | undefined }) {
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
 
@@ -159,7 +163,7 @@ export default function QuizEditorPage() {
 
   if (id && !quiz && isLoading) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <CircularProgress />
       </Box>
     );
@@ -175,7 +179,7 @@ export default function QuizEditorPage() {
 
   if (id && !quiz) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <CircularProgress />
       </Box>
     );
@@ -185,7 +189,7 @@ export default function QuizEditorPage() {
 
   if (id && quiz && questionsLoading) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <CircularProgress />
       </Box>
     );
@@ -200,7 +204,7 @@ export default function QuizEditorPage() {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <Tabs
         value={tabValue}
         onChange={(_, newValue) => setTabValue(newValue)}

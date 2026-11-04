@@ -25,6 +25,9 @@ import profile from './profile.json';
 import quizSettings from './quizSettings.json';
 import quizPreview from './quizPreview.json';
 import landing from './landing.json';
+import layout from './layout.json';
+import meeting from './meeting.json';
+import admin from './admin.json';
 
 export default {
    common,
@@ -53,5 +56,8 @@ export default {
    profile,
    quizSettings,
    quizPreview,
-   landing
+   landing,
+   layout,
+   meeting,
+   admin
 };
