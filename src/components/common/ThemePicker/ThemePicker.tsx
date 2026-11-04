@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import CheckIcon from '@mui/icons-material/Check';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import { useTranslation } from 'react-i18next';
 import { themePalettes, type ThemePaletteName } from '../../../theme';
 import { useThemePreferences } from '../../../theme/ThemePreferencesContext';
@@ -48,12 +50,12 @@ export default function ThemePicker() {
         </Typography>
         <MenuItem
           onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
-          role="menuitemcheckbox"
-          aria-checked={mode === 'dark'}
           aria-label={mode === 'light' ? t('appearance.enableDark') : t('appearance.enableLight')}
         >
           <ListItemIcon>
-            <PaletteOutlinedIcon fontSize="small" />
+            {mode === 'light'
+              ? <LightModeOutlinedIcon fontSize="small" />
+              : <DarkModeOutlinedIcon fontSize="small" />}
           </ListItemIcon>
           <ListItemText
             primary={mode === 'light' ? t('appearance.light') : t('appearance.dark')}
@@ -61,10 +63,13 @@ export default function ThemePicker() {
           <Switch
             edge="end"
             checked={mode === 'dark'}
-            tabIndex={-1}
             onChange={() => setMode(mode === 'light' ? 'dark' : 'light')}
             onClick={(event) => event.stopPropagation()}
-            slotProps={{ input: { 'aria-hidden': true } }}
+            slotProps={{
+              input: {
+                'aria-label': mode === 'light' ? t('appearance.enableDark') : t('appearance.enableLight'),
+              },
+            }}
           />
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />

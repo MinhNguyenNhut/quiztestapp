@@ -15,7 +15,6 @@ import {
   Divider,
   IconButton,
   MenuItem,
-  Snackbar,
   Stack,
   TextField,
   Tooltip,
@@ -25,6 +24,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import VideoCallIcon from '@mui/icons-material/VideoCall';
+import AppAlert from '../components/common/AppAlert/AppAlert';
 import ConfirmDialog from '../components/common/ConfirmDialog/ConfirmDialog';
 import { copyToClipboard } from '../utils/clipboard';
 import {
@@ -34,6 +34,7 @@ import {
   type Meeting,
 } from '../api/meetingApi';
 import { useAuthToken } from '../hooks/useAuthToken';
+import { useAlert } from '../hooks/useAlert';
 
 interface MeetingFormValues {
   title: string;
@@ -49,8 +50,7 @@ export default function MeetingLobbyPage() {
   const [meetingsError, setMeetingsError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [copyError, setCopyError] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { alert, showAlert, closeAlert } = useAlert();
   const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
   const [deletingRoomId, setDeletingRoomId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -124,10 +124,9 @@ export default function MeetingLobbyPage() {
   const handleCopyLink = async (roomId: string) => {
     try {
       await copyToClipboard(`${window.location.origin}/meeting/${encodeURIComponent(roomId)}`);
-      setCopied(true);
-      setCopyError(false);
+      showAlert(t('meeting.linkCopied'), 'success');
     } catch {
-      setCopyError(true);
+      showAlert(t('meeting.copyFailed'), 'error');
     }
   };
 
@@ -148,7 +147,7 @@ export default function MeetingLobbyPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', py: { xs: 1, sm: 3 } }}>
+    <Box sx={{ mx: 'auto', py: { xs: 1, sm: 3 } }}>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
         {t('meeting.title')}
       </Typography>
@@ -324,21 +323,12 @@ export default function MeetingLobbyPage() {
         </Box>
       </Stack>
 
-      <Snackbar
-        open={copied}
-        autoHideDuration={2000}
-        onClose={() => setCopied(false)}
-        message={t('meeting.linkCopied')}
+      <AppAlert
+        open={alert.open}
+        message={alert.message}
+        severity={alert.severity}
+        onClose={closeAlert}
       />
-      <Snackbar
-        open={copyError}
-        autoHideDuration={3000}
-        onClose={() => setCopyError(false)}
-      >
-        <Alert severity="error" onClose={() => setCopyError(false)}>
-          {t('meeting.copyFailed')}
-        </Alert>
-      </Snackbar>
       <ConfirmDialog
         open={Boolean(meetingToDelete)}
         title={t('meeting.deleteMeetingTitle')}

@@ -228,7 +228,7 @@ export default function SubmissionsDashboardPage() {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1400, mx: 'auto' }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, mx: 'auto' }}>
       <SubmissionsSummaryHeader quiz={quiz} submissions={submissions} />
 
       <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>

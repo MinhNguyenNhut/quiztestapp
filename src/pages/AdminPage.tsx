@@ -113,7 +113,7 @@ function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ mx: 'auto' }}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
@@ -285,7 +285,7 @@ function AdminQuizzesPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ mx: 'auto' }}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}

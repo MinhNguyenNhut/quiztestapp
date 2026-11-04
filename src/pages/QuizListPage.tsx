@@ -117,7 +117,7 @@ export default function QuizListPage() {
     navigate(`/quiz/${quiz.id}/preview`);
 
   return (
-    <Box sx={{ mx: 'auto', maxWidth: 1440 }}>
+    <Box sx={{ mx: 'auto' }}>
       <PageHeader search={search} onSearchChange={setSearch} />
 
       {error && (
