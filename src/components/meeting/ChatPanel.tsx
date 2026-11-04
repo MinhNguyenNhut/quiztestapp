@@ -1,10 +1,9 @@
-// src/features/meeting/ChatPanel.tsx
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Box, Drawer, IconButton, TextField, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
-import type { ChatMessage } from './useMeeting';
+import type { ChatMessage } from '../../hooks/useMeeting';
 
 interface Props {
   open: boolean;

@@ -14,13 +14,13 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../store';
-import ThemePicker from '../../components/common/ThemePicker/ThemePicker';
-import { copyToClipboard } from './clipboard';
+import { useAppSelector } from '../../features/store';
+import ThemePicker from '../common/ThemePicker/ThemePicker';
+import { endMeeting, type Meeting } from '../../api/meetingApi';
+import { useMeeting } from '../../hooks/useMeeting';
+import { copyToClipboard } from '../../utils/clipboard';
 import ChatPanel from './ChatPanel';
 import ControlBar from './ControlBar';
-import { endMeeting, type Meeting } from './meetingApi';
-import { useMeeting } from './useMeeting';
 import VideoTile from './VideoTile';
 
 interface Props {

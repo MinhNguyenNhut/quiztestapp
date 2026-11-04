@@ -1,8 +1,7 @@
-// src/features/meeting/useMeeting.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
-import { useAppSelector } from '../store';
+import { useAppSelector } from '../features/store';
 
 const API_URL = (
   (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3000'

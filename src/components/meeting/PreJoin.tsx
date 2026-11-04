@@ -6,9 +6,9 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import { Link as RouterLink } from 'react-router-dom';
-import { useAppSelector } from '../store';
-import ThemePicker from '../../components/common/ThemePicker/ThemePicker';
-import type { Meeting } from './meetingApi';
+import { useAppSelector } from '../../features/store';
+import ThemePicker from '../common/ThemePicker/ThemePicker';
+import type { Meeting } from '../../api/meetingApi';
 import VideoTile from './VideoTile';
 
 interface Props {

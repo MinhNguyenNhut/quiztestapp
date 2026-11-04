@@ -2,10 +2,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Box, Button, CircularProgress } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import MeetingRoom from '../features/meeting/MeetingRoom';
-import { getMeeting, MeetingApiError, type Meeting } from '../features/meeting/meetingApi';
-import PreJoin from '../features/meeting/PreJoin';
-import { useAuthToken } from '../features/meeting/useAuthToken';
+import MeetingRoom from '../components/meeting/MeetingRoom';
+import { getMeeting, MeetingApiError, type Meeting } from '../api/meetingApi';
+import PreJoin from '../components/meeting/PreJoin';
+import { useAuthToken } from '../hooks/useAuthToken';
 import ThemePicker from '../components/common/ThemePicker/ThemePicker';
 
 function Centered({ children }: { children: ReactNode }) {

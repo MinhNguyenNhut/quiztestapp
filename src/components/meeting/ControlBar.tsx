@@ -1,4 +1,3 @@
-// src/features/meeting/ControlBar.tsx
 import { Badge, Box, IconButton, Tooltip } from '@mui/material';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import ChatIcon from '@mui/icons-material/Chat';

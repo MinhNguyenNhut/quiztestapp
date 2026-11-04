@@ -1,4 +1,3 @@
-// src/features/meeting/VideoTile.tsx
 import { useEffect, useRef } from 'react';
 import { Avatar, Box, Chip } from '@mui/material';
 

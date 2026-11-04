@@ -26,14 +26,14 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ConfirmDialog from '../components/common/ConfirmDialog/ConfirmDialog';
-import { copyToClipboard } from '../features/meeting/clipboard';
+import { copyToClipboard } from '../utils/clipboard';
 import {
   createMeeting,
   deleteMeeting,
   getMyMeetings,
   type Meeting,
-} from '../features/meeting/meetingApi';
-import { useAuthToken } from '../features/meeting/useAuthToken';
+} from '../api/meetingApi';
+import { useAuthToken } from '../hooks/useAuthToken';
 
 interface MeetingFormValues {
   title: string;
