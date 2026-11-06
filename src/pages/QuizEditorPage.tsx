@@ -1,13 +1,13 @@
 import { Alert, Box, Tabs, Tab, CircularProgress } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import QuestionBuilder from '../components/question-builder/QuestionBuilder';
 import { CandidateFieldsBuilder } from '../components/candidate-fields-builder';
 import QuizSettingsBuilder, { DEFAULT_QUIZ_SETTINGS } from '../components/quiz-settings-builder';
 
-import type { Question, QuizFormValues } from '../types';
+import type { Question, QuestionFormValues, QuizFormValues, QuestionType, RichTextContent } from '../types';
 import type { RootState } from '../features/store.ts';
 
 import { quizToFormValues } from '../utils/quizMappers.ts';
@@ -69,6 +69,8 @@ export default function QuizEditorPage() {
 function QuizEditorContent({ id }: { id: string | undefined }) {
   const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const aiDraft = readAiDraft(location.state);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -228,6 +230,7 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
             <QuestionBuilder
               mode="create"
               createdBy={userProfile?.id}
+              defaultValues={aiDraft}
               onSave={handleSave}
             />
           )}
@@ -264,4 +267,90 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
       </Box>
     </Box>
   );
+}
+
+const QUESTION_TYPE_VALUES: QuestionType[] = [
+  'single_choice',
+  'multiple_choice',
+  'true_false',
+  'fill_in_blank',
+  'matching',
+  'reading_comprehension',
+  'short_answer',
+  'essay',
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isRichText(value: unknown): value is RichTextContent {
+  return isRecord(value) && typeof value.html === 'string' && typeof value.text === 'string';
+}
+
+function isQuestionFormValue(value: unknown): value is QuestionFormValues {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.type === 'string' &&
+    QUESTION_TYPE_VALUES.some((type) => type === value.type) &&
+    typeof value.title === 'string' &&
+    isRichText(value.content) &&
+    typeof value.points === 'number' &&
+    ['easy', 'medium', 'hard'].includes(String(value.difficulty)) &&
+    Array.isArray(value.tags) &&
+    value.tags.every((tag) => typeof tag === 'string') &&
+    Array.isArray(value.options) &&
+    value.options.every(
+      (option) =>
+        isRecord(option) &&
+        typeof option.text === 'string' &&
+        typeof option.isCorrect === 'boolean' &&
+        (option.id === undefined || typeof option.id === 'string') &&
+        (option.order === undefined || typeof option.order === 'number'),
+    ) &&
+    (value.id === undefined || typeof value.id === 'string') &&
+    (value.description === undefined || typeof value.description === 'string') &&
+    (value.expectedAnswer === undefined || typeof value.expectedAnswer === 'string') &&
+    (value.caseSensitive === undefined || typeof value.caseSensitive === 'boolean') &&
+    (value.scoringGuide === undefined || typeof value.scoringGuide === 'string') &&
+    (value.blanks === undefined ||
+      (Array.isArray(value.blanks) &&
+        value.blanks.every(
+          (blank) =>
+            isRecord(blank) &&
+            typeof blank.id === 'string' &&
+            typeof blank.label === 'string' &&
+            (blank.correctAnswer === undefined || typeof blank.correctAnswer === 'string'),
+        ))) &&
+    (value.matchingPairs === undefined ||
+      (Array.isArray(value.matchingPairs) &&
+        value.matchingPairs.every(
+          (pair) =>
+            isRecord(pair) &&
+            typeof pair.id === 'string' &&
+            typeof pair.left === 'string' &&
+            typeof pair.right === 'string',
+        ))) &&
+    (value.childQuestions === undefined ||
+      (Array.isArray(value.childQuestions) && value.childQuestions.every(isQuestionFormValue))) &&
+    (value.explanation === undefined || isRichText(value.explanation)) &&
+    (value.passage === undefined || isRichText(value.passage)) &&
+    (value.rubric === undefined || isRichText(value.rubric))
+  );
+}
+
+function isQuizFormValue(value: unknown): value is QuizFormValues {
+  return (
+    isRecord(value) &&
+    typeof value.title === 'string' &&
+    typeof value.description === 'string' &&
+    (value.estimatedTime === undefined || typeof value.estimatedTime === 'number') &&
+    Array.isArray(value.questions) &&
+    value.questions.every(isQuestionFormValue)
+  );
+}
+
+function readAiDraft(state: unknown): QuizFormValues | undefined {
+  if (!isRecord(state) || !isQuizFormValue(state.aiDraft)) return undefined;
+  return state.aiDraft;
 }

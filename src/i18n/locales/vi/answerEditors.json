@@ -1,5 +1,6 @@
 {
    "optionPlaceholder": "Đáp án {{letter}}",
+   "dragOption": "Kéo để đổi thứ tự đáp án",
    "addOption": "Thêm đáp án",
    "singleChoice": {
       "title": "Các đáp án"

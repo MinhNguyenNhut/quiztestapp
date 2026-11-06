@@ -1,5 +1,6 @@
 {
    "optionPlaceholder": "Option {{letter}}",
+   "dragOption": "Drag to reorder options",
    "addOption": "Add Option",
    "singleChoice": {
       "title": "Options"

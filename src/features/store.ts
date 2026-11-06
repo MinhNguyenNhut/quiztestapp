@@ -8,6 +8,7 @@ import userReducer from './user/userSlice';
 import authReducer from './auth/authSlice';
 import questionReducer from './questions/questionSlice';
 import { examMiddleware } from './exam/examMiddleware.ts';
+import aiQuizReducer from './aiQuiz/aiQuizSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     submission: submissionReducer,
     user: userReducer,
     auth: authReducer,
+    aiQuiz: aiQuizReducer,
   },
   middleware: (getDefault) => getDefault().prepend(examMiddleware.middleware),
   devTools: import.meta.env.DEV,

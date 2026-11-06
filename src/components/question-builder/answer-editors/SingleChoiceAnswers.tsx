@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { memo, useCallback } from 'react';
 import {
   useFieldArray,
@@ -22,6 +23,7 @@ import {
 } from 'react-hook-form';
 import type { QuizFormValues } from '../../../types/index.ts';
 import { v4 as uuidv4 } from 'uuid';
+import { useOptionDrag } from './useOptionDrag.ts';
 
 interface Props {
   control: Control<QuizFormValues>;
@@ -96,17 +98,28 @@ const OptionTextField = memo(function OptionTextField({
   );
 })
 
-export default memo(function SingleChoiceAnswers({ control, setValue, index }: Props) {
+export default memo(function SingleChoiceAnswers({ control, setValue, getValues, index }: Props) {
   const { t } = useTranslation();
 
+  const optionsPath = `questions.${index}.options` as const;
   const {
     fields,
     append,
     remove,
+    swap,
   } = useFieldArray({
     control,
-    name: `questions.${index}.options`,
+    name: optionsPath,
   });
+  const reorderOptions = useCallback((from: number, to: number) => {
+    swap(from, to);
+    getValues(optionsPath).forEach((option, optionIndex) => {
+      if (option.order !== optionIndex) {
+        setValue(`${optionsPath}.${optionIndex}.order`, optionIndex, { shouldDirty: true });
+      }
+    });
+  }, [getValues, optionsPath, setValue, swap]);
+  const drag = useOptionDrag(reorderOptions);
 
   const handleAdd = useCallback(() => {
     if (fields.length >= 6) return;
@@ -154,6 +167,9 @@ export default memo(function SingleChoiceAnswers({ control, setValue, index }: P
         {fields.map((field, optIdx) => (
           <Box
             key={field.id}
+            data-option-row
+            data-option-id={field.id}
+            data-option-index={optIdx}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -166,6 +182,16 @@ export default memo(function SingleChoiceAnswers({ control, setValue, index }: P
               borderColor: 'divider',
             }}
           >
+            <IconButton
+              size="small"
+              aria-label={t('answerEditors.dragOption')}
+              onPointerDown={(event) => drag.onPointerDown(optIdx, event)}
+              onPointerUp={drag.onPointerUp}
+              onPointerCancel={drag.onPointerCancel}
+              sx={{ cursor: 'grab', touchAction: 'none', '&:active': { cursor: 'grabbing' } }}
+            >
+              <DragIndicatorIcon fontSize="small" />
+            </IconButton>
             <Typography
               variant="body2"
               sx={{

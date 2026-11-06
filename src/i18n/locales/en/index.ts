@@ -29,6 +29,7 @@ import layout from './layout.json';
 import meeting from './meeting.json';
 import admin from './admin.json';
 import appearance from './appearance.json';
+import aiQuiz from './aiQuiz.json';
 
 export default {
    common,
@@ -61,5 +62,6 @@ export default {
    layout,
    meeting,
    admin,
-   appearance
+   appearance,
+   aiQuiz,
 };

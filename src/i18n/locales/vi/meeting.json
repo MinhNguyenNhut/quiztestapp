@@ -46,6 +46,8 @@
   "turnCameraOff": "Tắt camera",
   "turnCameraOn": "Bật camera",
   "cameraUnavailableTooltip": "Không có camera",
+  "speaking": "Đang nói",
+  "microphoneMuted": "Micrô đã tắt",
   "stopPresenting": "Dừng trình chiếu",
   "presentScreen": "Trình chiếu màn hình",
   "chat": "Trò chuyện",

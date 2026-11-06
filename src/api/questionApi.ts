@@ -7,9 +7,19 @@ import type {
 import { apiDelete, apiGet, apiPatch, apiPost } from './httpClient';
 
 export type CreateQuestionOptionPayload = {
+  id: string;
   text: string;
   isCorrect: boolean;
   order: number;
+};
+
+export type CreateChildQuestionPayload = Omit<
+  QuestionFormValues,
+  'id' | 'options' | 'childQuestions' | 'passage'
+> & {
+  id: string;
+  order: number;
+  options: CreateQuestionOptionPayload[];
 };
 
 export type CreateQuestionPayload = {
@@ -26,7 +36,7 @@ export type CreateQuestionPayload = {
   blanks?: Question['blanks'];
   matchingPairs?: Question['matchingPairs'];
   passage?: Question['passage'];
-  childQuestions?: QuestionFormValues[];
+  childQuestions?: CreateChildQuestionPayload[];
   expectedAnswer?: string;
   caseSensitive?: boolean;
   rubric?: Question['rubric'];

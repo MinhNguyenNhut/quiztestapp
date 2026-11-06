@@ -48,6 +48,13 @@ export type MeetingStatus = 'connecting' | 'joined' | 'error' | 'ended';
 interface MeetingPeer {
   id: string;
   name: string;
+  micAvailable?: boolean;
+  micOn?: boolean;
+}
+
+interface MicrophoneState {
+  available: boolean;
+  enabled: boolean;
 }
 
 interface SignalData {
@@ -68,6 +75,7 @@ export function useMeeting(
   const [remotes, setRemotes] = useState<Record<string, MediaStream>>({});
   const [peerIds, setPeerIds] = useState<string[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [microphones, setMicrophones] = useState<Record<string, MicrophoneState>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatError, setChatError] = useState(false);
   const [status, setStatus] = useState<MeetingStatus>('connecting');
@@ -143,6 +151,16 @@ export function useMeeting(
       });
       setPeerIds([...new Set(ids)]);
       setNames(peerNames);
+      const peerMicrophones: Record<string, MicrophoneState> = {};
+      peers.forEach((peer) => {
+        if (typeof peer !== 'string') {
+          peerMicrophones[peer.id] = {
+            available: peer.micAvailable ?? true,
+            enabled: peer.micOn ?? true,
+          };
+        }
+      });
+      setMicrophones(peerMicrophones);
       peers.forEach((peer) => {
         const id = typeof peer === 'string' ? peer : peer.id;
         enqueue(id, async () => {
@@ -158,23 +176,24 @@ export function useMeeting(
         current.includes(peer.id) ? current : [...current, peer.id],
       );
       setNames((current) => ({ ...current, [peer.id]: peer.name }));
+      setMicrophones((current) => ({
+        ...current,
+        [peer.id]: {
+          available: peer.micAvailable ?? true,
+          enabled: peer.micOn ?? true,
+        },
+      }));
     });
 
-    socket.on('signal', ({ from, data }: { from: string; data: SignalData }) => {
-      setPeerIds((current) => current.includes(from) ? current : [...current, from]);
-      enqueue(from, async () => {
-        const pc = pcs.current.get(from) ?? createPc(from);
-        if (data.sdp) {
-          await pc.setRemoteDescription(data.sdp);
-          if (data.sdp.type === 'offer') {
-            await pc.setLocalDescription(await pc.createAnswer());
-            socket.emit('signal', { to: from, data: { sdp: pc.localDescription } });
-          }
-        } else if (data.candidate) {
-          await pc.addIceCandidate(data.candidate);
-        }
-      });
-    });
+    socket.on(
+      'mic-state',
+      (state: { id: string; available: boolean; enabled: boolean }) => {
+        setMicrophones((current) => ({
+          ...current,
+          [state.id]: { available: state.available, enabled: state.enabled },
+        }));
+      },
+    );
 
     socket.on('peer-left', (id: string) => {
       pcs.current.get(id)?.close();
@@ -190,6 +209,27 @@ export function useMeeting(
         const remaining = { ...current };
         delete remaining[id];
         return remaining;
+      });
+      setMicrophones((current) => {
+        const remaining = { ...current };
+        delete remaining[id];
+        return remaining;
+      });
+    });
+
+    socket.on('signal', ({ from, data }: { from: string; data: SignalData }) => {
+      setPeerIds((current) => current.includes(from) ? current : [...current, from]);
+      enqueue(from, async () => {
+        const pc = pcs.current.get(from) ?? createPc(from);
+        if (data.sdp) {
+          await pc.setRemoteDescription(data.sdp);
+          if (data.sdp.type === 'offer') {
+            await pc.setLocalDescription(await pc.createAnswer());
+            socket.emit('signal', { to: from, data: { sdp: pc.localDescription } });
+          }
+        } else if (data.candidate) {
+          await pc.addIceCandidate(data.candidate);
+        }
       });
     });
 
@@ -233,12 +273,17 @@ export function useMeeting(
         return;
       }
       const hasVideo = stream.getVideoTracks().length > 0;
+      const hasAudio = stream.getAudioTracks().length > 0;
       stream.getAudioTracks().forEach((t) => (t.enabled = initialRef.current.audio));
       stream.getVideoTracks().forEach((t) => (t.enabled = initialRef.current.video));
       setCamOn(hasVideo && initialRef.current.video);
       streamRef.current = stream;
       setLocalStream(stream);
-      socket.emit('join', { roomId });
+      socket.emit('join', {
+        roomId,
+        micAvailable: hasAudio,
+        micOn: hasAudio && initialRef.current.audio,
+      });
     })();
 
     const peerConnections = pcs.current;
@@ -263,6 +308,7 @@ export function useMeeting(
     const next = !tracks[0].enabled;
     tracks.forEach((t) => (t.enabled = next));
     setMicOn(next);
+    socketRef.current?.emit('mic-state', { available: true, enabled: next });
   }, []);
 
   const toggleCam = useCallback(() => {
@@ -304,6 +350,7 @@ export function useMeeting(
     remotes,
     peerIds,
     names,
+    microphones,
     messages,
     chatError,
     status,

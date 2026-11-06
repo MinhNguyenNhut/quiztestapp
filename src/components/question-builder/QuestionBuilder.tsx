@@ -15,11 +15,11 @@ import { createQuiz } from '../../features/quiz/quizSlice.ts';
 import { createQuestion, deleteQuestion, updateQuestion } from '../../features/questions/questionThunks.ts';
 import { useAlert } from '../../hooks/useAlert.ts';
 import AppAlert from '../common/AppAlert/AppAlert.tsx';
-import type { CreateQuestionPayload } from '../../api/questionApi.ts';
+import type { CreateChildQuestionPayload, CreateQuestionPayload } from '../../api/questionApi.ts';
 import { useAppDispatch } from '../../features/store.ts';
 
 type QuestionBuilderProps =
-  | { mode: 'create'; createdBy?: string; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void }
+  | { mode: 'create'; createdBy?: string; defaultValues?: QuizFormValues; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void }
   | { mode: 'edit'; defaultValues: QuizFormValues; originalQuiz: Quiz; onSave: (data: QuizFormValues) => void | Promise<void>; onCancel?: () => void; onDirtyChange?: (isDirty: boolean) => void };
 
 function getFirstErrorMessage(errors: unknown): string | undefined {
@@ -41,7 +41,6 @@ const buildPayload = (question: QuestionFormValues, index: number): CreateQuesti
   content: question.content,
   description: question.description,
   difficulty: question.difficulty,
-  explanation: question.explanation,
   points: question.points,
   order: index,
   options: (question.options ?? []).map((option, optionIndex) => ({
@@ -50,13 +49,52 @@ const buildPayload = (question: QuestionFormValues, index: number): CreateQuesti
     isCorrect: option.isCorrect ?? false,
     order: option.order ?? optionIndex,
   })),
-  childQuestions: question.childQuestions,
+  explanation: question.explanation,
+  tags: question.tags ?? [],
+  blanks: question.blanks ?? [],
+  matchingPairs: question.matchingPairs ?? [],
+  passage: question.passage,
+  childQuestions: question.childQuestions?.map(buildChildQuestionPayload),
+  expectedAnswer: question.expectedAnswer,
+  caseSensitive: question.caseSensitive,
+  rubric: question.rubric,
+  scoringGuide: question.scoringGuide,
 });
+
+function buildChildQuestionPayload(
+  question: QuestionFormValues,
+  index: number,
+): CreateChildQuestionPayload {
+  return {
+    id: question.id ?? uuidv4(),
+    type: question.type,
+    title: question.title,
+    content: question.content,
+    description: question.description,
+    points: question.points,
+    difficulty: question.difficulty,
+    tags: question.tags ?? [],
+    order: index,
+    options: (question.options ?? []).map((option, optionIndex) => ({
+      id: option.id ?? uuidv4(),
+      text: option.text,
+      isCorrect: option.isCorrect,
+      order: option.order ?? optionIndex,
+    })),
+    explanation: question.explanation,
+    blanks: question.blanks ?? [],
+    matchingPairs: question.matchingPairs ?? [],
+    expectedAnswer: question.expectedAnswer,
+    caseSensitive: question.caseSensitive,
+    rubric: question.rubric,
+    scoringGuide: question.scoringGuide,
+  };
+}
 
 export default function QuestionBuilder(props: QuestionBuilderProps) {
   const { onSave, onDirtyChange, mode } = props;
 
-  const defaultValues = mode === 'edit' ? props.defaultValues : undefined;
+  const defaultValues = props.defaultValues;
   const originalQuiz = mode === 'edit' ? props.originalQuiz : undefined;
   const createdBy = mode === 'create' ? props.createdBy : undefined;
 
@@ -72,7 +110,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
   const quizFormSchema = useMemo(() => createQuestionSchemas(t).createQuizFormSchema, [t]);
 
   const [initialValues] = useState<QuizFormValues>(() =>
-    mode === 'edit' && defaultValues
+    defaultValues
       ? {
         ...defaultValues,
         questions: (defaultValues.questions ?? []).map((question) => ({

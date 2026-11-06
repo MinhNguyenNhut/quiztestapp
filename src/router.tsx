@@ -16,6 +16,7 @@ import QuizPreviewPage from './pages/QuizPreviewPage.tsx';
 import MeetingLobbyPage from './pages/MeetingLobbyPage.tsx';
 import MeetingRoomPage from './pages/MeetingRoomPage.tsx';
 import AdminPage from './pages/AdminPage.tsx';
+import QuizAiGeneratorPage from './pages/QuizAiGeneratorPage.tsx';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
     children: [
       { path: 'quizzes', element: <QuizListPage /> },
       { path: 'quiz/new', element: <QuizEditorPage /> },
+      { path: 'quiz/ai', element: <QuizAiGeneratorPage /> },
       { path: 'quiz/:id/edit', element: <QuizEditorPage /> },
       { path: 'quiz/:id/submissions', element: <SubmissionsDashboardPage /> },
       { path: 'meeting', element: <MeetingLobbyPage /> },

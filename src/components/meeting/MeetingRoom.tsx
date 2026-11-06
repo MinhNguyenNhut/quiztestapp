@@ -182,6 +182,9 @@ export default function MeetingRoom({ meeting, token, initial }: Props) {
       >
         <VideoTile
           stream={m.screenStream ?? m.localStream}
+          audioStream={m.localStream}
+          micAvailable={Boolean(m.localStream?.getAudioTracks().length)}
+          micOn={m.micOn}
           label={sharing
             ? t('meeting.presenting')
             : profile?.name || t('meeting.you')}
@@ -194,6 +197,8 @@ export default function MeetingRoom({ meeting, token, initial }: Props) {
           <VideoTile
             key={id}
             stream={m.remotes[id] ?? null}
+            micAvailable={m.microphones[id]?.available}
+            micOn={m.microphones[id]?.enabled}
             label={m.names[id] || t('meeting.participantNumber', { number: index + 1 })}
           />
         ))}

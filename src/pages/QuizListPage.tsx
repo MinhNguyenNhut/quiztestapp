@@ -51,6 +51,7 @@ import {
 } from '../types/index.ts';
 import ConfirmDialog from '../components/common/ConfirmDialog/ConfirmDialog.tsx';
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 type ToastState = {
   open: boolean;
@@ -208,7 +209,7 @@ function PageHeader({
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={1.5}
-        sx={{ width: { xs: '100%', sm: 'auto' }, alignItems: "stretch" }}
+        sx={{ width: { xs: '100%', sm: 'auto' }, alignItems: 'stretch' }}
       >
         <TextField
           size="small"
@@ -226,6 +227,15 @@ function PageHeader({
             },
           }}
         />
+        <Button
+          variant="outlined"
+          component={RouterLink}
+          to="/quiz/ai"
+          startIcon={<AutoAwesomeIcon />}
+          sx={{ whiteSpace: 'nowrap' }}
+        >
+          {t('aiQuiz.createWithAi')}
+        </Button>
         <Button
           variant="contained"
           component={RouterLink}

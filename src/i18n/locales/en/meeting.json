@@ -46,6 +46,8 @@
   "turnCameraOff": "Turn off camera",
   "turnCameraOn": "Turn on camera",
   "cameraUnavailableTooltip": "No camera available",
+  "speaking": "Speaking",
+  "microphoneMuted": "Microphone muted",
   "stopPresenting": "Stop presenting",
   "presentScreen": "Present screen",
   "chat": "Chat",
