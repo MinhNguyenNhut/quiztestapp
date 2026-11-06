@@ -43,6 +43,8 @@
    "done": "Xong",
    "saveFields": "Lưu trường",
    "fieldsSaved": "Đã lưu trường thông tin thí sinh",
+   "fieldsSavedToDraft": "Đã lưu trường thí sinh vào bản nháp. Hãy lưu bài kiểm tra để lưu thay đổi.",
+   "saveFailed": "Không thể lưu trường thí sinh.",
    "fieldsCountHeader": "Trường ({{count}})",
    "noFieldsClickAdd": "Chưa có trường nào. Nhấp \"Thêm trường\" để tạo một trường.",
    "untitled": "(chưa đặt tên)",

@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '../features/store';
+import { store, useAppDispatch, useAppSelector } from '../features/store';
 import { isQuizUnlimitedTime } from '../types/quiz';
 import {
   clearAnswer,
@@ -26,7 +26,7 @@ import {
   toggleFlag,
 } from '../features/exam/examSlice';
 import { createSubmission } from '../features/submissions/submissionSlice';
-import { isAnswered, type Quiz, type Submission } from '../types';
+import type { Quiz, Submission } from '../types';
 import { useFullscreen } from '../shared/hooks/useFullscreen';
 import { useNetworkStatus } from '../shared/hooks/useNetworkStatus';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
@@ -50,8 +50,11 @@ export default function ExamPage() {
   const { t } = useTranslation();
 
   const quizzes = useAppSelector(state => state.quiz.quizzes);
-  const session = useAppSelector(getExamSession);
-  const submissionCurrent = useAppSelector((s) => s.submission.current);
+  const sessionQuizId = useAppSelector((state) => state.exam.quizId);
+  const sessionCandidate = useAppSelector((state) => state.exam.candidate);
+  const sessionStartedAt = useAppSelector((state) => state.exam.startedAt);
+  const submissionId = useAppSelector((state) => state.submission.current?.id ?? null);
+  const submissionQuizId = useAppSelector((state) => state.submission.current?.quizId ?? null);
 
   const quiz: Quiz | null = useMemo(
     () => quizzes.find((q) => q.id === id) ?? null,
@@ -62,41 +65,40 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (!quiz) return;
-    if (session.quizId !== quiz.id) return;
-    if (submissionCurrent && submissionCurrent.quizId === quiz.id) return;
+    if (sessionQuizId !== quiz.id) return;
+    if (submissionId && submissionQuizId === quiz.id) return;
     if (submissionRequestedRef.current) return;
 
     submissionRequestedRef.current = true;
     void dispatch(
       createSubmission({
-        quizId: session.quizId,
-        candidate: (session.candidate ?? {}) as Submission['candidate'],
+        quizId: sessionQuizId,
+        candidate: (sessionCandidate ?? {}) as Submission['candidate'],
       }),
     );
-  }, [dispatch, quiz, session.quizId, session.candidate, submissionCurrent]);
+  }, [dispatch, quiz, sessionQuizId, sessionCandidate, submissionId, submissionQuizId]);
 
   useEffect(() => {
     if (!quiz) return;
-    if (session.quizId === quiz.id) return;
+    if (sessionQuizId === quiz.id) return;
     navigate(`/quiz/${quiz.id}/candidate`, { replace: true });
-  }, [quiz, session.quizId, navigate]);
+  }, [quiz, sessionQuizId, navigate]);
 
   const finalizeSubmission = useCallback(
     async (statusOverride?: Submission['status']) => {
       void statusOverride;
       if (!quiz) return;
-      if (!session.startedAt || !session.quizId) return;
-      if (!submissionCurrent || submissionCurrent.quizId !== quiz.id) {
+      if (!sessionStartedAt || !sessionQuizId) return;
+      if (!submissionId || submissionQuizId !== quiz.id) {
         return;
       }
 
       // Mark the session submitted locally; the exam listener middleware
       // hears `submitSession` and POSTs submit, then records the result.
       dispatch(submitSession());
-      const submissionId = submissionCurrent.id;
       navigate(`/quiz/${quiz.id}/result/${submissionId}`, { replace: true });
     },
-    [dispatch, navigate, quiz, session, submissionCurrent]
+    [dispatch, navigate, quiz, sessionStartedAt, sessionQuizId, submissionId, submissionQuizId]
   );
 
   if (!quiz) {
@@ -116,7 +118,7 @@ export default function ExamPage() {
     );
   }
 
-  if (session.quizId !== quiz.id) {
+  if (sessionQuizId !== quiz.id) {
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="info">{t('exam.loadingExam')}</Alert>
@@ -136,7 +138,14 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const session = useAppSelector(getExamSession);
+  const currentIndex = useAppSelector((state) => state.exam.currentIndex);
+  const answeredCount = useAppSelector((state) => state.exam.answeredCount);
+  const flags = useAppSelector((state) => state.exam.flags);
+  const remainingSeconds = useAppSelector((state) => state.exam.remainingSeconds);
+  const isSubmitted = useAppSelector((state) => state.exam.isSubmitted);
+  const quizId = useAppSelector((state) => state.exam.quizId);
+  const candidate = useAppSelector((state) => state.exam.candidate);
+  const autoSaveStatus = useAppSelector((state) => state.exam.autoSaveStatus);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -148,29 +157,16 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   const settings = quiz.settings;
 
   const question = useMemo(
-    () => quiz.questions[session.currentIndex] ?? null,
-    [quiz.questions, session.currentIndex]
+    () => quiz.questions[currentIndex] ?? null,
+    [quiz.questions, currentIndex]
   );
-
-  const answeredCount = useMemo(() => {
-    let n = 0;
-    for (const q of quiz.questions) {
-      if (isAnswered(session.answers[q.id] ?? null)) n += 1;
-    }
-    return n;
-  }, [quiz.questions, session.answers]);
 
   const remaining = quiz.questions.length - answeredCount;
 
-  const liveScore = useMemo(() => {
-    if (!question) return 0;
-    let total = 0;
-    for (const q of quiz.questions) {
-      const a = session.answers[q.id];
-      if (a && isAnswered(a)) total += 1;
-    }
-    return total;
-  }, [quiz.questions, session.answers, question]);
+  const hasAnswer = useAppSelector((state) =>
+    question ? Boolean(state.exam.answeredQuestions[question.id]) : false
+  );
+  const isCurrentFlagged = question ? flags.includes(question.id) : false;
 
   // Check if unlimited time is enabled
   const isUnlimitedTime = isQuizUnlimitedTime(quiz);
@@ -178,37 +174,27 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
   useEffect(() => {
     // If unlimited time is enabled, don't start the timer
     if (isUnlimitedTime) return;
-    if (session.isSubmitted) return;
-    if (session.remainingSeconds <= 0) return;
+    if (isSubmitted) return;
+    if (remainingSeconds <= 0) return;
     const id = window.setInterval(() => {
-      dispatch(tickTimer(Math.max(0, session.remainingSeconds - 1)));
+      dispatch(tickTimer(Math.max(0, remainingSeconds - 1)));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [dispatch, session.remainingSeconds, session.isSubmitted, isUnlimitedTime]);
+  }, [dispatch, remainingSeconds, isSubmitted, isUnlimitedTime]);
 
   useEffect(() => {
     // If unlimited time is enabled, don't expire the timer
     if (isUnlimitedTime) return;
-    if (session.isSubmitted) return;
-    if (session.remainingSeconds > 0) return;
+    if (isSubmitted) return;
+    if (remainingSeconds > 0) return;
     dispatch(expireTimer());
     onSubmit('expired');
-  }, [dispatch, session.remainingSeconds, session.isSubmitted, onSubmit, isUnlimitedTime]);
+  }, [dispatch, remainingSeconds, isSubmitted, onSubmit, isUnlimitedTime]);
 
-  useAutoSave(AUTOSAVE_KEY_PREFIX + (session.quizId ?? ''), session, {
-    onSave: () => {
-      try {
-        dispatch(setAutoSaveStatus('saving'));
-        sessionStorage.setItem(
-          AUTOSAVE_KEY_PREFIX + (session.quizId ?? ''),
-          JSON.stringify(session)
-        );
-        dispatch(setAutoSaveStatus('saved'));
-      } catch {
-        dispatch(setAutoSaveStatus('error'));
-      }
-    },
-  });
+  const questionSummaries = useMemo(
+    () => quiz.questions.map(({ id, title }) => ({ id, title })),
+    [quiz.questions]
+  );
 
   const handleNext = useCallback(() => {
     dispatch(nextQuestion());
@@ -245,31 +231,32 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
 
   const handleSaveNow = useCallback(() => {
     try {
+      const session = getExamSession(store.getState());
       dispatch(setAutoSaveStatus('saving'));
       sessionStorage.setItem(
         AUTOSAVE_KEY_PREFIX + (session.quizId ?? ''),
-        JSON.stringify(session)
+        JSON.stringify({ ...session, autoSaveStatus: 'idle' })
       );
       dispatch(setAutoSaveStatus('saved'));
     } catch {
       dispatch(setAutoSaveStatus('error'));
     }
-  }, [session, dispatch]);
+  }, [dispatch]);
 
   const handleBack = useCallback(() => {
-    if (session.isSubmitted) {
+    if (isSubmitted) {
       navigate('/');
       return;
     }
     if (window.confirm(t('exam.goBackConfirm'))) {
-      navigate(`/quiz/${session.quizId}/candidate`);
+      navigate(`/quiz/${quizId}/candidate`);
     }
-  }, [navigate, session.quizId, session.isSubmitted, t]);
+  }, [navigate, quizId, isSubmitted, t]);
 
   const handleRetry = useCallback(() => {
     dispatch(resetSession());
-    navigate(`/quiz/${session.quizId}/candidate`);
-  }, [dispatch, navigate, session.quizId]);
+    navigate(`/quiz/${quizId}/candidate`);
+  }, [dispatch, navigate, quizId]);
 
   useKeyboardShortcuts({
     ArrowLeft: () => handlePrevious(),
@@ -294,23 +281,25 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
     );
   }
 
-  const isCurrentFlagged = session.flags.includes(question.id);
-  const currentAnswer = session.answers[question.id] ?? null;
-  const hasAnswer = isAnswered(currentAnswer);
   const unanswered = quiz.questions.length - answeredCount;
   const candidateName =
-    typeof session.candidate?.firstname === 'string'
-      ? `${session.candidate.firstname} ${session.candidate.lastname ?? ''}`.trim()
+    typeof candidate?.firstname === 'string'
+      ? `${candidate.firstname} ${candidate.lastname ?? ''}`.trim()
       : t('exam.candidateFallback');
 
   return (
     <Box
       sx={{
-        height: 'calc(100vh - 64px)',
+        height: '100%',
+        minHeight: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
         backgroundColor: 'background.default',
-        overflow: 'auto',
+        overflow: 'hidden',
       }}
     >
+      <ExamSessionAutoSave />
       <ExamHeader
         quizTitle={quiz.title}
         candidateName={candidateName}
@@ -321,59 +310,61 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
           setErrorMessage(null);
         }}
         onBack={handleBack}
-        autoSaveStatus={session.autoSaveStatus}
+        autoSaveStatus={autoSaveStatus}
         online={online}
         trailing={
           !isUnlimitedTime && !isMobile ? (
-            <HeaderTimer remainingSeconds={session.remainingSeconds} />
+            <HeaderTimer remainingSeconds={remainingSeconds} />
           ) : undefined
         }
       />
 
       {!isUnlimitedTime && isMobile && (
-        <Box sx={{ p: 2 }}>
-          <TimerCard remainingSeconds={session.remainingSeconds} dense />
+        <Box sx={{ p: 2, flexShrink: 0 }}>
+          <TimerCard remainingSeconds={remainingSeconds} dense />
         </Box>
       )}
 
       <Box
         sx={{
+          flex: 1,
+          minHeight: 0,
           mx: 'auto',
+          width: '100%',
           p: { xs: 1.5, md: 3 },
-          overflow: 'auto',
+          overflow: 'hidden',
         }}
       >
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
           {!isMobile && (
-            <Grid size={{ xs: 12, md: 4, lg: 3.5 }}>
-              <Box sx={{ position: 'sticky', top: 80 }}>
+            <Grid size={{ xs: 12, md: 4, lg: 3.5 }} sx={{ minHeight: 0, overflow: 'hidden' }}>
+              <Box sx={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
                 <ExamSidebar>
                   <CandidateMiniCard
                     name={candidateName}
                     email={
-                      typeof session.candidate?.email === 'string'
-                        ? session.candidate.email
+                      typeof candidate?.email === 'string'
+                        ? candidate.email
                         : undefined
                     }
-                    score={liveScore}
+                    score={answeredCount}
                     total={quiz.questions.length}
-                    timeLeftSeconds={isUnlimitedTime ? 0 : session.remainingSeconds}
+                    timeLeftSeconds={isUnlimitedTime ? 0 : remainingSeconds}
                   />
                   {!isUnlimitedTime && (
-                    <TimerCard remainingSeconds={session.remainingSeconds} />
+                    <TimerCard remainingSeconds={remainingSeconds} />
                   )}
                   <ProgressCard
                     answered={answeredCount}
                     total={quiz.questions.length}
-                    flagged={session.flags.length}
+                    flagged={flags.length}
                     remaining={remaining}
                   />
                   <QuestionPalette
                     total={quiz.questions.length}
-                    currentIndex={session.currentIndex}
-                    answers={session.answers}
-                    flags={session.flags}
-                    questions={quiz.questions.map((q) => ({ id: q.id, title: q.title }))}
+                    currentIndex={currentIndex}
+                    flags={flags}
+                    questions={questionSummaries}
                     onJump={handleJump}
                   />
                 </ExamSidebar>
@@ -381,16 +372,19 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
             </Grid>
           )}
 
-          <Grid size={{ xs: 12, md: 8, lg: 8.5 }}>
+          <Grid
+            size={{ xs: 12, md: 8, lg: 8.5 }}
+            sx={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+          >
             <QuestionCard
               question={question}
-              index={session.currentIndex}
+              index={currentIndex}
               total={quiz.questions.length}
               contentHtml={question.content.html || question.content.text}
             />
             <ExamFooter
-              isFirst={session.currentIndex === 0}
-              isLast={session.currentIndex === quiz.questions.length - 1}
+              isFirst={currentIndex === 0}
+              isLast={currentIndex === quiz.questions.length - 1}
               isFlagged={isCurrentFlagged}
               hasAnswer={hasAnswer}
               onPrevious={handlePrevious}
@@ -429,6 +423,46 @@ function ExamView({ quiz, onSubmit }: ExamViewProps) {
       </Snackbar>
     </Box>
   );
+}
+
+function ExamSessionAutoSave() {
+  const dispatch = useAppDispatch();
+  const session = useAppSelector(getExamSession);
+  const key = AUTOSAVE_KEY_PREFIX + (session.quizId ?? '');
+  const sessionForSave = useMemo(
+    () => ({ ...session, autoSaveStatus: 'idle' as const }),
+    [
+      session.quizId,
+      session.questionIds,
+      session.currentIndex,
+      session.answers,
+      session.answeredQuestions,
+      session.answeredCount,
+      session.flags,
+      session.bookmarks,
+      session.startedAt,
+      session.durationSeconds,
+      session.remainingSeconds,
+      session.isFullscreen,
+      session.reviewMode,
+      session.isSubmitted,
+      session.candidate,
+    ],
+  );
+
+  useAutoSave(key, sessionForSave, {
+    onSave: () => {
+      try {
+        dispatch(setAutoSaveStatus('saving'));
+        sessionStorage.setItem(key, JSON.stringify(sessionForSave));
+        dispatch(setAutoSaveStatus('saved'));
+      } catch {
+        dispatch(setAutoSaveStatus('error'));
+      }
+    },
+  });
+
+  return null;
 }
 
 const HeaderTimer = ({ remainingSeconds }: { remainingSeconds: number }) => {

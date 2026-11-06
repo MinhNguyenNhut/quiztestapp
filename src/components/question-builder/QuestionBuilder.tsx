@@ -61,6 +61,49 @@ const buildPayload = (question: QuestionFormValues, index: number): CreateQuesti
   scoringGuide: question.scoringGuide,
 });
 
+function cloneQuestionForDuplicate(question: QuestionFormValues): QuestionFormValues {
+  const cloneQuestion = (item: QuestionFormValues): QuestionFormValues => {
+    const blankIds = new Map<string, string>();
+    const getBlankId = (id: string): string => {
+      let clonedId = blankIds.get(id);
+      if (!clonedId) {
+        clonedId = uuidv4();
+        blankIds.set(id, clonedId);
+      }
+      return clonedId;
+    };
+    const cloneBlanks = (blanks: QuestionFormValues['blanks']) =>
+      blanks?.map((blank) => ({ ...blank, id: getBlankId(blank.id) }));
+    const cloneContent = (content: QuestionFormValues['content']) => {
+      const blanks = cloneBlanks(content.blanks);
+      return {
+        ...content,
+        html: content.html.replace(/data-blank-id="([^"]+)"/g, (match, id: string) => {
+          const clonedId = blankIds.get(id);
+          return clonedId ? `data-blank-id="${clonedId}"` : match;
+        }),
+        blanks,
+      };
+    };
+    const blanks = cloneBlanks(item.blanks);
+
+    return {
+      ...item,
+      id: uuidv4(),
+      content: cloneContent(item.content),
+      explanation: item.explanation ? cloneContent(item.explanation) : undefined,
+      passage: item.passage ? cloneContent(item.passage) : undefined,
+      rubric: item.rubric ? cloneContent(item.rubric) : undefined,
+      options: item.options.map((option) => ({ ...option, id: uuidv4() })),
+      blanks,
+      matchingPairs: item.matchingPairs?.map((pair) => ({ ...pair, id: uuidv4() })),
+      childQuestions: item.childQuestions?.map(cloneQuestion),
+    };
+  };
+
+  return cloneQuestion(question);
+}
+
 function buildChildQuestionPayload(
   question: QuestionFormValues,
   index: number,
@@ -136,7 +179,7 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
 
   const { control, setValue, getValues } = methods;
   const isDirty = onDirtyChange ? methods.formState.isDirty : undefined;
-  const { fields, append, remove, move } = useFieldArray({ control, name: 'questions' });
+  const { fields, append, insert, remove, move } = useFieldArray({ control, name: 'questions' });
 
   const prevDirtyRef = useRef(isDirty ?? false);
   useEffect(() => {
@@ -274,15 +317,12 @@ export default function QuestionBuilder(props: QuestionBuilderProps) {
     (index: number) => {
       const question = getValues(`questions.${index}`);
       if (!question) return;
-      const cloned = { ...question, id: uuidv4() };
+      const cloned = cloneQuestionForDuplicate(question);
       const newIndex = index + 1;
-      const allQuestions = getValues('questions');
-      const updated = [...allQuestions.slice(0, newIndex), cloned, ...allQuestions.slice(newIndex)];
-      // Removed shouldValidate: true to prevent massive lag
-      setValue('questions', updated, { shouldDirty: true });
+      insert(newIndex, cloned);
       setSelectedIndex(newIndex);
     },
-    [getValues, setValue],
+    [getValues, insert],
   );
 
   const handleDelete = useCallback(

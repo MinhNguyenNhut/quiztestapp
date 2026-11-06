@@ -4,6 +4,7 @@
  * the Redux store, not via React Hook Form, so the exam page stays
  * decoupled from form state.
  */
+import { memo } from 'react';
 import type { Question } from '../../../types/quiz';
 import { SingleChoiceAnswer } from './SingleChoiceAnswer';
 import { MultipleChoiceAnswer } from './MultipleChoiceAnswer';
@@ -18,7 +19,7 @@ interface AnswerRendererProps {
   question: Question;
 }
 
-export const AnswerRenderer = ({ question }: AnswerRendererProps) => {
+export const AnswerRenderer = memo(({ question }: AnswerRendererProps) => {
   switch (question.type) {
     case 'single_choice':
       return <SingleChoiceAnswer question={question} />;
@@ -39,4 +40,4 @@ export const AnswerRenderer = ({ question }: AnswerRendererProps) => {
     default:
       return null;
   }
-};
+});

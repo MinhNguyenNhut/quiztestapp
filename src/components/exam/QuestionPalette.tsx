@@ -1,36 +1,27 @@
+import { memo, useCallback } from 'react';
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PaletteCell } from './PaletteCell';
-import type { AnyAnswer } from '../../types/answer';
-import { isAnswered } from '../../types/answer';
+import { useAppSelector } from '../../features/store';
 
 export type PaletteStatus = 'unanswered' | 'current' | 'answered' | 'flagged' | 'required_unanswered';
 
 interface QuestionPaletteProps {
   total: number;
   currentIndex: number;
-  answers: Record<string, AnyAnswer>;
   flags: string[];
   questions: { id: string; title: string }[];
   onJump: (index: number) => void;
 }
 
-export const QuestionPalette = ({
+export const QuestionPalette = memo(({
   total,
   currentIndex,
-  answers,
   flags,
   questions,
   onJump,
 }: QuestionPaletteProps) => {
   const { t } = useTranslation();
-
-  const statusFor = (index: number, id: string): PaletteStatus => {
-    if (index === currentIndex) return 'current';
-    if (flags.includes(id) && !isAnswered(answers[id] ?? null)) return 'flagged';
-    if (isAnswered(answers[id] ?? null)) return 'answered';
-    return 'unanswered';
-  };
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2 }}>
@@ -52,20 +43,14 @@ export const QuestionPalette = ({
           }}
         >
           {questions.map((q, i) => {
-            const status = statusFor(i, q.id);
-            const tooltip = t('examUi.questionShort', {
-              number: i + 1,
-              title: q.title || t('examUi.untitledQuestion'),
-            });
             return (
-              <PaletteCell
+              <QuestionPaletteCell
                 key={q.id}
+                question={q}
                 index={i}
-                status={status}
-                tooltip={tooltip}
-                flagged={flags.includes(q.id)}
+                isFlagged={flags.includes(q.id)}
                 isCurrent={i === currentIndex}
-                onClick={() => onJump(i)}
+                onJump={onJump}
               />
             );
           })}
@@ -74,7 +59,49 @@ export const QuestionPalette = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+interface QuestionPaletteCellProps {
+  question: { id: string; title: string };
+  index: number;
+  isFlagged: boolean;
+  isCurrent: boolean;
+  onJump: (index: number) => void;
+}
+
+const QuestionPaletteCell = memo(({
+  question,
+  index,
+  isFlagged,
+  isCurrent,
+  onJump,
+}: QuestionPaletteCellProps) => {
+  const { t } = useTranslation();
+  const answered = useAppSelector((state) => Boolean(state.exam.answeredQuestions[question.id]));
+  const status: PaletteStatus = isCurrent
+    ? 'current'
+    : isFlagged && !answered
+      ? 'flagged'
+      : answered
+        ? 'answered'
+        : 'unanswered';
+  const tooltip = t('examUi.questionShort', {
+    number: index + 1,
+    title: question.title || t('examUi.untitledQuestion'),
+  });
+  const handleClick = useCallback(() => onJump(index), [onJump, index]);
+
+  return (
+    <PaletteCell
+      index={index}
+      status={status}
+      tooltip={tooltip}
+      flagged={isFlagged}
+      isCurrent={isCurrent}
+      onClick={handleClick}
+    />
+  );
+});
 
 const Legend = () => {
   const { t } = useTranslation();

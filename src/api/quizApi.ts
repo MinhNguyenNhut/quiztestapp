@@ -103,8 +103,4 @@ export const quizApi = {
     apiPatch<Quiz>(`/api/quizzes/${id}`, payload),
 
   remove: (id: string) => apiDelete<void>(`/api/quizzes/${id}`),
-
-  /** PATCH /api/quizzes/:id/candidate-fields — `config` body is any. */
-  patchCandidateFields: (id: string, config: CandidateFieldsConfig) =>
-    apiPatch<Quiz>(`/api/quizzes/${id}/candidate-fields`, { candidateFieldsConfig: config }),
 };

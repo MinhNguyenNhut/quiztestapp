@@ -11,7 +11,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
-import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
+import { setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
 
 interface Props {
@@ -22,8 +22,7 @@ export const TrueFalseAnswer = ({ question }: Props) => {
   const { t } = useTranslation();
 
   const dispatch = useAppDispatch();
-  const session = useAppSelector(getExamSession);
-  const answer = session.answers[question.id];
+  const answer = useAppSelector((state) => state.exam.answers[question.id]);
   const selected = answer?.type === 'true_false' ? answer.value : null;
 
   return (

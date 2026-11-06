@@ -1,8 +1,11 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Typography } from '@mui/material';
+import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
-import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
+import { setReadingChildAnswer } from '../../../features/exam/examSlice';
+import type { AnyAnswer } from '../../../types/answer';
 import type { Question } from '../../../types/quiz';
 import { AnswerRenderer } from './AnswerRenderer';
 
@@ -13,34 +16,18 @@ interface Props {
 export const ReadingComprehensionAnswer = ({ question }: Props) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const session = useAppSelector(getExamSession);
-  const answer = session.answers[question.id];
-  const childAnswers: Record<string, import('../../../types/answer').AnyAnswer> =
-    answer?.type === 'reading_comprehension' ? answer.childAnswers : {};
   const childQuestions = question.childQuestions ?? [];
 
-  const updateChild = (childId: string, value: import('../../../types/answer').AnyAnswer) => {
-    if (value === null) {
-      const next = { ...childAnswers };
-      delete next[childId];
-      dispatch(
-        setAnswer({
-          questionId: question.id,
-          value: { type: 'reading_comprehension', childAnswers: next },
-        }),
-      );
-      return;
-    }
-    dispatch(
-      setAnswer({
+  const updateChild = useCallback(
+    (childId: string, value: AnyAnswer) => {
+      dispatch(setReadingChildAnswer({
         questionId: question.id,
-        value: {
-          type: 'reading_comprehension',
-          childAnswers: { ...childAnswers, [childId]: value },
-        },
-      }),
-    );
-  };
+        childQuestionId: childId,
+        value,
+      }));
+    },
+    [dispatch, question.id],
+  );
 
   return (
     <Box>
@@ -89,7 +76,11 @@ export const ReadingComprehensionAnswer = ({ question }: Props) => {
             </AccordionSummary>
             <AccordionDetails>
               <Divider sx={{ mb: 2 }} />
-              <ChildProxy question={child} value={childAnswers[child.id] ?? null} onChange={(v) => updateChild(child.id, v)} />
+              <ChildProxy
+                parentQuestionId={question.id}
+                question={child}
+                onUpdate={updateChild}
+              />
             </AccordionDetails>
           </Accordion>
         ))
@@ -99,93 +90,40 @@ export const ReadingComprehensionAnswer = ({ question }: Props) => {
 };
 
 /**
- * ChildProxy — wraps a sub-question in a thin context so AnswerRenderer
- * can write to the parent's `childAnswers` map instead of the top-level
- * exam slice. Done by mounting a private RHF-less shim: the AnswerRenderer
- * for the child uses the same Redux store but with the child's id as
- * the questionId. To keep things simple, we re-render the renderer with
- * a different questionId by remapping.
+ * ChildProxy reads and updates its nested answer without subscribing the
+ * passage and sibling questions to each keystroke.
  */
-import { useEffect, useMemo } from 'react';
-import type { AnyAnswer } from '../../../types';
-import { useTranslation } from 'react-i18next';
-
 interface ProxyProps {
+  parentQuestionId: string;
   question: Question;
-  value: AnyAnswer;
-  onChange: (v: AnyAnswer) => void;
+  onUpdate: (childId: string, value: AnyAnswer) => void;
 }
 
-const ChildProxy = ({ question, value, onChange }: ProxyProps) => {
-  // Intercept dispatches: we want setAnswer(childId, …) to call
-  // onChange instead of writing the global answers map. Easiest path:
-  // temporarily rewrite the slice via a one-shot effect. We use a
-  // dedicated slice-less store subscription here.
-
-  useEffect(() => {
-    // no-op — kept for parity / future analytics
-  }, [question.id]);
-
-  // Use a small wrapper that dispatches setAnswer on the *child* id and
-  // the parent listens, propagating into childAnswers.
-  const remapped = useMemo(() => {
-    // Replace the question's id with the child id so AnswerRenderer
-    // writes against `answers[child.id]`. The parent then maps that
-    // back into childAnswers[child.id].
-    return { ...question, id: question.id };
-  }, [question]);
-
-  // We avoid dispatching globally: instead, the parent's onChange is
-  // bound to the child's onChange by intercepting the AnswerRenderer
-  // through a context. For simplicity, we render the renderer inside
-  // a child that subscribes to the parent state and overrides the
-  // dispatch path. Implementation below:
-  return <RemappedAnswerRenderer question={remapped} value={value} onChange={onChange} />;
-};
-
-interface RemappedProps {
-  question: Question;
-  value: AnyAnswer;
-  onChange: (v: AnyAnswer) => void;
-}
-
-const RemappedAnswerRenderer = ({ question, value, onChange }: RemappedProps) => {
-  // Build a tiny standalone store: re-use the global answers map but
-  // mirror setAnswer dispatches into onChange.
-  const dispatch = useAppDispatch();
-  const session = useAppSelector(getExamSession);
-  const stored = session.answers[question.id] ?? null;
-
-  // We do NOT write to the global store; we only read and call onChange.
-  useEffect(() => {
-    if (stored && stored !== value) onChange(stored);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stored]);
-
-  return (
-    <Box
-      onKeyDownCapture={(e) => {
-        // No-op; future: support keyboard submit for child answers.
-        void e;
-      }}
-    >
-      <AnswerRendererForChild question={question} value={value} onChange={onChange} dispatch={dispatch} />
-    </Box>
+const ChildProxy = ({ parentQuestionId, question, onUpdate }: ProxyProps) => {
+  const value = useAppSelector((state) => {
+    const answer = state.exam.answers[parentQuestionId];
+    return answer?.type === 'reading_comprehension'
+      ? answer.childAnswers[question.id] ?? null
+      : null;
+  });
+  const onChange = useCallback(
+    (nextValue: AnyAnswer) => onUpdate(question.id, nextValue),
+    [onUpdate, question.id],
   );
+
+  return <AnswerRendererForChild question={question} value={value} onChange={onChange} />;
 };
 
 interface RendererProps {
   question: Question;
   value: AnyAnswer;
   onChange: (v: AnyAnswer) => void;
-  dispatch: ReturnType<typeof useAppDispatch>;
 }
 
 // We re-implement the per-type renderers here (without the global
 // dispatch) so changes bubble into the parent's childAnswers map.
-const AnswerRendererForChild = ({ question, value, onChange, dispatch: _dispatch }: RendererProps) => {
+const AnswerRendererForChild = ({ question, value, onChange }: RendererProps) => {
   const { t } = useTranslation();
-  void _dispatch; // explicitly unused in this branch
   switch (question.type) {
     case 'single_choice':
       return (

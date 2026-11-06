@@ -43,6 +43,8 @@
    "done": "Done",
    "saveFields": "Save Fields",
    "fieldsSaved": "Candidate information fields saved.",
+   "fieldsSavedToDraft": "Candidate fields saved to this quiz draft. Save the quiz to persist them.",
+   "saveFailed": "Failed to save candidate fields.",
    "fieldsCountHeader": "Fields ({{count}})",
    "noFieldsClickAdd": "There are no fields yet. Click \"Add Field\" to create one.",
    "untitled": "(untitled)",

@@ -41,6 +41,7 @@ import {
 import type { Quiz, Submission } from '../types';
 import { isAnswered } from '../types/answer';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
+import { getSubmissionTimeSpentSeconds } from '../shared/utils/submissionTime';
 import { fetchQuizById } from '../features/quiz/quizSlice';
 import { getUserProfile } from '../features/user/userSlice';
 
@@ -163,6 +164,12 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
 
   // Get quiz settings
   const settings = quiz.settings;
+  const submissionWithDuration = useMemo(() => {
+    return {
+      ...submission,
+      timeSpentSeconds: getSubmissionTimeSpentSeconds(submission),
+    };
+  }, [submission]);
 
   // ---------------------------------------------------------------------
   // IMPORTANT: All hooks below must run on every render, in the same
@@ -183,9 +190,9 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
       quiz,
       summary.perQuestion,
       safeAnswers,
-      submission.timeSpentSeconds ?? 0
+      submissionWithDuration.timeSpentSeconds ?? 0
     );
-  }, [quiz, summary, safeAnswers, submission.timeSpentSeconds]);
+  }, [quiz, summary, safeAnswers, submissionWithDuration.timeSpentSeconds]);
 
   const difficulties = useMemo(
     () => difficultyBreakdown(quiz, summary.perQuestion),
@@ -204,8 +211,8 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
 
   const timeUsedRatio = useMemo(() => {
     if (!quiz.estimatedTime || quiz.estimatedTime <= 0) return 0;
-    return Math.min(1, (submission.timeSpentSeconds ?? 0) / quiz.estimatedTime);
-  }, [quiz.estimatedTime, submission.timeSpentSeconds]);
+    return Math.min(1, (submissionWithDuration.timeSpentSeconds ?? 0) / (quiz.estimatedTime * 60));
+  }, [quiz.estimatedTime, submissionWithDuration.timeSpentSeconds]);
 
   // Plain derived values (not hooks) — fine wherever they sit.
   const passed = (submission.percentage ?? 0) >= (quiz.passingScore ?? 0);
@@ -327,7 +334,7 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
         <Stack spacing={3}>
           {isQuizOwner || settings?.showPassFailStatus !== false ? (
             <ResultHeader
-              submission={submission}
+              submission={submissionWithDuration}
               passed={passed}
               rankPercentile={rankPercentile}
             />
@@ -339,7 +346,7 @@ function ResultView({ quiz, submission, isQuizOwner }: ResultViewProps) {
               wrong={summary.wrong}
               skipped={summary.skipped}
               accuracy={summary.percentage / 100}
-              timeUsedSeconds={submission.timeSpentSeconds ?? 0}
+              timeUsedSeconds={submissionWithDuration.timeSpentSeconds ?? 0}
             />
           ) : null}
           <CandidateSummaryCard

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Box, Card, CardContent, Stack, Typography, Divider, Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { DifficultyChip } from '../../shared/components/DifficultyChip';
@@ -14,13 +15,17 @@ interface QuestionCardProps {
   contentHtml: string;
 }
 
-export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCardProps) => {
+export const QuestionCard = memo(({ question, index, total, contentHtml }: QuestionCardProps) => {
   const { t } = useTranslation();
 
   return (
     <Card
       elevation={0}
       sx={{
+        flex: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
         border: '1px solid',
         borderColor: 'divider',
         borderRadius: 3,
@@ -61,7 +66,7 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
         )}
       </Box>
       <Divider />
-      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+      <CardContent sx={{ p: { xs: 2, md: 3 }, flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {contentHtml ? (
           <Box
             sx={{
@@ -102,4 +107,4 @@ export const QuestionCard = ({ question, index, total, contentHtml }: QuestionCa
       </CardContent>
     </Card>
   );
-};
+});

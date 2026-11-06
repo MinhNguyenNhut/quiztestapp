@@ -108,7 +108,11 @@ export const submitSubmission = createAsyncThunk<
   'submissions/submit',
   async ({ submissionId, timeSpentSeconds }, { rejectWithValue }) => {
     try {
-      return await submissionApi.submit(submissionId, { timeSpentSeconds });
+      const submission = await submissionApi.submit(submissionId, { timeSpentSeconds });
+      return {
+        ...submission,
+        timeSpentSeconds: timeSpentSeconds ?? submission.timeSpentSeconds,
+      };
     } catch (err) {
       return rejectWithValue(rejectMessage(err, 'Failed to submit'));
     }

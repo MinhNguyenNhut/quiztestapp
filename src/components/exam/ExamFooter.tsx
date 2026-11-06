@@ -41,14 +41,15 @@ export const ExamFooter = ({
     <Box
       component="footer"
       sx={{
-        position: { xs: 'sticky', md: 'static' },
-        bottom: 0,
+        position: 'relative',
         zIndex: 50,
+        flexShrink: 0,
         backgroundColor: 'background.paper',
         borderTop: { xs: '1px solid', md: 'none' },
         borderColor: 'divider',
         boxShadow: { xs: '0 -4px 12px rgba(0,0,0,0.06)', md: 'none' },
-        px: { xs: 2, md: 0 },
+        borderRadius: 1,
+        px: { xs: 2, md: 1 },
         py: 1.5,
         mt: { md: 2 },
       }}

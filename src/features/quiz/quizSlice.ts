@@ -143,14 +143,15 @@ export const deleteQuiz = createAsyncThunk<string, string, { rejectValue: string
   },
 );
 
-/** PATCH /api/quizzes/:id/candidate-fields — body is `candidateFieldsConfig`. */
+/** PATCH /api/quizzes/:id with the updated candidate fields configuration. */
 export const patchCandidateFields = createAsyncThunk<
   Quiz,
   { quizId: string; config: CandidateFieldsConfig },
   { rejectValue: string }
 >('quizzes/patchCandidateFields', async ({ quizId, config }, { rejectWithValue }) => {
   try {
-    return await quizApi.patchCandidateFields(quizId, config);
+    const quiz = await quizApi.update(quizId, { candidateFieldsConfig: config });
+    return { ...quiz, candidateFieldsConfig: config };
   } catch (err) {
     return rejectWithValue(rejectMessage(err, 'Failed to update candidate fields'));
   }

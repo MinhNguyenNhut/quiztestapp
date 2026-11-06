@@ -7,6 +7,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import type { CandidateFieldsConfig } from '../../types/candidate';
 import type { Quiz } from '../../types/quiz';
 import type { Submission } from '../../types/submission';
+import { getSubmissionTimeSpentSeconds } from '../../shared/utils/submissionTime';
 
 interface SubmissionsBulkActionsProps {
   submissions: Submission[];
@@ -46,7 +47,7 @@ export function SubmissionsBulkActions({
       s.score !== undefined ? String(Math.round(s.score * 10) / 10) : '—',
       String(s.percentage ?? 0),
       s.status,
-      String(s.timeSpentSeconds ?? ''),
+      String(getSubmissionTimeSpentSeconds(s) ?? ''),
       s.submittedAt ?? '',
     ]);
 

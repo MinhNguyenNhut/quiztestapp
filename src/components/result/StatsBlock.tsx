@@ -17,6 +17,7 @@ interface StatsBlockProps {
 }
 
 const formatTime = (s: number): string => {
+  if (!Number.isFinite(s)) return '—';
   const m = Math.floor(s / 60);
   const sec = Math.round(s % 60);
   if (m === 0) return `${sec}s`;

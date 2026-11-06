@@ -1,6 +1,6 @@
 import { Box, Stack, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
-import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
+import { setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
 import { useTranslation } from 'react-i18next';
 
@@ -13,8 +13,7 @@ const MAX = 5000;
 export const EssayAnswer = ({ question }: Props) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const session = useAppSelector(getExamSession);
-  const answer = session.answers[question.id];
+  const answer = useAppSelector((state) => state.exam.answers[question.id]);
   const value = answer?.type === 'essay' ? answer.text : '';
 
   return (

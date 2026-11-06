@@ -4,7 +4,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, 
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useAppDispatch } from '../../features/store';
-import { updateCandidateFieldsConfig } from '../../features/quiz/quizSlice';
+import { patchCandidateFields } from '../../features/quiz/quizSlice';
 import { useAlert } from '../../hooks/useAlert';
 import AppAlert from '../common/AppAlert/AppAlert';
 import {
@@ -20,9 +20,10 @@ import AddCandidateFieldModal from './AddCandidateFieldModal';
 interface CandidateFieldsBuilderProps {
   quizId: string;
   defaultConfig: CandidateFieldsConfig;
+  onSave?: (config: CandidateFieldsConfig) => void | Promise<void>;
 }
 
-const sortByOrder = (items: CandidateField[]): CandidateField[] =>
+const sortByOrder = (items: CandidateField[] = []): CandidateField[] =>
   [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 const renumber = (items: CandidateField[]): CandidateField[] =>
@@ -31,18 +32,21 @@ const renumber = (items: CandidateField[]): CandidateField[] =>
 /**
  * Form-owning parent for the candidate-fields editor. Holds the working
  * `CandidateFieldsConfig` in local state, exposes a "Save" button that
- * dispatches `updateCandidateFieldsConfig`, and a "Manage sections"
+ * persists changes (or updates the new-quiz draft), and a "Manage sections"
  * button that opens a section manager dialog. Mirrors `QuestionBuilder`'s
  * split-pane shape (list left, editor right).
  */
-export default function CandidateFieldsBuilder({ quizId, defaultConfig }: CandidateFieldsBuilderProps) {
+export default function CandidateFieldsBuilder({ quizId, defaultConfig, onSave }: CandidateFieldsBuilderProps) {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { alert, showAlert, closeAlert } = useAlert();
 
-  const [fields, setFields] = useState<CandidateField[]>(() => sortByOrder(defaultConfig.fields));
+  const [fields, setFields] = useState<CandidateField[]>(() =>
+    sortByOrder(Array.isArray(defaultConfig?.fields) ? defaultConfig.fields : [])
+  );
   const [sections, setSections] = useState<CandidateFieldSection[]>(() =>
-    [...(defaultConfig.sections ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    (Array.isArray(defaultConfig?.sections) ? [...defaultConfig.sections] : [])
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -107,14 +111,30 @@ export default function CandidateFieldsBuilder({ quizId, defaultConfig }: Candid
     });
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const config: CandidateFieldsConfig = {
       fields: renumber(fields),
       sections: sections.length > 0 ? sections : undefined,
     };
-    dispatch(updateCandidateFieldsConfig({ quizId, config }));
-    showAlert(t('candidateFieldsBuilder.fieldsSaved'), 'success');
-  }, [dispatch, fields, sections, quizId, showAlert, t]);
+
+    try {
+      if (onSave) {
+        await onSave(config);
+      } else {
+        await dispatch(patchCandidateFields({ quizId, config })).unwrap();
+      }
+      showAlert(
+        t(onSave ? 'candidateFieldsBuilder.fieldsSavedToDraft' : 'candidateFieldsBuilder.fieldsSaved'),
+        'success',
+      );
+    } catch (error) {
+      console.error(error);
+      showAlert(
+        typeof error === 'string' ? error : t('candidateFieldsBuilder.saveFailed'),
+        'error',
+      );
+    }
+  }, [dispatch, fields, sections, quizId, onSave, showAlert, t]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

@@ -12,7 +12,7 @@ interface ResultHeaderProps {
 }
 
 const formatDuration = (seconds?: number): string => {
-  if (!seconds) return '—';
+  if (seconds === undefined || !Number.isFinite(seconds)) return '—';
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   if (m === 0) return `${s}s`;

@@ -3,11 +3,10 @@
  *
  * Bridges the local exam slice to the submissions API:
  *
- *  - `setAnswer`      -> debounce-dispatch `saveAnswer(submissionId, ...)`
- *                        to persist answers off-screen as the candidate
- *                        types. The submissionSlice tracks the lifecycle
- *                        (saving -> saved/error) and examSlice mirrors it
- *                        into `autoSaveStatus`.
+ *  - answer updates   -> debounce-dispatch `saveAnswer(submissionId, ...)`
+ *                        to persist answers as the candidate types. The
+ *                        submissionSlice tracks the lifecycle and examSlice
+ *                        mirrors it into `autoSaveStatus`.
  *  - `submitSession`  -> dispatch `submitSubmission` (which POSTs to the
  *                        backend, returning the final submission), then
  *                        dispatch `recordSubmission` to snapshot it into
@@ -15,10 +14,9 @@
  *
  * `saveAnswer` requires a `submissionId` which the exam slice doesn't
  * track locally. The middleware looks at `submission.current?.id` from
- * the store, so candidates MUST dispatch `createSubmission` (e.g. from
- * the candidate-info page) before the first `setAnswer` lands. Without
- * a current submission the middleware silently no-ops the save — the
- * local answer is still preserved in the exam slice, no data lost.
+ * the store, so candidates MUST dispatch `createSubmission` before the
+ * first answer update. Without a current submission the local answer is
+ * still preserved in the exam slice.
  */
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import type { TypedStartListening } from '@reduxjs/toolkit';
@@ -28,7 +26,7 @@ import {
   saveAnswer,
   submitSubmission,
 } from '../submissions/submissionSlice.ts';
-import { setAnswer, submitSession } from './examSlice.ts';
+import { setAnswer, setReadingChildAnswer, submitSession } from './examSlice.ts';
 
 export const examMiddleware = createListenerMiddleware();
 
@@ -43,13 +41,15 @@ const startAppListening = examMiddleware.startListening as unknown as StartAppLi
 const pendingTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 startAppListening({
-  actionCreator: setAnswer,
+  matcher: isAnyOf(setAnswer, setReadingChildAnswer),
   effect: async (action, api) => {
     const state = api.getState();
     const submission = state.submission.current;
     if (!submission) return; // not yet submitted to backend
 
-    const { questionId, value } = action.payload;
+    const { questionId } = action.payload;
+    const value = state.exam.answers[questionId];
+    if (!value) return;
     const submissionId = submission.id;
     const existing = pendingTimers.get(submissionId);
     if (existing) clearTimeout(existing);

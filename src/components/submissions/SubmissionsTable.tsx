@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { CandidateFieldsConfig } from '../../types/candidate';
 import type { Submission, SubmissionStatus } from '../../types/submission';
+import { getSubmissionTimeSpentSeconds } from '../../shared/utils/submissionTime';
 
 interface SubmissionsTableProps {
    submissions: Submission[];
@@ -132,7 +133,7 @@ export function SubmissionsTable({
                                     variant="outlined"
                                  />
                               </TableCell>
-                              <TableCell>{formatSeconds(s.timeSpentSeconds)}</TableCell>
+                              <TableCell>{formatSeconds(getSubmissionTimeSpentSeconds(s))}</TableCell>
                               <TableCell>{formatDate(s.submittedAt, i18n.language)}</TableCell>
                               <TableCell align="right">
                                  <Tooltip title={t('common.delete')}>

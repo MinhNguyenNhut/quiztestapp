@@ -105,7 +105,7 @@ export const isAnswered = (answer: AnyAnswer): boolean => {
     case 'essay':
       return answer.text.trim() !== '';
     case 'reading_comprehension':
-      return Object.keys(answer.childAnswers).length > 0;
+      return Object.values(answer.childAnswers).some((childAnswer) => isAnswered(childAnswer));
     default:
       return false;
   }

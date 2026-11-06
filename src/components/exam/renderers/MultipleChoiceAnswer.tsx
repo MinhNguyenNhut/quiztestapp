@@ -1,6 +1,6 @@
 import { Box, Checkbox, FormControl, FormControlLabel, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
-import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
+import { setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
 
 interface Props {
@@ -9,8 +9,7 @@ interface Props {
 
 export const MultipleChoiceAnswer = ({ question }: Props) => {
   const dispatch = useAppDispatch();
-  const session = useAppSelector(getExamSession);
-  const answer = session.answers[question.id];
+  const answer = useAppSelector((state) => state.exam.answers[question.id]);
   const selected: string[] = answer?.type === 'multiple_choice' ? answer.optionIds : [];
 
   const toggle = (optionId: string) => {

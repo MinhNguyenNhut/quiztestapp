@@ -1,7 +1,7 @@
 import { Box, Stack, TextField, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../features/store';
-import { getExamSession, setAnswer } from '../../../features/exam/examSlice';
+import { setAnswer } from '../../../features/exam/examSlice';
 import type { Question } from '../../../types/quiz';
 
 interface Props {
@@ -14,8 +14,7 @@ export const ShortAnswerAnswer = ({ question }: Props) => {
   const { t } = useTranslation();
 
   const dispatch = useAppDispatch();
-  const session = useAppSelector(getExamSession);
-  const answer = session.answers[question.id];
+  const answer = useAppSelector((state) => state.exam.answers[question.id]);
   const value = answer?.type === 'short_answer' ? answer.text : '';
 
   return (

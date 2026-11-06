@@ -32,7 +32,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { QuestionFormValues, QuestionType, QuizFormValues } from '../types';
 import { formValuesToQuiz, quizToFormValues } from '../utils/quizMappers';
 import { useAppDispatch, useAppSelector } from '../features/store';
-import { generateAiQuiz, removeGeneratedQuestion } from '../features/aiQuiz/aiQuizSlice';
+import {
+  clearGeneratedQuiz,
+  generateAiQuiz,
+  removeGeneratedQuestion,
+} from '../features/aiQuiz/aiQuizSlice';
 import type { GenerateAiQuizRequest } from '../api/aiQuizApi';
 import { getQuestionTypeLabel } from '../types/quiz';
 
@@ -136,6 +140,7 @@ export default function QuizAiGeneratorPage() {
         updatedAt: now,
       }),
     );
+    dispatch(clearGeneratedQuiz());
     navigate('/quiz/new', { state: { aiDraft: mappedValues } });
   };
 

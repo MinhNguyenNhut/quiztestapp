@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Quiz } from '../../types/quiz';
 import type { Submission } from '../../types/submission';
+import { getSubmissionTimeSpentSeconds } from '../../shared/utils/submissionTime';
 
 interface SubmissionsSummaryHeaderProps {
   quiz: Quiz;
@@ -28,11 +29,12 @@ export function SubmissionsSummaryHeader({ quiz, submissions }: SubmissionsSumma
   const passRate = totalAttempts === 0 ? 0 : Math.round((passed / totalAttempts) * 100);
 
   const avgTime = useMemo(() => {
-    const withTime = submissions.filter((s) => s.timeSpentSeconds);
+    const withTime = submissions
+      .map((submission) => getSubmissionTimeSpentSeconds(submission))
+      .filter((time): time is number => time !== undefined && Number.isFinite(time));
     if (withTime.length === 0) return 0;
     return Math.round(
-      withTime.reduce((sum, s) => sum + (s.timeSpentSeconds ?? 0), 0) /
-        withTime.length
+      withTime.reduce((sum, time) => sum + time, 0) / withTime.length
     );
   }, [submissions]);
 

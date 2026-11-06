@@ -40,9 +40,9 @@ export const ExamHeader = ({
     <Box
       component="header"
       sx={{
-        position: 'sticky',
-        top: 0,
+        position: 'relative',
         zIndex: 1100,
+        flexShrink: 0,
         backgroundColor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
@@ -51,7 +51,6 @@ export const ExamHeader = ({
     >
       <Box
         sx={{
-          maxWidth: 1400,
           mx: 'auto',
           px: { xs: 2, md: 3 },
           py: 1.5,

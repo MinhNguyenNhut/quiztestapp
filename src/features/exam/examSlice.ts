@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AnyAnswer, Answer } from '../../types/answer';
+import { isAnswered } from '../../types/answer';
 import type { Question } from '../../types/quiz';
 import { saveAnswer, submitSubmission } from '../submissions/submissionSlice.ts';
 
@@ -10,6 +11,8 @@ export interface ExamSessionState {
   questionIds: string[];
   currentIndex: number;
   answers: Record<string, AnyAnswer>;
+  answeredQuestions: Record<string, true>;
+  answeredCount: number;
   flags: string[];
   bookmarks: string[];
   startedAt: string | null;
@@ -28,6 +31,8 @@ const initialState: ExamSessionState = {
   questionIds: [],
   currentIndex: 0,
   answers: {},
+  answeredQuestions: {},
+  answeredCount: 0,
   flags: [],
   bookmarks: [],
   startedAt: null,
@@ -52,6 +57,12 @@ interface SetAnswerPayload {
   value: Answer;
 }
 
+interface SetReadingChildAnswerPayload {
+  questionId: string;
+  childQuestionId: string;
+  value: AnyAnswer;
+}
+
 const clampIndex = (idx: number, total: number): number => {
   if (total <= 0) return 0;
   if (idx < 0) return 0;
@@ -70,6 +81,8 @@ const examSlice = createSlice({
       state.questionIds = questions.map((q) => q.id);
       state.currentIndex = 0;
       state.answers = {};
+      state.answeredQuestions = {};
+      state.answeredCount = 0;
       state.flags = [];
       state.bookmarks = [];
       state.startedAt = new Date().toISOString();
@@ -97,9 +110,42 @@ const examSlice = createSlice({
       );
     },
     setAnswer(state, action: PayloadAction<SetAnswerPayload>) {
-      state.answers[action.payload.questionId] = action.payload.value;
+      const { questionId, value } = action.payload;
+      const wasAnswered = isAnswered(state.answers[questionId] ?? null);
+      const isNowAnswered = isAnswered(value);
+      if (wasAnswered !== isNowAnswered) {
+        state.answeredCount += isNowAnswered ? 1 : -1;
+        if (isNowAnswered) state.answeredQuestions[questionId] = true;
+        else delete state.answeredQuestions[questionId];
+      }
+      state.answers[questionId] = value;
+    },
+    setReadingChildAnswer(state, action: PayloadAction<SetReadingChildAnswerPayload>) {
+      const { questionId, childQuestionId, value } = action.payload;
+      const previousAnswer = state.answers[questionId];
+      const wasAnswered = isAnswered(previousAnswer ?? null);
+      const childAnswers: Record<string, AnyAnswer> =
+        previousAnswer?.type === 'reading_comprehension'
+          ? { ...previousAnswer.childAnswers }
+          : {};
+
+      if (value === null) delete childAnswers[childQuestionId];
+      else childAnswers[childQuestionId] = value;
+
+      const nextAnswer: Answer = { type: 'reading_comprehension', childAnswers };
+      const isNowAnswered = isAnswered(nextAnswer);
+      if (wasAnswered !== isNowAnswered) {
+        state.answeredCount += isNowAnswered ? 1 : -1;
+        if (isNowAnswered) state.answeredQuestions[questionId] = true;
+        else delete state.answeredQuestions[questionId];
+      }
+      state.answers[questionId] = nextAnswer;
     },
     clearAnswer(state, action: PayloadAction<string>) {
+      if (state.answeredQuestions[action.payload]) {
+        state.answeredCount = Math.max(0, state.answeredCount - 1);
+      }
+      delete state.answeredQuestions[action.payload];
       delete state.answers[action.payload];
     },
     toggleFlag(state, action: PayloadAction<string>) {
@@ -167,6 +213,7 @@ export const {
   nextQuestion,
   previousQuestion,
   setAnswer,
+  setReadingChildAnswer,
   clearAnswer,
   toggleFlag,
   toggleBookmark,

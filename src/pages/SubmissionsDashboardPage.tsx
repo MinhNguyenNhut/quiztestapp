@@ -24,6 +24,7 @@ import { SubmissionsTable } from '../components/submissions/SubmissionsTable';
 import { SubmissionsBulkActions } from '../components/submissions/SubmissionsBulkActions';
 import type { Submission } from '../types/submission';
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields';
+import { getSubmissionTimeSpentSeconds } from '../shared/utils/submissionTime';
 
 type PendingDelete = { kind: 'single'; submission: Submission } | { kind: 'bulk'; ids: string[] };
 
@@ -130,7 +131,7 @@ export default function SubmissionsDashboardPage() {
       } else if (sortBy === 'score') {
         cmp = (a.percentage ?? 0) - (b.percentage ?? 0);
       } else if (sortBy === 'time') {
-        cmp = (a.timeSpentSeconds ?? 0) - (b.timeSpentSeconds ?? 0);
+        cmp = (getSubmissionTimeSpentSeconds(a) ?? 0) - (getSubmissionTimeSpentSeconds(b) ?? 0);
       }
       return sortOrder === 'asc' ? cmp : -cmp;
     });

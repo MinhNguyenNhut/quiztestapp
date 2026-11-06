@@ -23,6 +23,7 @@ import { getUserProfile } from '../features/user/userSlice';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getDefaultCandidateFieldsConfig } from '../shared/constants/defaultCandidateFields.ts';
+import type { CandidateFieldsConfig } from '../types/candidate.ts';
 
 import { fetchQuestionsForQuiz } from '../features/questions/questionThunks.ts';
 
@@ -71,6 +72,9 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const aiDraft = readAiDraft(location.state);
+  const [draftCandidateConfig, setDraftCandidateConfig] = useState<CandidateFieldsConfig>(
+    () => getDefaultCandidateFieldsConfig(i18n.language),
+  );
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -147,6 +151,7 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
           title: data.title,
           description: data.description,
           estimatedTime: data.estimatedTime ?? 0,
+          candidateFieldsConfig: draftCandidateConfig,
           settings: data.settings ?? DEFAULT_QUIZ_SETTINGS,
           createdBy: userProfile?.id
         })
@@ -156,12 +161,19 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
         throw new Error(result.payload ?? 'Failed to create quiz');
       }
     }
-  }, [dispatch, id, quiz, userProfile]);
+  }, [dispatch, id, quiz, userProfile, draftCandidateConfig]);
 
   const defaultCandidateConfig = useMemo(() => getDefaultCandidateFieldsConfig(i18n.language), [i18n.language]);
+  const handleSaveDraftCandidateConfig = useCallback((config: CandidateFieldsConfig) => {
+    setDraftCandidateConfig(config);
+  }, []);
   const candidateConfig = useMemo(() => {
-    return quiz?.candidateFieldsConfig ?? defaultCandidateConfig;
-  }, [quiz?.candidateFieldsConfig, defaultCandidateConfig]);
+    if (!quiz) return draftCandidateConfig;
+    const savedConfig = quiz.candidateFieldsConfig;
+    return savedConfig && Array.isArray(savedConfig.fields)
+      ? savedConfig
+      : defaultCandidateConfig;
+  }, [quiz, defaultCandidateConfig, draftCandidateConfig]);
 
   if (id && !quiz && isLoading) {
     return (
@@ -245,7 +257,8 @@ function QuizEditorContent({ id }: { id: string | undefined }) {
           ) : (
             <CandidateFieldsBuilder
               quizId={quizId}
-              defaultConfig={defaultCandidateConfig}
+              defaultConfig={candidateConfig}
+              onSave={handleSaveDraftCandidateConfig}
             />
           )}
         </TabPanel>
